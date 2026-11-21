@@ -1,0 +1,33 @@
+# --- SECRETS (never commit) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.keystore
+keystore/
+secrets/
+mnemonic*
+seed*
+
+# --- Node ---
+node_modules/
+dist/
+*.log
+npm-debug.log*
+
+# --- Foundry ---
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+
+# --- Bot runtime data (local dry-run logs; sample data is committed separately) ---
+bot/data/*.local.json
+bot/data/*.local.jsonl
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

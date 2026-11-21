@@ -1,0 +1,22 @@
+title = "flash-loan-arbitrage secret scanning rules"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "rpc-url-with-api-key"
+description = "RPC URL that contains an API key (Alchemy, Infura, QuickNode, Ankr, Blast)"
+regex = '''(?i)https?://[a-z0-9.-]*(alchemy\.com|infura\.io|quiknode\.pro|ankr\.com|blastapi\.io)/[a-z0-9_/-]*[A-Za-z0-9_-]{20,}'''
+keywords = ["alchemy", "infura", "quiknode", "ankr", "blastapi"]
+
+[[rules]]
+id = "evm-private-key"
+description = "EVM private key (64 hex chars) assigned to a key-like variable"
+regex = '''(?i)(private[_-]?key|secret[_-]?key|deployer[_-]?key)\s*[=:]\s*["']?(0x)?[a-f0-9]{64}\b'''
+keywords = ["private", "secret", "deployer"]
+
+[[rules]]
+id = "seed-phrase-assignment"
+description = "Seed phrase / mnemonic assigned to a variable"
+regex = '''(?i)(mnemonic|seed[_-]?phrase)\s*[=:]\s*["'](\w+\s+){11,23}\w+["']'''
+keywords = ["mnemonic", "seed"]

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Blocks any commit that contains secrets. Fails CLOSED: if gitleaks is missing, the commit is blocked.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "ERROR: gitleaks is not installed. Install it (see README) before committing." >&2
+  exit 1
+fi
+gitleaks git --staged --config .gitleaks.toml --redact --verbose
+status=$?
+if [ $status -ne 0 ]; then
+  echo "" >&2
+  echo "COMMIT BLOCKED: possible secret detected. Remove it, then commit again." >&2
+  exit 1
+fi
