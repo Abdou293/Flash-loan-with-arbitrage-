@@ -7,7 +7,7 @@ Not security-audited. Use at your own risk.
 
 ## Status
 - [x] Phase 1: project structure and secret scanning
-- [ ] Phase 2: smart contract + Foundry fork tests
+- [~] Phase 2: smart contract + Foundry tests (mock tests pass; fork tests written, not yet run)
 - [ ] Phase 3: bot framework and strategies (dry-run)
 - [ ] Phase 4: backtesting and dry-run report
 - [ ] Phase 5: testnet test + dashboard
