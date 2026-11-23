@@ -9,8 +9,9 @@ import {IUniswapV3Router} from "../src/interfaces/IUniswapV3Router.sol";
 /// Arbitrum mainnet FORK tests against the real Aave pool and real Uniswap V3 pools.
 /// Skipped automatically when ARBITRUM_RPC_URL is not set.
 ///
-/// !! ADDRESS WARNING !!  The addresses below were written from memory and have NOT been verified
-/// in this environment (network access was restricted). Before trusting any result, verify each one:
+/// ADDRESS NOTE: the addresses below were written from memory. Their on-chain identity was checked
+/// with `scripts/verify-addresses.sh` (token symbols/decimals, router -> canonical factory/WETH, Aave
+/// pool <-> provider). That is NOT the same as checking the official sources, so still confirm each one:
 ///   - Aave V3 Pool (Arbitrum):  https://github.com/bgd-labs/aave-address-book  (AaveV3Arbitrum.POOL)
 ///   - Uniswap V3 SwapRouter:    https://docs.uniswap.org/contracts/v3/reference/deployments/arbitrum-deployments
 ///   - WETH / native USDC:       https://arbiscan.io  (check the verified token pages)

@@ -44,7 +44,11 @@ check "WETH symbol"   WETH "$(call $WETH 'symbol()(string)')"
 check "WETH decimals" 18   "$(call $WETH 'decimals()(uint8)')"
 check "USDC symbol"   USDC "$(call $USDC 'symbol()(string)')"
 check "USDC decimals" 6    "$(call $USDC 'decimals()(uint8)')"
-check "USDT symbol"   USDT "$(call $USDT 'symbol()(string)')"
+# Tether upgraded Arbitrum USDT to "USDT0", whose symbol is "USD₮0": accept both.
+usdt_sym="$(call $USDT 'symbol()(string)')"
+[ "$(lc "$usdt_sym")" = "usd₮0" ] && usdt_sym=USDT
+check "USDT symbol (USDT or USD₮0)" USDT "$usdt_sym"
+check "USDT decimals" 6    "$(call $USDT 'decimals()(uint8)')"
 check "ARB symbol"    ARB  "$(call $ARB 'symbol()(string)')"
 
 check "Uniswap V3 router -> factory is the canonical V3 factory" "$UNI_V3_FACTORY" "$(call $UNI_V3_ROUTER 'factory()(address)')"
