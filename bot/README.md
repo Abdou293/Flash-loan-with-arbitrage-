@@ -35,3 +35,21 @@ Output (git-ignored): `data/opportunities.<source>.local.jsonl`, `data/stats.<so
 - Gas is an estimate (`baseGasUnits`/`perStepGasUnits` in the config). Token/router addresses in the config are unverified.
 - Free RPC tiers limit request rates: RPC mode caches per cycle, throttles calls (`minCallIntervalMs`) and polls every
   `POLL_INTERVAL_MS`. Scanning many routes will be slow on a free plan.
+
+## Backtesting
+
+    npm run gen-sample-dataset -- --snapshots 300 --seed 42    # SYNTHETIC dataset (pipeline test only)
+    npm run collect -- --from-block <N> --to-block <M> --step 2000 --interval-ms 300   # REAL history (see below)
+    npm run backtest -- --dataset data/dataset.rpc.local.jsonl --label real-report     # replay + Markdown/JSON report
+
+How it works: `collect` records, per block, a *rate curve* (tokens out per token in at several USD sizes) for every
+venue and direction. `backtest` replays those snapshots through the same engine the bot uses (same strategies,
+profit calculator and risk engine). The report is written to `data/<label>.local.md` and `.local.json`.
+
+**Real history needs your machine:** an archive-capable RPC (a free Alchemy account works for limited history) or a
+local `anvil --fork-url <your RPC> --fork-block-number <N>` fork. Start with a tiny range (3 snapshots) to check your
+rate limits, then widen it. `collect` and `RpcMarket` were not run against a live network during development.
+
+**What the backtest can and cannot tell you:** it assumes every opportunity is filled at the recorded price, so it is an
+upper bound; it cannot see competing bots or latency; `newPoolScanner` is not backtestable with this data format.
+The generated report repeats these limitations automatically and flags synthetic data in a banner.

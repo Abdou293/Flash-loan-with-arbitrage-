@@ -30,6 +30,7 @@ export class RpcMarket implements MarketData {
   private priceCache = new Map<string, number>();
   private lastCall = 0;
   private gasCache: number | null = null;
+  private blockTag: number | undefined;
 
   constructor(
     private readonly o: RpcMarketOptions,
@@ -37,6 +38,14 @@ export class RpcMarket implements MarketData {
     private readonly usdVenueLookup: (a: Token, b: Token) => Step | undefined,
   ) {
     this.provider = new JsonRpcProvider(o.rpcUrl, undefined, { staticNetwork: true });
+  }
+
+  /** Query historical state at this block (needs an archive node or an anvil fork). */
+  setBlockTag(block: number | undefined): void {
+    this.blockTag = block;
+    this.cache.clear();
+    this.priceCache.clear();
+    this.gasCache = null;
   }
 
   async advance(): Promise<void> {
@@ -60,20 +69,22 @@ export class RpcMarket implements MarketData {
     try {
       if (step.venue.kind === "uniV3") {
         const quoter = new Contract(QUOTER_V2, QUOTER_ABI, this.provider);
-        const res = await quoter.getFunction("quoteExactInputSingle").staticCall({
-          tokenIn: step.tokenIn.address,
-          tokenOut: step.tokenOut.address,
-          amountIn,
-          fee: step.venue.fee,
-          sqrtPriceLimitX96: 0,
-        });
+        const res = await quoter.getFunction("quoteExactInputSingle").staticCall(
+          {
+            tokenIn: step.tokenIn.address,
+            tokenOut: step.tokenOut.address,
+            amountIn,
+            fee: step.venue.fee,
+            sqrtPriceLimitX96: 0,
+          },
+          this.overrides(),
+        );
         out = res[0] as bigint;
       } else {
         const router = new Contract(step.venue.router, V2_ABI, this.provider);
-        const amounts = (await router.getFunction("getAmountsOut")(amountIn, [
-          step.tokenIn.address,
-          step.tokenOut.address,
-        ])) as bigint[];
+        const amounts = (await router
+          .getFunction("getAmountsOut")
+          .staticCall(amountIn, [step.tokenIn.address, step.tokenOut.address], this.overrides())) as bigint[];
         out = amounts[amounts.length - 1] ?? 0n;
       }
     } catch {
@@ -81,6 +92,10 @@ export class RpcMarket implements MarketData {
     }
     this.cache.set(key, out);
     return out;
+  }
+
+  private overrides(): { blockTag?: number } {
+    return this.blockTag === undefined ? {} : { blockTag: this.blockTag };
   }
 
   async usdPrice(token: Token): Promise<number> {
@@ -102,8 +117,13 @@ export class RpcMarket implements MarketData {
   async gasPriceGwei(): Promise<number> {
     if (this.gasCache !== null) return this.gasCache;
     await this.throttle();
-    const fee = await this.provider.getFeeData();
-    this.gasCache = Number(fee.gasPrice ?? 0n) / 1e9;
+    if (this.blockTag !== undefined) {
+      const block = await this.provider.getBlock(this.blockTag);
+      this.gasCache = Number(block?.baseFeePerGas ?? 0n) / 1e9;
+    } else {
+      const fee = await this.provider.getFeeData();
+      this.gasCache = Number(fee.gasPrice ?? 0n) / 1e9;
+    }
     return this.gasCache;
   }
 

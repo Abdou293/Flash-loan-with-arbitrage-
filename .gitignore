@@ -25,6 +25,7 @@ contracts/lib/
 # --- Bot runtime data (local dry-run logs; sample data is committed separately) ---
 bot/data/*.local.json
 bot/data/*.local.jsonl
+bot/data/*.local.md
 
 # --- OS / editor ---
 .DS_Store
