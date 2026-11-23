@@ -1,0 +1,37 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: bot } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: bot/package-lock.json }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  contracts:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: contracts } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts@v5.0.2 --no-git
+      - run: forge test --no-match-contract Fork -vv   # fork tests need a private RPC URL, so they are not run in CI
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
