@@ -17,6 +17,19 @@ UNI_V3_ROUTER=0xE592427A0AEce92De3Edee1F18E0157C05861564
 UNI_V3_FACTORY=0x1F98431c8aD98523631AE4a59f267346ea31F984   # canonical Uniswap V3 factory
 SUSHI_V2_ROUTER=0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506
 
+# Preflight: fail fast with a readable reason (API key is redacted from any message).
+redact() { sed -E 's#(/v2/)[^[:space:]"]+#\1***#g'; }
+if ! command -v cast >/dev/null 2>&1; then
+  echo "ERROR: 'cast' (Foundry) not found in PATH. Run: source ~/.bashrc" >&2; exit 2
+fi
+probe="$(cast chain-id --rpc-url "$RPC" 2>&1)"
+if ! printf '%s' "$probe" | grep -qE '^[0-9]+$'; then
+  echo "ERROR: cannot reach the RPC. cast said:" >&2
+  printf '%s\n' "$probe" | redact | head -6 >&2
+  echo "Hints: Arbitrum enabled in your Alchemy app? URL is the full HTTPS URL from .env? Wait a minute and retry." >&2
+  exit 2
+fi
+
 pass=0; fail=0
 lc() { printf '%s' "$1" | tr 'A-Z' 'a-z' | tr -d '"'; }
 call() { cast call "$1" "$2" --rpc-url "$RPC" 2>/dev/null | head -1 | awk '{print $1}'; }
