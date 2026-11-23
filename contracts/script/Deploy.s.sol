@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Script} from "forge-std/Test.sol";
+import {Script} from "forge-std/Script.sol";
 import {FlashArb} from "../src/FlashArb.sol";
 
 /// Deploys FlashArb to a TESTNET only.

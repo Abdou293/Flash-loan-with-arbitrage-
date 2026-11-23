@@ -11,7 +11,7 @@ reentrancy guard. Not security-audited.
 ## Setup (inside WSL/Ubuntu or any Linux/macOS shell)
 
     cd contracts
-    forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts@v5.0.2 --no-git
+    bash ../scripts/install-contract-deps.sh
 
 ## Tests
 

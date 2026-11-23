@@ -73,7 +73,7 @@ Windows users: install WSL2 (Ubuntu), then work inside Ubuntu.
 
     # contracts
     cd contracts
-    forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts@v5.0.2 --no-git
+    bash ../scripts/install-contract-deps.sh
     forge test --no-match-contract Fork           # logic tests with mocks, no network
     export ARBITRUM_RPC_URL=<free RPC URL>
     forge test --match-contract Fork -vv          # fork tests (verify the addresses at the top of that file first)
