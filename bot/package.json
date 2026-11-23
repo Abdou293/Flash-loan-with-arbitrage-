@@ -1,0 +1,23 @@
+{
+  "name": "flash-arb-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Educational plug-in arbitrage bot framework (dry-run only)",
+  "license": "MIT",
+  "scripts": {
+    "dry-run": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

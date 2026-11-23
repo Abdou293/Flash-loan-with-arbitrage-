@@ -1,0 +1,37 @@
+# bot/
+
+TypeScript (ethers v6) plug-in arbitrage bot. **Dry-run only**: this version has no code path that sends a transaction
+(`DRY_RUN=false` is refused), and it never reads `PRIVATE_KEY`.
+
+## Architecture
+
+    strategies/*  ->  propose candidate routes          (crossDex, triangular, feeTier, newPoolScanner)
+    core/profit   ->  best trade size + net profit      (out - in - flash fee - slippage reserve - gas)
+    core/risk     ->  min profit, max gas, size cap, auto-pause after N consecutive failures
+    core/simulator->  pre-send simulation (static call on a deployed contract; synthetic in sample mode)
+    core/store    ->  JSONL log of every opportunity + per-strategy stats
+    core/market   ->  SampleMarket (synthetic, seeded)  |  RpcMarket (read-only eth_call, cached, throttled)
+
+Add a strategy: implement `Strategy` (`src/strategies/Strategy.ts`), register it in `registry.ts`, add a block in
+`strategies.config.json` with `"enabled": true/false`.
+
+## Run
+
+    npm install
+    npm test            # 23 unit tests
+    npm run typecheck
+    npm run dry-run -- --cycles 200 --seed 42            # synthetic data, no network
+    npm run dry-run -- --source rpc --cycles 20          # needs ARBITRUM_RPC_URL in .env (read-only)
+
+Output (git-ignored): `data/opportunities.<source>.local.jsonl`, `data/stats.<source>.local.json`.
+
+## Read this before interpreting any number
+
+- **Sample mode is synthetic.** Prices and spreads are random numbers I chose. Profits in sample mode only prove the code
+  runs; they say nothing about real markets, and the "new pool" strategy in particular looks great there only because
+  the synthetic world gives new pools large random mispricings.
+- RPC mode and the static-call simulator have **not been run against a live network** in development (the sandbox had no
+  access). Treat them as untested until you run them yourself.
+- Gas is an estimate (`baseGasUnits`/`perStepGasUnits` in the config). Token/router addresses in the config are unverified.
+- Free RPC tiers limit request rates: RPC mode caches per cycle, throttles calls (`minCallIntervalMs`) and polls every
+  `POLL_INTERVAL_MS`. Scanning many routes will be slow on a free plan.

@@ -1,0 +1,34 @@
+{
+  "_note": "Token/router addresses below are NOT verified (written from memory). Check them against official sources before any live use. Sample (synthetic) mode ignores addresses.",
+  "global": {
+    "flashLoanFeeBps": 5,
+    "slippageBps": 10,
+    "baseGasUnits": 350000,
+    "perStepGasUnits": 150000,
+    "tradeSizesUsd": [1000, 5000, 25000, 100000]
+  },
+  "risk": {
+    "minNetProfitUsd": 1,
+    "maxGasPriceGwei": 1,
+    "maxConsecutiveFailures": 3,
+    "maxTradeSizeUsd": 50000
+  },
+  "tokens": {
+    "WETH": { "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", "decimals": 18, "usd": 3000 },
+    "USDC": { "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", "decimals": 6, "usd": 1 },
+    "USDT": { "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", "decimals": 6, "usd": 1 },
+    "ARB": { "address": "0x912CE59144191C1204E64559FE8253a0e49E6548", "decimals": 18, "usd": 0.5 }
+  },
+  "venues": [
+    { "id": "uniV3-500", "dex": "uniswap", "kind": "uniV3", "fee": 500, "router": "0xE592427A0AEce92De3Edee1F18E0157C05861564", "liquidityUsd": 20000000, "pairs": ["WETH/USDC", "WETH/USDT"] },
+    { "id": "uniV3-3000", "dex": "uniswap", "kind": "uniV3", "fee": 3000, "router": "0xE592427A0AEce92De3Edee1F18E0157C05861564", "liquidityUsd": 8000000, "pairs": ["WETH/USDC", "WETH/USDT", "ARB/WETH", "ARB/USDC"] },
+    { "id": "uniV3-10000", "dex": "uniswap", "kind": "uniV3", "fee": 10000, "router": "0xE592427A0AEce92De3Edee1F18E0157C05861564", "liquidityUsd": 1500000, "pairs": ["WETH/USDC", "ARB/USDC"] },
+    { "id": "sushiV2-3000", "dex": "sushiswap", "kind": "uniV2", "fee": 3000, "router": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506", "liquidityUsd": 3000000, "pairs": ["WETH/USDC", "WETH/USDT", "ARB/WETH", "ARB/USDC", "USDC/USDT"] }
+  ],
+  "strategies": {
+    "crossDex": { "enabled": true, "pairs": [["WETH", "USDC"], ["WETH", "USDT"], ["ARB", "USDC"], ["ARB", "WETH"]] },
+    "triangular": { "enabled": true, "cycles": [["WETH", "USDC", "ARB"], ["WETH", "USDT", "USDC"]] },
+    "feeTier": { "enabled": true, "pairs": [["WETH", "USDC"], ["WETH", "USDT"], ["ARB", "USDC"]] },
+    "newPoolScanner": { "enabled": true, "baseTokens": ["WETH", "USDC"], "minLiquidityUsd": 20000, "minAgeMinutes": 10, "maxTaxBps": 100, "requireSellable": true }
+  }
+}
