@@ -10,7 +10,7 @@ Not security-audited. Use at your own risk.
 - [~] Phase 2: smart contract + Foundry tests (mock tests pass; fork tests written, not yet run)
 - [x] Phase 3: bot framework and strategies (dry-run; 23 unit tests, synthetic data only)
 - [~] Phase 4: backtest engine + report generator done (33 tests); real-history report still to be produced on a machine with RPC access
-- [ ] Phase 5: testnet test + dashboard
+- [~] Phase 5: dashboard done (static, runs on synthetic demo data); testnet end-to-end test still to do on your machine
 - [ ] Phase 6: publishing
 
 ## Secret scanning (required before committing)

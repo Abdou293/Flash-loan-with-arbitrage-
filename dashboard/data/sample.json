@@ -1,0 +1,1276 @@
+{
+ "meta": {
+  "dataSource": "synthetic",
+  "generatedAt": "2026-11-23T16:14:08.327Z",
+  "cycles": 300,
+  "seed": 42,
+  "caveats": [
+   "newPoolScanner dominates this chart ONLY because the synthetic generator gives brand-new pools large random mispricings (±5%). Real new pools are mostly scams or illiquid, and this strategy is the riskiest of the four.",
+   "The 'simulated failed' rows are random synthetic reverts, included to exercise the auto-pause logic.",
+   "These numbers must not be read as a ranking of strategies. A real ranking needs a backtest on recorded on-chain data."
+  ],
+  "note": "Random prices generated to exercise the software. Not market history; not evidence of profitability."
+ },
+ "status": {
+  "mode": "dry-run",
+  "dryRun": true,
+  "paused": false,
+  "cyclesRun": 300,
+  "liveExecutionAvailable": false
+ },
+ "strategies": [
+  {
+   "name": "crossDex",
+   "enabled": true,
+   "routesEvaluated": 4800,
+   "profitableBeforeRisk": 9,
+   "rejectedByRisk": 8,
+   "simulatedOk": 1,
+   "simulatedRevert": 0,
+   "estimatedNetProfitUsd": 1,
+   "bestNetProfitUsd": 1
+  },
+  {
+   "name": "triangular",
+   "enabled": true,
+   "routesEvaluated": 10800,
+   "profitableBeforeRisk": 8,
+   "rejectedByRisk": 7,
+   "simulatedOk": 1,
+   "simulatedRevert": 0,
+   "estimatedNetProfitUsd": 2.68,
+   "bestNetProfitUsd": 2.68
+  },
+  {
+   "name": "feeTier",
+   "enabled": true,
+   "routesEvaluated": 3000,
+   "profitableBeforeRisk": 40,
+   "rejectedByRisk": 35,
+   "simulatedOk": 5,
+   "simulatedRevert": 0,
+   "estimatedNetProfitUsd": 5.89,
+   "bestNetProfitUsd": 1.34
+  },
+  {
+   "name": "newPoolScanner",
+   "enabled": true,
+   "routesEvaluated": 550,
+   "profitableBeforeRisk": 105,
+   "rejectedByRisk": 3,
+   "simulatedOk": 93,
+   "simulatedRevert": 9,
+   "estimatedNetProfitUsd": 2328.45,
+   "bestNetProfitUsd": 66.34
+  }
+ ],
+ "trades": {
+  "simulated": 109,
+  "simulatedSucceeded": 100,
+  "simulatedFailed": 9,
+  "executed": 0
+ },
+ "gas": {
+  "estimatedGasOfSimulatedTradesUsd": 4.28,
+  "gasActuallySpentUsd": 0
+ },
+ "series": [
+  {
+   "cycle": 5,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 0,
+    "newPoolScanner": 8.68
+   }
+  },
+  {
+   "cycle": 10,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 0,
+    "newPoolScanner": 20.77
+   }
+  },
+  {
+   "cycle": 15,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 49.78
+   }
+  },
+  {
+   "cycle": 20,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 77.9
+   }
+  },
+  {
+   "cycle": 25,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 77.9
+   }
+  },
+  {
+   "cycle": 30,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 92.1
+   }
+  },
+  {
+   "cycle": 35,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 97.51
+   }
+  },
+  {
+   "cycle": 40,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 128.89
+   }
+  },
+  {
+   "cycle": 45,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 255.62
+   }
+  },
+  {
+   "cycle": 50,
+   "cumNetUsd": {
+    "crossDex": 0,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 268.68
+   }
+  },
+  {
+   "cycle": 55,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 303.08
+   }
+  },
+  {
+   "cycle": 60,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 360.03
+   }
+  },
+  {
+   "cycle": 65,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 371.55
+   }
+  },
+  {
+   "cycle": 70,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 430.79
+   }
+  },
+  {
+   "cycle": 75,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 450.63
+   }
+  },
+  {
+   "cycle": 80,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 498.2
+   }
+  },
+  {
+   "cycle": 85,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 549.07
+   }
+  },
+  {
+   "cycle": 90,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 549.07
+   }
+  },
+  {
+   "cycle": 95,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 599.67
+   }
+  },
+  {
+   "cycle": 100,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 623.8
+   }
+  },
+  {
+   "cycle": 105,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 1.34,
+    "newPoolScanner": 623.8
+   }
+  },
+  {
+   "cycle": 110,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 648.97
+   }
+  },
+  {
+   "cycle": 115,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 671
+   }
+  },
+  {
+   "cycle": 120,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 709.67
+   }
+  },
+  {
+   "cycle": 125,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 754.43
+   }
+  },
+  {
+   "cycle": 130,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 832.09
+   }
+  },
+  {
+   "cycle": 135,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 840.1
+   }
+  },
+  {
+   "cycle": 140,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 840.1
+   }
+  },
+  {
+   "cycle": 145,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 848.91
+   }
+  },
+  {
+   "cycle": 150,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 919.28
+   }
+  },
+  {
+   "cycle": 155,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 948.74
+   }
+  },
+  {
+   "cycle": 160,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 1020.79
+   }
+  },
+  {
+   "cycle": 165,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 1079.25
+   }
+  },
+  {
+   "cycle": 170,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 2.59,
+    "newPoolScanner": 1083.03
+   }
+  },
+  {
+   "cycle": 175,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1149.22
+   }
+  },
+  {
+   "cycle": 180,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1149.22
+   }
+  },
+  {
+   "cycle": 185,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1218.07
+   }
+  },
+  {
+   "cycle": 190,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1251.1
+   }
+  },
+  {
+   "cycle": 195,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1314.84
+   }
+  },
+  {
+   "cycle": 200,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1340.83
+   }
+  },
+  {
+   "cycle": 205,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1353.56
+   }
+  },
+  {
+   "cycle": 210,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1431.24
+   }
+  },
+  {
+   "cycle": 215,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1431.24
+   }
+  },
+  {
+   "cycle": 220,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 0,
+    "feeTier": 3.87,
+    "newPoolScanner": 1450.49
+   }
+  },
+  {
+   "cycle": 225,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 4.89,
+    "newPoolScanner": 1536.98
+   }
+  },
+  {
+   "cycle": 230,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 4.89,
+    "newPoolScanner": 1640.69
+   }
+  },
+  {
+   "cycle": 235,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 4.89,
+    "newPoolScanner": 1640.69
+   }
+  },
+  {
+   "cycle": 240,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 4.89,
+    "newPoolScanner": 1653.63
+   }
+  },
+  {
+   "cycle": 245,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 4.89,
+    "newPoolScanner": 1765.56
+   }
+  },
+  {
+   "cycle": 250,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 1847.82
+   }
+  },
+  {
+   "cycle": 255,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 1855.49
+   }
+  },
+  {
+   "cycle": 260,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 1993.75
+   }
+  },
+  {
+   "cycle": 265,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 2018.14
+   }
+  },
+  {
+   "cycle": 270,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 2060.5
+   }
+  },
+  {
+   "cycle": 275,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 2076.32
+   }
+  },
+  {
+   "cycle": 280,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 2131.2
+   }
+  },
+  {
+   "cycle": 285,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 2187.34
+   }
+  },
+  {
+   "cycle": 290,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 2187.34
+   }
+  },
+  {
+   "cycle": 295,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 2288.91
+   }
+  },
+  {
+   "cycle": 300,
+   "cumNetUsd": {
+    "crossDex": 1,
+    "triangular": 2.68,
+    "feeTier": 5.89,
+    "newPoolScanner": 2328.45
+   }
+  }
+ ],
+ "recentOpportunities": [
+  {
+   "id": "300-19147",
+   "cycle": 300,
+   "timestamp": "2026-11-23T16:14:08.326Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW300x0@uniV3-500 | NEW300x0→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 41.12,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.04,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 39.54,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "295-18829",
+   "cycle": 295,
+   "timestamp": "2026-11-23T16:14:08.293Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW295x2@uniV3-10000 | NEW295x2→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 11.24,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.01,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 9.69,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "293-18701",
+   "cycle": 293,
+   "timestamp": "2026-11-23T16:14:08.280Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW293x2@uniV3-3000 | NEW293x2→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 67.86,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.07,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 66.24,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "292-18635",
+   "cycle": 292,
+   "timestamp": "2026-11-23T16:14:08.273Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW292x0@uniV3-3000 | NEW292x0→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 27.2,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.03,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 25.64,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "285-18191",
+   "cycle": 285,
+   "timestamp": "2026-11-23T16:14:08.227Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW285x1@uniV3-10000 | NEW285x1→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 57.73,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.06,
+   "gasCostUsd": 0.03,
+   "netProfitUsd": 56.14,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "284-18126",
+   "cycle": 284,
+   "timestamp": "2026-11-23T16:14:08.220Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW284x1@sushiV2-3000 | NEW284x1→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 14.84,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.01,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 13.28,
+   "status": "simulated_revert",
+   "reason": "synthetic revert (state changed before inclusion)",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "284-18123",
+   "cycle": 284,
+   "timestamp": "2026-11-23T16:14:08.220Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW284x0@uniV3-10000 | NEW284x0→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 51.93,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.05,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 50.33,
+   "status": "simulated_revert",
+   "reason": "synthetic revert (state changed before inclusion)",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "284-18115",
+   "cycle": 284,
+   "timestamp": "2026-11-23T16:14:08.219Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDC@uniV3-3000 | USDC→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 2.39,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 0.84,
+   "status": "rejected_risk",
+   "reason": "net profit $0.84 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "283-18005",
+   "cycle": 283,
+   "timestamp": "2026-11-23T16:14:08.207Z",
+   "strategy": "crossDex",
+   "route": "WETH→USDT@uniV3-500 | USDT→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 1.81,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 0.26,
+   "status": "rejected_risk",
+   "reason": "net profit $0.26 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "279-17807",
+   "cycle": 279,
+   "timestamp": "2026-11-23T16:14:08.185Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW279x0@uniV3-500 | NEW279x0→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 2.76,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 1.21,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "279-17799",
+   "cycle": 279,
+   "timestamp": "2026-11-23T16:14:08.184Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDC@uniV3-3000 | USDC→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 1.57,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 0.01,
+   "status": "rejected_risk",
+   "reason": "net profit $0.01 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "278-17744",
+   "cycle": 278,
+   "timestamp": "2026-11-23T16:14:08.178Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW278x1@sushiV2-3000 | NEW278x1→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 39.21,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.04,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 37.63,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "277-17680",
+   "cycle": 277,
+   "timestamp": "2026-11-23T16:14:08.171Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW277x1@sushiV2-3000 | NEW277x1→WETH@uniV3-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 17.6,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.02,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 16.04,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "275-17547",
+   "cycle": 275,
+   "timestamp": "2026-11-23T16:14:08.157Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDC@uniV3-3000 | USDC→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 1.59,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.03,
+   "netProfitUsd": 0.05,
+   "status": "rejected_risk",
+   "reason": "net profit $0.05 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "274-17492",
+   "cycle": 274,
+   "timestamp": "2026-11-23T16:14:08.152Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW274x0@sushiV2-3000 | NEW274x0→WETH@uniV3-10000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 9.86,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.01,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 8.31,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "271-17302",
+   "cycle": 271,
+   "timestamp": "2026-11-23T16:14:08.132Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW271x0@sushiV2-3000 | NEW271x0→WETH@uniV3-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 9.06,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.01,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 7.51,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "266-16987",
+   "cycle": 266,
+   "timestamp": "2026-11-23T16:14:08.100Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW266x1@uniV3-10000 | NEW266x1→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 43.96,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.04,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 42.36,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "264-16858",
+   "cycle": 264,
+   "timestamp": "2026-11-23T16:14:08.087Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDT@uniV3-3000 | USDT→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 2.29,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 0.75,
+   "status": "rejected_risk",
+   "reason": "net profit $0.75 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "263-16794",
+   "cycle": 263,
+   "timestamp": "2026-11-23T16:14:08.080Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDT@uniV3-3000 | USDT→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 1.69,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 0.15,
+   "status": "rejected_risk",
+   "reason": "net profit $0.15 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "261-16672",
+   "cycle": 261,
+   "timestamp": "2026-11-23T16:14:08.068Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW261x0@sushiV2-3000 | NEW261x0→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 25.96,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.03,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 24.39,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "261-16612",
+   "cycle": 261,
+   "timestamp": "2026-11-23T16:14:08.062Z",
+   "strategy": "crossDex",
+   "route": "WETH→USDC@sushiV2-3000 | USDC→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 2.09,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 0.54,
+   "status": "rejected_risk",
+   "reason": "net profit $0.54 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "260-16608",
+   "cycle": 260,
+   "timestamp": "2026-11-23T16:14:08.062Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW260x0@sushiV2-3000 | NEW260x0→WETH@uniV3-10000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 67.96,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.07,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 66.34,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "259-16543",
+   "cycle": 259,
+   "timestamp": "2026-11-23T16:14:08.055Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW259x1@uniV3-500 | NEW259x1→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 30.24,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.03,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 28.67,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "258-16479",
+   "cycle": 258,
+   "timestamp": "2026-11-23T16:14:08.048Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW258x1@uniV3-500 | NEW258x1→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 44.83,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.04,
+   "gasCostUsd": 0.03,
+   "netProfitUsd": 43.25,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "256-16343",
+   "cycle": 256,
+   "timestamp": "2026-11-23T16:14:08.032Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDC@uniV3-500 | USDC→WETH@uniV3-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 1.87,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.03,
+   "netProfitUsd": 0.33,
+   "status": "rejected_risk",
+   "reason": "net profit $0.33 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "254-16225",
+   "cycle": 254,
+   "timestamp": "2026-11-23T16:14:08.016Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW254x1@uniV3-10000 | NEW254x1→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 8.1,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.01,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 6.55,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "251-16031",
+   "cycle": 251,
+   "timestamp": "2026-11-23T16:14:07.991Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW251x1@uniV3-3000 | NEW251x1→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 2.68,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 1.12,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "251-16027",
+   "cycle": 251,
+   "timestamp": "2026-11-23T16:14:07.991Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDT@uniV3-500 | USDT→WETH@uniV3-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 1.93,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 0.38,
+   "status": "rejected_risk",
+   "reason": "net profit $0.38 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "251-16009",
+   "cycle": 251,
+   "timestamp": "2026-11-23T16:14:07.988Z",
+   "strategy": "triangular",
+   "route": "WETH→USDT@uniV3-500 | USDT→USDC@sushiV2-3000 | USDC→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 1.64,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.07,
+   "netProfitUsd": 0.07,
+   "status": "rejected_risk",
+   "reason": "net profit $0.07 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "250-15961",
+   "cycle": 250,
+   "timestamp": "2026-11-23T16:14:07.981Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDC@uniV3-3000 | USDC→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 2.55,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 1,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "249-15906",
+   "cycle": 249,
+   "timestamp": "2026-11-23T16:14:07.974Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW249x0@sushiV2-3000 | NEW249x0→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 7.5,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.01,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 5.95,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "249-15901",
+   "cycle": 249,
+   "timestamp": "2026-11-23T16:14:07.972Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDT@uniV3-500 | USDT→WETH@uniV3-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 2.1,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 0.56,
+   "status": "rejected_risk",
+   "reason": "net profit $0.56 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "249-15849",
+   "cycle": 249,
+   "timestamp": "2026-11-23T16:14:07.965Z",
+   "strategy": "crossDex",
+   "route": "WETH→USDT@uniV3-500 | USDT→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 1.73,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 0.18,
+   "status": "rejected_risk",
+   "reason": "net profit $0.18 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "246-15712",
+   "cycle": 246,
+   "timestamp": "2026-11-23T16:14:07.945Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW246x1@sushiV2-3000 | NEW246x1→WETH@uniV3-500",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 46.35,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.05,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 44.76,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "246-15710",
+   "cycle": 246,
+   "timestamp": "2026-11-23T16:14:07.944Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW246x0@sushiV2-3000 | NEW246x0→WETH@uniV3-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 33.13,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.03,
+   "gasCostUsd": 0.05,
+   "netProfitUsd": 31.55,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "245-15637",
+   "cycle": 245,
+   "timestamp": "2026-11-23T16:14:07.934Z",
+   "strategy": "feeTier",
+   "route": "WETH→USDC@uniV3-500 | USDC→WETH@uniV3-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 1.98,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 0.43,
+   "status": "rejected_risk",
+   "reason": "net profit $0.43 < min $1",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "244-15583",
+   "cycle": 244,
+   "timestamp": "2026-11-23T16:14:07.926Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW244x1@uniV3-10000 | NEW244x1→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 33.75,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.03,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 32.18,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "244-15581",
+   "cycle": 244,
+   "timestamp": "2026-11-23T16:14:07.926Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW244x0@uniV3-10000 | NEW244x0→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 10.19,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.01,
+   "gasCostUsd": 0.04,
+   "netProfitUsd": 8.64,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "243-15517",
+   "cycle": 243,
+   "timestamp": "2026-11-23T16:14:07.917Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW243x2@uniV3-3000 | NEW243x2→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 12.94,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.01,
+   "gasCostUsd": 0.03,
+   "netProfitUsd": 11.4,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  },
+  {
+   "id": "243-15513",
+   "cycle": 243,
+   "timestamp": "2026-11-23T16:14:07.916Z",
+   "strategy": "newPoolScanner",
+   "route": "WETH→NEW243x0@uniV3-3000 | NEW243x0→WETH@sushiV2-3000",
+   "borrowToken": "WETH",
+   "amountInUsd": 1000,
+   "grossProfitUsd": 48.42,
+   "flashLoanFeeUsd": 0.5,
+   "slippageReserveUsd": 1.05,
+   "gasCostUsd": 0.03,
+   "netProfitUsd": 46.84,
+   "status": "simulated_ok",
+   "dataSource": "synthetic"
+  }
+ ]
+}

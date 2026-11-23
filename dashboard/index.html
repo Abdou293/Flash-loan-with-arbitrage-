@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flash Arb Dashboard</title>
+  <meta name="description" content="Dry-run dashboard for an educational flash-loan arbitrage bot on Arbitrum.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Cpath d=%27M2 12l4-5 3 3 5-7%27 fill=%27none%27 stroke=%27%232563eb%27 stroke-width=%272%27/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>Flash Loan Arbitrage Bot</h1>
+      <p class="sub">Arbitrum · educational / portfolio project</p>
+    </div>
+    <div id="status" class="pills" aria-live="polite"></div>
+  </header>
+
+  <div id="banner" class="banner" role="note" hidden></div>
+  <div id="error" class="error" role="alert" hidden></div>
+
+  <main>
+    <section aria-labelledby="kpi-h">
+      <h2 id="kpi-h" class="sr">Key figures</h2>
+      <div id="kpis" class="kpis"></div>
+    </section>
+
+    <section aria-labelledby="strat-h">
+      <h2 id="strat-h">Strategies</h2>
+      <div class="scroll">
+        <table id="strategies">
+          <thead>
+            <tr>
+              <th>Strategy</th><th>State</th><th class="n">Routes checked</th><th class="n">Profitable (pre-risk)</th>
+              <th class="n">Rejected by risk</th><th class="n">Simulated OK</th><th class="n">Simulated failed</th>
+              <th class="n">Est. net profit</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="chart-h">
+      <h2 id="chart-h">Cumulative estimated net profit per strategy</h2>
+      <p class="hint">Estimated, simulated trades only, after flash-loan fee, slippage reserve and estimated gas.</p>
+      <div id="chart" class="chart"></div>
+      <div id="caveats" class="banner inline" role="note" hidden></div>
+      <ul id="legend" class="legend"></ul>
+    </section>
+
+    <section aria-labelledby="opp-h">
+      <h2 id="opp-h">Recent opportunities</h2>
+      <div class="scroll">
+        <table id="opps">
+          <thead>
+            <tr><th>Cycle</th><th>Strategy</th><th>Route</th><th class="n">Size</th><th class="n">Net</th><th>Status</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>Disclaimer:</strong> educational / portfolio project. Not financial advice. No profit guarantees.
+    Not security-audited. This dashboard only displays dry-run (simulated) data; no real transactions are sent.</p>
+    <p id="meta"></p>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

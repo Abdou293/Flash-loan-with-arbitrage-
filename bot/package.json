@@ -11,7 +11,8 @@
     "test": "vitest run",
     "gen-sample-dataset": "tsx src/backtest/genSample.ts",
     "collect": "tsx src/backtest/collect.ts",
-    "backtest": "tsx src/backtest/cli.ts"
+    "backtest": "tsx src/backtest/cli.ts",
+    "export-dashboard": "tsx src/exportDashboard.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

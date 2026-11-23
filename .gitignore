@@ -32,3 +32,6 @@ bot/data/*.local.md
 Thumbs.db
 .vscode/
 .idea/
+
+# Dashboard local data
+dashboard/data/live.json
