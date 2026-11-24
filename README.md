@@ -134,6 +134,11 @@ Free RPC plans rate-limit requests. The bot caches per cycle, throttles calls (`
 Re-run on the same data with a **zero-fee lender** (Balancer V2): closest to break-even became -63.47 / -15.19 / **-2.01**,
 exactly $0.50 better each (the 5 bps Aave premium on a $1,000 trade). Still no profitable route.
 
+### Results: one hour of block-level gap monitoring (2026-11-24)
+12,680 Arbitrum blocks, 6,893 polls (one Multicall3 call each), 0 errors. Deep pools never left their fee band; the gaps
+that did were in thin SushiSwap pools where every quote, even at $100, lost money after price impact (best: -$0.77).
+Full report: [docs/reports/gap-monitor-2026-11-24-1h.md](docs/reports/gap-monitor-2026-11-24-1h.md).
+
 **No profitable opportunity was found.** Every route lost money after the flash-loan premium, DEX fees, price impact,
 slippage reserve and gas. `feeTier` came closest. This is the expected result for liquid pools that professional bots keep
 in line, and it is the reason this project stays in dry-run mode. Sampling every 30 minutes cannot see gaps that last seconds.
