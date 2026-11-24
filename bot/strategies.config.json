@@ -13,11 +13,23 @@
     ]
   },
   "flashLoan": {
-    "_note": "Zero-interest flash loans only (Balancer V2 Vault). On 2026-11-24 the Vault held ~110 WETH but only ~4.2k USDC on Arbitrum, so only WETH is borrowable. Routes that would borrow anything else are skipped.",
-    "provider": "balancerV2",
-    "vault": "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
-    "borrowable": [
-      "WETH"
+    "_note": "Zero-interest lenders only. 'borrowable' must match what each lender actually holds: run scripts/verify-addresses.sh (it prints the balances) and edit these lists. Balancer V2 on 2026-11-24: ~110 WETH, ~4.2k USDC. Uniswap V4 PoolManager: to be confirmed on-chain.",
+    "lenders": [
+      {
+        "provider": "balancerV2",
+        "address": "0xBA12222222228d8Ba445958a75a0704d566BF2C8",
+        "borrowable": [
+          "WETH"
+        ]
+      },
+      {
+        "provider": "uniswapV4",
+        "address": "0x360E68faCcca8cA495c1B759Fd9EEe466db9FB32",
+        "borrowable": [
+          "WETH",
+          "USDC"
+        ]
+      }
     ]
   },
   "risk": {
@@ -40,7 +52,8 @@
     "USDT": {
       "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
       "decimals": 6,
-      "usd": 1
+      "usd": 1,
+      "onchainSymbol": "USD₮0"
     },
     "ARB": {
       "address": "0x912CE59144191C1204E64559FE8253a0e49E6548",

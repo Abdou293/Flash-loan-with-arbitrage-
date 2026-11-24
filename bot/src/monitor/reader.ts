@@ -20,6 +20,7 @@ export const arbSysIface = new Interface(["function arbBlockNumber() view return
 export const routerIface = new Interface(["function factory() view returns (address)"]);
 export const v3FactoryIface = new Interface(["function getPool(address,address,uint24) view returns (address)"]);
 export const v2FactoryIface = new Interface(["function getPair(address,address) view returns (address)"]);
+export const erc20Iface = new Interface(["function balanceOf(address) view returns (uint256)"]);
 export const poolIface = new Interface([
   "function token0() view returns (address)",
   "function slot0() view returns (uint160 sqrtPriceX96,int24 tick,uint16,uint16,uint16,uint8,bool)",
@@ -34,6 +35,15 @@ export interface PoolInfo {
   b: Token;
   address: string;
   aIsToken0: boolean;
+  /** raw token balances held by the pool (read at init), used to skip near-empty "dead" pools */
+  balanceA?: bigint;
+  balanceB?: bigint;
+}
+
+/** sqrtPriceX96 is the first 32-byte word of slot0 on Uniswap V3 and its forks (PancakeSwap V3 changes later fields,
+ *  e.g. feeProtocol is uint32 there), so it is read directly instead of decoding the whole struct. */
+export function sqrtPriceFromSlot0(returnData: string): bigint {
+  return BigInt("0x" + returnData.slice(2, 66)) & ((1n << 160n) - 1n);
 }
 
 export interface Snapshot {
@@ -106,6 +116,19 @@ export class GapReader {
         return { ...p, aIsToken0: token0 === p.a.address.toLowerCase() };
       })
       .filter((x): x is PoolInfo => x !== null);
+
+    // pool depth: how much of each token the pool actually holds
+    const bal = await this.multicall(
+      this.pools.flatMap((p) => [
+        { target: p.a.address, callData: erc20Iface.encodeFunctionData("balanceOf", [p.address]) },
+        { target: p.b.address, callData: erc20Iface.encodeFunctionData("balanceOf", [p.address]) },
+      ]),
+    );
+    this.pools.forEach((p, i) => {
+      const ra = bal[2 * i], rb = bal[2 * i + 1];
+      if (ra?.success) p.balanceA = erc20Iface.decodeFunctionResult("balanceOf", ra.returnData)[0] as bigint;
+      if (rb?.success) p.balanceB = erc20Iface.decodeFunctionResult("balanceOf", rb.returnData)[0] as bigint;
+    });
     return this.pools;
   }
 
@@ -135,8 +158,7 @@ export class GapReader {
       const [dec0, dec1] = p.aIsToken0 ? [p.a.decimals, p.b.decimals] : [p.b.decimals, p.a.decimals];
       let t1PerT0: number;
       if (p.venue.kind === "uniV3") {
-        const [sqrt] = poolIface.decodeFunctionResult("slot0", r.returnData);
-        t1PerT0 = v3PriceToken1PerToken0(sqrt as bigint, dec0, dec1);
+        t1PerT0 = v3PriceToken1PerToken0(sqrtPriceFromSlot0(r.returnData), dec0, dec1);
       } else {
         const [r0, r1] = poolIface.decodeFunctionResult("getReserves", r.returnData);
         t1PerT0 = v2PriceToken1PerToken0(r0 as bigint, r1 as bigint, dec0, dec1);

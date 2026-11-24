@@ -1,0 +1,212 @@
+{
+  "_note": "Radar-only extension of strategies.config.json (tokens are added, venues are appended). Addresses were written from memory: scripts/verify-addresses.sh checks every token and router on-chain. Pools that do not exist are skipped automatically by the radar.",
+  "extends": "strategies.config.json",
+  "tokens": {
+    "WBTC": {
+      "address": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+      "decimals": 8,
+      "usd": 90000
+    },
+    "LINK": {
+      "address": "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4",
+      "decimals": 18,
+      "usd": 15
+    },
+    "GMX": {
+      "address": "0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a",
+      "decimals": 18,
+      "usd": 20
+    },
+    "wstETH": {
+      "address": "0x5979D7b546E38E414F7E9822514be443A4800529",
+      "decimals": 18,
+      "usd": 3600
+    },
+    "USDCe": {
+      "address": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+      "decimals": 6,
+      "usd": 1,
+      "onchainSymbol": "USDC.e"
+    },
+    "DAI": {
+      "address": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+      "decimals": 18,
+      "usd": 1
+    }
+  },
+  "venues": [
+    {
+      "id": "uniV3-100",
+      "dex": "uniswap",
+      "kind": "uniV3",
+      "fee": 100,
+      "router": "0xE592427A0AEce92De3Edee1F18E0157C05861564",
+      "liquidityUsd": 0,
+      "pairs": [
+        "WETH/USDC",
+        "WETH/USDT",
+        "WETH/USDCe",
+        "WBTC/WETH",
+        "WBTC/USDC",
+        "ARB/WETH",
+        "ARB/USDC",
+        "LINK/WETH",
+        "GMX/WETH",
+        "wstETH/WETH",
+        "USDC/USDT",
+        "USDC/USDCe",
+        "DAI/USDC"
+      ]
+    },
+    {
+      "id": "uniV3-500x",
+      "dex": "uniswap",
+      "kind": "uniV3",
+      "fee": 500,
+      "router": "0xE592427A0AEce92De3Edee1F18E0157C05861564",
+      "liquidityUsd": 0,
+      "pairs": [
+        "WETH/USDCe",
+        "WBTC/WETH",
+        "WBTC/USDC",
+        "ARB/WETH",
+        "ARB/USDC",
+        "LINK/WETH",
+        "GMX/WETH",
+        "wstETH/WETH",
+        "USDC/USDT",
+        "USDC/USDCe",
+        "DAI/USDC"
+      ]
+    },
+    {
+      "id": "uniV3-3000x",
+      "dex": "uniswap",
+      "kind": "uniV3",
+      "fee": 3000,
+      "router": "0xE592427A0AEce92De3Edee1F18E0157C05861564",
+      "liquidityUsd": 0,
+      "pairs": [
+        "WETH/USDCe",
+        "WBTC/WETH",
+        "WBTC/USDC",
+        "LINK/WETH",
+        "GMX/WETH",
+        "wstETH/WETH",
+        "USDC/USDT",
+        "USDC/USDCe",
+        "DAI/USDC"
+      ]
+    },
+    {
+      "id": "pcsV3-100",
+      "dex": "pancakeswap",
+      "kind": "uniV3",
+      "fee": 100,
+      "router": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+      "quoter": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "liquidityUsd": 0,
+      "pairs": [
+        "WETH/USDC",
+        "WETH/USDT",
+        "WETH/USDCe",
+        "WBTC/WETH",
+        "WBTC/USDC",
+        "ARB/WETH",
+        "ARB/USDC",
+        "LINK/WETH",
+        "GMX/WETH",
+        "wstETH/WETH",
+        "USDC/USDT",
+        "USDC/USDCe",
+        "DAI/USDC"
+      ]
+    },
+    {
+      "id": "pcsV3-500",
+      "dex": "pancakeswap",
+      "kind": "uniV3",
+      "fee": 500,
+      "router": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+      "quoter": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "liquidityUsd": 0,
+      "pairs": [
+        "WETH/USDC",
+        "WETH/USDT",
+        "WETH/USDCe",
+        "WBTC/WETH",
+        "WBTC/USDC",
+        "ARB/WETH",
+        "ARB/USDC",
+        "LINK/WETH",
+        "GMX/WETH",
+        "wstETH/WETH",
+        "USDC/USDT",
+        "USDC/USDCe",
+        "DAI/USDC"
+      ]
+    },
+    {
+      "id": "pcsV3-2500",
+      "dex": "pancakeswap",
+      "kind": "uniV3",
+      "fee": 2500,
+      "router": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+      "quoter": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "liquidityUsd": 0,
+      "pairs": [
+        "WETH/USDC",
+        "WETH/USDT",
+        "WETH/USDCe",
+        "WBTC/WETH",
+        "WBTC/USDC",
+        "ARB/WETH",
+        "ARB/USDC",
+        "LINK/WETH",
+        "GMX/WETH",
+        "wstETH/WETH",
+        "USDC/USDT",
+        "USDC/USDCe",
+        "DAI/USDC"
+      ]
+    },
+    {
+      "id": "pcsV3-10000",
+      "dex": "pancakeswap",
+      "kind": "uniV3",
+      "fee": 10000,
+      "router": "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+      "quoter": "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997",
+      "liquidityUsd": 0,
+      "pairs": [
+        "WETH/USDC",
+        "WETH/USDT",
+        "WETH/USDCe",
+        "WBTC/WETH",
+        "WBTC/USDC",
+        "ARB/WETH",
+        "ARB/USDC",
+        "LINK/WETH",
+        "GMX/WETH",
+        "wstETH/WETH",
+        "USDC/USDT",
+        "USDC/USDCe",
+        "DAI/USDC"
+      ]
+    },
+    {
+      "id": "sushiV2-3000x",
+      "dex": "sushiswap",
+      "kind": "uniV2",
+      "fee": 3000,
+      "router": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
+      "liquidityUsd": 0,
+      "pairs": [
+        "WBTC/WETH",
+        "LINK/WETH",
+        "GMX/WETH",
+        "USDC/USDCe"
+      ]
+    }
+  ]
+}

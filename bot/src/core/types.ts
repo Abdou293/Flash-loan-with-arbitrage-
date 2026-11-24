@@ -12,6 +12,8 @@ export interface Venue {
   kind: VenueKind;
   fee: number; // fee in hundredths of a bip: 500 = 0.05%, 3000 = 0.30%
   router: string;
+  /** Uniswap-V3-style QuoterV2 for this venue (defaults to Uniswap's) */
+  quoter?: string;
   liquidityUsd: number; // used by the synthetic market only
   pairs: string[]; // "A/B" pairs traded on this venue
 }

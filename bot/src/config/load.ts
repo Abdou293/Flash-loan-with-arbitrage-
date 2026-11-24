@@ -1,11 +1,23 @@
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import type { GlobalConfig, RiskConfig, Token, Venue } from "../core/types.js";
 
-export interface FlashLoanConfig {
-  provider: string;
-  vault: string;
-  /** Token symbols the lender can actually supply. Routes starting with any other token are skipped. */
+export interface LenderConfig {
+  provider: "balancerV2" | "uniswapV4";
+  address: string;
+  /** Token symbols this lender can actually supply (check on-chain balances). */
   borrowable: string[];
+}
+
+export interface FlashLoanConfig {
+  lenders: LenderConfig[];
+  /** Union of all lenders' borrowable tokens. Routes starting with any other token are skipped. */
+  borrowable: string[];
+}
+
+/** First lender that can supply `symbol` (lenders are listed in order of preference). */
+export function lenderFor(cfg: FlashLoanConfig, symbol: string): LenderConfig | undefined {
+  return cfg.lenders.find((l) => l.borrowable.includes(symbol));
 }
 
 export interface BotConfig {
@@ -19,7 +31,19 @@ export interface BotConfig {
 }
 
 export function loadConfig(path: string): BotConfig {
-  const raw = JSON.parse(readFileSync(path, "utf8"));
+  let raw = JSON.parse(readFileSync(path, "utf8"));
+  if (raw.extends) {
+    // "extends": tokens are merged, venues appended, everything else inherited unless overridden
+    const base = JSON.parse(readFileSync(join(dirname(path), raw.extends), "utf8"));
+    raw = {
+      ...base,
+      ...raw,
+      tokens: { ...base.tokens, ...raw.tokens },
+      venues: [...base.venues, ...(raw.venues ?? [])],
+      flashLoan: raw.flashLoan ?? base.flashLoan,
+      strategies: raw.strategies ?? base.strategies,
+    };
+  }
   const tokens: Record<string, Token> = {};
   const tokenUsd: Record<string, number> = {};
   for (const [symbol, t] of Object.entries<any>(raw.tokens)) {
@@ -29,8 +53,10 @@ export function loadConfig(path: string): BotConfig {
   for (const v of raw.venues as Venue[])
     for (const p of v.pairs) for (const s of p.split("/")) if (!tokens[s]) throw new Error(`venue ${v.id}: unknown token ${s}`);
   if (!tokens["WETH"]) throw new Error("config must define WETH (used to price gas)");
-  const flashLoan: FlashLoanConfig = raw.flashLoan ?? { provider: "none", vault: "", borrowable: Object.keys(tokens) };
-  for (const s of flashLoan.borrowable) if (!tokens[s]) throw new Error(`flashLoan.borrowable: unknown token ${s}`);
+  const lenders: LenderConfig[] = raw.flashLoan?.lenders ?? [];
+  const borrowable = [...new Set(lenders.flatMap((l) => l.borrowable))];
+  for (const s of borrowable) if (!tokens[s]) throw new Error(`flashLoan: unknown borrowable token ${s}`);
+  const flashLoan: FlashLoanConfig = { lenders, borrowable };
   return { global: raw.global, flashLoan, risk: raw.risk, tokens, tokenUsd, venues: raw.venues, strategies: raw.strategies };
 }
 

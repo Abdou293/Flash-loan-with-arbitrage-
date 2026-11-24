@@ -8,14 +8,15 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 import {IBalancerVault} from "./interfaces/IBalancerVault.sol";
+import {IUniswapV4PoolManager} from "./interfaces/IUniswapV4PoolManager.sol";
 import {IUniswapV3Router} from "./interfaces/IUniswapV3Router.sol";
 import {IUniswapV2Router} from "./interfaces/IUniswapV2Router.sol";
 
 /// @title FlashArb
-/// @notice Educational flash-loan arbitrage executor funded ONLY by zero-interest flash loans from the Balancer V2
-///         Vault. Borrows one token, runs a list of swaps across DEX routers, repays the loan (plus whatever fee the
-///         Vault charges, zero at the time of writing), and reverts the whole transaction unless the trade itself
-///         made at least `minProfit`.
+/// @notice Educational flash-loan arbitrage executor funded ONLY by zero-interest flash loans, from either the
+///         Balancer V2 Vault or the Uniswap V4 PoolManager ("flash accounting"). Borrows one token, runs a list of
+///         swaps across DEX routers, repays the loan (plus any fee the lender charges; zero for both when checked),
+///         and reverts the whole transaction unless the trade itself made at least `minProfit`.
 /// @dev NOT security-audited. Educational / portfolio use only.
 contract FlashArb is Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -23,6 +24,12 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
     enum DexType {
         UNISWAP_V3, // router implements exactInputSingle (original SwapRouter)
         UNISWAP_V2 // router implements swapExactTokensForTokens (SushiSwap, etc.)
+    }
+
+    /// @notice Which zero-interest lender funds the trade.
+    enum Lender {
+        BALANCER_V2,
+        UNISWAP_V4
     }
 
     /// @param dex       Which router ABI to use.
@@ -36,8 +43,10 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
         uint24 fee;
     }
 
-    /// @notice Balancer V2 Vault: the lender, and the only address allowed to call `receiveFlashLoan`.
+    /// @notice Balancer V2 Vault: a lender, and the only address allowed to call `receiveFlashLoan`.
     address public immutable VAULT;
+    /// @notice Uniswap V4 PoolManager (zero = disabled): a lender, and the only address allowed to call `unlockCallback`.
+    address public immutable POOL_MANAGER;
 
     mapping(address => bool) public allowedRouters;
 
@@ -50,6 +59,8 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
     event Withdrawn(address indexed token, address indexed to, uint256 amount);
 
     error NotVault();
+    error NotPoolManager();
+    error LenderDisabled();
     error UnexpectedFlashLoan();
     error RouterNotAllowed(address router);
     error EmptyRoute();
@@ -57,9 +68,10 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
     error InsufficientProfit(uint256 balanceAfter, uint256 required);
     error ZeroAddress();
 
-    constructor(address vault_) Ownable(msg.sender) {
+    constructor(address vault_, address poolManager_) Ownable(msg.sender) {
         if (vault_ == address(0)) revert ZeroAddress();
         VAULT = vault_;
+        POOL_MANAGER = poolManager_;
     }
 
     // ---------------------------------------------------------------- owner controls
@@ -87,12 +99,13 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
 
     // ---------------------------------------------------------------- entry point
 
-    /// @notice Start an arbitrage funded by a Balancer V2 flash loan. Owner only, blocked while paused.
+    /// @notice Start an arbitrage funded by a zero-interest flash loan. Owner only, blocked while paused.
+    /// @param lender     Balancer V2 Vault or Uniswap V4 PoolManager (pick the one that holds enough of `asset`).
     /// @param asset      Token to borrow (and the token the route must end in).
     /// @param amount     Amount to borrow.
     /// @param steps      Swap route.
     /// @param minProfit  Minimum profit of THIS trade, in `asset` units, after any loan fee, or the tx reverts.
-    function execute(address asset, uint256 amount, SwapStep[] calldata steps, uint256 minProfit)
+    function execute(Lender lender, address asset, uint256 amount, SwapStep[] calldata steps, uint256 minProfit)
         external
         onlyOwner
         whenNotPaused
@@ -106,13 +119,20 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
 
         uint256 balanceBefore = IERC20(asset).balanceOf(address(this));
         bytes memory userData = abi.encode(steps, minProfit, balanceBefore);
-        address[] memory tokens = new address[](1);
-        tokens[0] = asset;
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = amount;
 
-        _pendingLoan = keccak256(abi.encode(asset, amount, userData));
-        IBalancerVault(VAULT).flashLoan(address(this), tokens, amounts, userData);
+        if (lender == Lender.BALANCER_V2) {
+            address[] memory tokens = new address[](1);
+            tokens[0] = asset;
+            uint256[] memory amounts = new uint256[](1);
+            amounts[0] = amount;
+            _pendingLoan = keccak256(abi.encode(asset, amount, userData));
+            IBalancerVault(VAULT).flashLoan(address(this), tokens, amounts, userData);
+        } else {
+            if (POOL_MANAGER == address(0)) revert LenderDisabled();
+            bytes memory data = abi.encode(asset, amount, userData);
+            _pendingLoan = keccak256(data);
+            IUniswapV4PoolManager(POOL_MANAGER).unlock(data);
+        }
         _pendingLoan = bytes32(0);
     }
 
@@ -131,10 +151,32 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
         if (expected == bytes32(0) || keccak256(abi.encode(tokens[0], amounts[0], userData)) != expected) {
             revert UnexpectedFlashLoan();
         }
+        _runAndCheck(tokens[0], amounts[0], feeAmounts[0], userData);
+        IERC20(tokens[0]).safeTransfer(VAULT, amounts[0] + feeAmounts[0]); // Balancer expects the repayment by transfer
+    }
 
-        address asset = tokens[0];
-        uint256 amount = amounts[0];
-        uint256 fee = feeAmounts[0];
+    /// @notice Uniswap V4 callback (flash accounting). The PoolManager only calls back whoever called `unlock`, and we
+    ///         additionally require the exact data this contract just sent. Borrow with `take`, repay with sync/settle.
+    function unlockCallback(bytes calldata data) external returns (bytes memory) {
+        if (msg.sender != POOL_MANAGER || POOL_MANAGER == address(0)) revert NotPoolManager();
+        bytes32 expected = _pendingLoan;
+        if (expected == bytes32(0) || keccak256(data) != expected) revert UnexpectedFlashLoan();
+        (address asset, uint256 amount, bytes memory userData) = abi.decode(data, (address, uint256, bytes));
+
+        IUniswapV4PoolManager pm = IUniswapV4PoolManager(POOL_MANAGER);
+        pm.take(asset, address(this), amount); // borrow: creates a debt that must be settled before unlock ends
+        _runAndCheck(asset, amount, 0, userData);
+        pm.sync(asset);
+        IERC20(asset).safeTransfer(POOL_MANAGER, amount);
+        pm.settle(); // repay: the PoolManager reverts the whole unlock if any debt is left
+        return "";
+    }
+
+    // ---------------------------------------------------------------- internals
+
+    /// @dev Runs the route and enforces: balanceAfter >= balanceBefore + amount + fee + minProfit.
+    ///      `balanceBefore` (measured before the loan) keeps old, un-withdrawn profits from hiding a losing trade.
+    function _runAndCheck(address asset, uint256 amount, uint256 fee, bytes memory userData) internal {
         (SwapStep[] memory steps, uint256 minProfit, uint256 balanceBefore) =
             abi.decode(userData, (SwapStep[], uint256, uint256));
 
@@ -145,16 +187,11 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
             currentToken = steps[i].tokenOut;
         }
 
-        // Measured against the balance BEFORE the loan, so old un-withdrawn profits can never hide a losing trade.
         uint256 required = balanceBefore + amount + fee + minProfit;
         uint256 balanceAfter = IERC20(asset).balanceOf(address(this));
         if (balanceAfter < required) revert InsufficientProfit(balanceAfter, required);
-
-        IERC20(asset).safeTransfer(VAULT, amount + fee); // Balancer expects the repayment by transfer
         emit ArbExecuted(asset, amount, fee, balanceAfter - balanceBefore - amount - fee);
     }
-
-    // ---------------------------------------------------------------- internals
 
     function _swap(SwapStep memory s, address tokenIn, uint256 amountIn) internal returns (uint256 amountOut) {
         IERC20(tokenIn).forceApprove(s.router, amountIn);

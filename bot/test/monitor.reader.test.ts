@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ARBSYS, arbSysIface, GapReader, MULTICALL3, mcIface, poolIface, routerIface, v2FactoryIface, v3FactoryIface, type CallFn } from "../src/monitor/reader.js";
+import { ARBSYS, arbSysIface, erc20Iface, GapReader, MULTICALL3, mcIface, poolIface, routerIface, v2FactoryIface, v3FactoryIface, type CallFn } from "../src/monitor/reader.js";
 import { config } from "./helpers.js";
 
 /**
@@ -37,6 +37,10 @@ function fakeChain(opts: { block: number; wethUsdcV3: number; wethUsdcV2: number
       const pairOk = [a, b].map((x: string) => x.toLowerCase()).sort().join() === [weth, usdc].sort().join();
       return v2FactoryIface.encodeFunctionResult("getPair", [pairOk ? poolFor("v2") : "0x" + "0".repeat(40)]);
     }
+    if (sel === erc20Iface.getFunction("balanceOf")!.selector) {
+      // every pool holds 100 WETH and 300k USDC
+      return erc20Iface.encodeFunctionResult("balanceOf", [t === weth ? 100n * 10n ** 18n : 300_000n * 10n ** 6n]);
+    }
     if (sel === poolIface.getFunction("token0")!.selector) return poolIface.encodeFunctionResult("token0", [config.tokens["WETH"]!.address]);
     if (sel === poolIface.getFunction("slot0")!.selector) return poolIface.encodeFunctionResult("slot0", [sqrtFor(opts.wethUsdcV3), 0, 0, 0, 0, 0, true]);
     if (sel === poolIface.getFunction("getReserves")!.selector) {
@@ -68,6 +72,8 @@ describe("GapReader (Multicall3)", () => {
     const pools = await reader.init();
     expect(pools.map((p) => p.id).sort()).toEqual(["sushiV2-3000:WETH/USDC", "uniV3-500:WETH/USDC"]);
     expect(pools.every((p) => p.aIsToken0)).toBe(true);
+    expect(pools[0]!.balanceA).toBe(100n * 10n ** 18n); // pool depth read for the dead-pool filter
+    expect(pools[0]!.balanceB).toBe(300_000n * 10n ** 6n);
   });
 
   it("reads every pool and the block number in ONE call per poll, with correct prices", async () => {

@@ -1,7 +1,7 @@
 {
  "meta": {
   "dataSource": "synthetic",
-  "generatedAt": "2026-11-24T16:15:25.881Z",
+  "generatedAt": "2026-11-24T19:10:01.101Z",
   "cycles": 300,
   "seed": 42,
   "caveats": [
@@ -620,7 +620,7 @@
   {
    "id": "300-16747",
    "cycle": 300,
-   "timestamp": "2026-11-24T16:15:25.880Z",
+   "timestamp": "2026-11-24T19:10:01.101Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW300x0@uniV3-500 | NEW300x0→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -636,7 +636,7 @@
   {
    "id": "297-16525",
    "cycle": 297,
-   "timestamp": "2026-11-24T16:15:25.851Z",
+   "timestamp": "2026-11-24T19:10:01.073Z",
    "strategy": "crossDex",
    "route": "WETH→USDC@uniV3-500 | USDC→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -653,7 +653,7 @@
   {
    "id": "295-16469",
    "cycle": 295,
-   "timestamp": "2026-11-24T16:15:25.845Z",
+   "timestamp": "2026-11-24T19:10:01.067Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW295x2@uniV3-10000 | NEW295x2→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -669,7 +669,7 @@
   {
    "id": "293-16357",
    "cycle": 293,
-   "timestamp": "2026-11-24T16:15:25.830Z",
+   "timestamp": "2026-11-24T19:10:01.053Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW293x2@uniV3-3000 | NEW293x2→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -685,7 +685,7 @@
   {
    "id": "292-16299",
    "cycle": 292,
-   "timestamp": "2026-11-24T16:15:25.818Z",
+   "timestamp": "2026-11-24T19:10:01.047Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW292x0@uniV3-3000 | NEW292x0→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -701,7 +701,7 @@
   {
    "id": "285-15911",
    "cycle": 285,
-   "timestamp": "2026-11-24T16:15:25.759Z",
+   "timestamp": "2026-11-24T19:10:01.001Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW285x1@uniV3-10000 | NEW285x1→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -717,7 +717,7 @@
   {
    "id": "284-15854",
    "cycle": 284,
-   "timestamp": "2026-11-24T16:15:25.752Z",
+   "timestamp": "2026-11-24T19:10:00.993Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW284x1@sushiV2-3000 | NEW284x1→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -734,7 +734,7 @@
   {
    "id": "284-15851",
    "cycle": 284,
-   "timestamp": "2026-11-24T16:15:25.751Z",
+   "timestamp": "2026-11-24T19:10:00.993Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW284x0@uniV3-10000 | NEW284x0→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -751,7 +751,7 @@
   {
    "id": "284-15845",
    "cycle": 284,
-   "timestamp": "2026-11-24T16:15:25.751Z",
+   "timestamp": "2026-11-24T19:10:00.993Z",
    "strategy": "feeTier",
    "route": "WETH→USDC@uniV3-3000 | USDC→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -767,7 +767,7 @@
   {
    "id": "283-15749",
    "cycle": 283,
-   "timestamp": "2026-11-24T16:15:25.739Z",
+   "timestamp": "2026-11-24T19:10:00.980Z",
    "strategy": "crossDex",
    "route": "WETH→USDT@uniV3-500 | USDT→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -784,7 +784,7 @@
   {
    "id": "280-15580",
    "cycle": 280,
-   "timestamp": "2026-11-24T16:15:25.716Z",
+   "timestamp": "2026-11-24T19:10:00.960Z",
    "strategy": "crossDex",
    "route": "WETH→USDC@sushiV2-3000 | USDC→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -801,7 +801,7 @@
   {
    "id": "279-15575",
    "cycle": 279,
-   "timestamp": "2026-11-24T16:15:25.715Z",
+   "timestamp": "2026-11-24T19:10:00.960Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW279x0@uniV3-500 | NEW279x0→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -817,7 +817,7 @@
   {
    "id": "279-15569",
    "cycle": 279,
-   "timestamp": "2026-11-24T16:15:25.714Z",
+   "timestamp": "2026-11-24T19:10:00.959Z",
    "strategy": "feeTier",
    "route": "WETH→USDC@uniV3-3000 | USDC→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -834,7 +834,7 @@
   {
    "id": "278-15520",
    "cycle": 278,
-   "timestamp": "2026-11-24T16:15:25.704Z",
+   "timestamp": "2026-11-24T19:10:00.952Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW278x1@sushiV2-3000 | NEW278x1→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -850,7 +850,7 @@
   {
    "id": "277-15464",
    "cycle": 277,
-   "timestamp": "2026-11-24T16:15:25.693Z",
+   "timestamp": "2026-11-24T19:10:00.945Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW277x1@sushiV2-3000 | NEW277x1→WETH@uniV3-3000",
    "borrowToken": "WETH",
@@ -866,7 +866,7 @@
   {
    "id": "276-15407",
    "cycle": 276,
-   "timestamp": "2026-11-24T16:15:25.684Z",
+   "timestamp": "2026-11-24T19:10:00.939Z",
    "strategy": "feeTier",
    "route": "WETH→USDT@uniV3-500 | USDT→WETH@uniV3-3000",
    "borrowToken": "WETH",
@@ -883,7 +883,7 @@
   {
    "id": "275-15349",
    "cycle": 275,
-   "timestamp": "2026-11-24T16:15:25.677Z",
+   "timestamp": "2026-11-24T19:10:00.932Z",
    "strategy": "feeTier",
    "route": "WETH→USDC@uniV3-3000 | USDC→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -900,7 +900,7 @@
   {
    "id": "275-15304",
    "cycle": 275,
-   "timestamp": "2026-11-24T16:15:25.670Z",
+   "timestamp": "2026-11-24T19:10:00.926Z",
    "strategy": "crossDex",
    "route": "WETH→USDC@sushiV2-3000 | USDC→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -917,7 +917,7 @@
   {
    "id": "274-15300",
    "cycle": 274,
-   "timestamp": "2026-11-24T16:15:25.669Z",
+   "timestamp": "2026-11-24T19:10:00.925Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW274x0@sushiV2-3000 | NEW274x0→WETH@uniV3-10000",
    "borrowToken": "WETH",
@@ -933,7 +933,7 @@
   {
    "id": "271-15134",
    "cycle": 271,
-   "timestamp": "2026-11-24T16:15:25.648Z",
+   "timestamp": "2026-11-24T19:10:00.899Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW271x0@sushiV2-3000 | NEW271x0→WETH@uniV3-3000",
    "borrowToken": "WETH",
@@ -949,7 +949,7 @@
   {
    "id": "266-14859",
    "cycle": 266,
-   "timestamp": "2026-11-24T16:15:25.613Z",
+   "timestamp": "2026-11-24T19:10:00.865Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW266x1@uniV3-10000 | NEW266x1→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -965,7 +965,7 @@
   {
    "id": "264-14748",
    "cycle": 264,
-   "timestamp": "2026-11-24T16:15:25.598Z",
+   "timestamp": "2026-11-24T19:10:00.852Z",
    "strategy": "feeTier",
    "route": "WETH→USDT@uniV3-3000 | USDT→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -981,7 +981,7 @@
   {
    "id": "263-14692",
    "cycle": 263,
-   "timestamp": "2026-11-24T16:15:25.589Z",
+   "timestamp": "2026-11-24T19:10:00.846Z",
    "strategy": "feeTier",
    "route": "WETH→USDT@uniV3-3000 | USDT→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -998,7 +998,7 @@
   {
    "id": "261-14584",
    "cycle": 261,
-   "timestamp": "2026-11-24T16:15:25.573Z",
+   "timestamp": "2026-11-24T19:10:00.830Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW261x0@sushiV2-3000 | NEW261x0→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -1014,7 +1014,7 @@
   {
    "id": "261-14532",
    "cycle": 261,
-   "timestamp": "2026-11-24T16:15:25.565Z",
+   "timestamp": "2026-11-24T19:10:00.824Z",
    "strategy": "crossDex",
    "route": "WETH→USDC@sushiV2-3000 | USDC→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -1030,7 +1030,7 @@
   {
    "id": "260-14528",
    "cycle": 260,
-   "timestamp": "2026-11-24T16:15:25.565Z",
+   "timestamp": "2026-11-24T19:10:00.824Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW260x0@sushiV2-3000 | NEW260x0→WETH@uniV3-10000",
    "borrowToken": "WETH",
@@ -1046,7 +1046,7 @@
   {
    "id": "259-14471",
    "cycle": 259,
-   "timestamp": "2026-11-24T16:15:25.558Z",
+   "timestamp": "2026-11-24T19:10:00.815Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW259x1@uniV3-500 | NEW259x1→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -1062,7 +1062,7 @@
   {
    "id": "258-14415",
    "cycle": 258,
-   "timestamp": "2026-11-24T16:15:25.551Z",
+   "timestamp": "2026-11-24T19:10:00.807Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW258x1@uniV3-500 | NEW258x1→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -1078,7 +1078,7 @@
   {
    "id": "256-14297",
    "cycle": 256,
-   "timestamp": "2026-11-24T16:15:25.537Z",
+   "timestamp": "2026-11-24T19:10:00.794Z",
    "strategy": "feeTier",
    "route": "WETH→USDC@uniV3-500 | USDC→WETH@uniV3-3000",
    "borrowToken": "WETH",
@@ -1095,7 +1095,7 @@
   {
    "id": "256-14251",
    "cycle": 256,
-   "timestamp": "2026-11-24T16:15:25.531Z",
+   "timestamp": "2026-11-24T19:10:00.789Z",
    "strategy": "crossDex",
    "route": "WETH→USDC@uniV3-500 | USDC→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -1112,7 +1112,7 @@
   {
    "id": "254-14193",
    "cycle": 254,
-   "timestamp": "2026-11-24T16:15:25.523Z",
+   "timestamp": "2026-11-24T19:10:00.778Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW254x1@uniV3-10000 | NEW254x1→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -1128,7 +1128,7 @@
   {
    "id": "251-14023",
    "cycle": 251,
-   "timestamp": "2026-11-24T16:15:25.503Z",
+   "timestamp": "2026-11-24T19:10:00.754Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW251x1@uniV3-3000 | NEW251x1→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -1144,7 +1144,7 @@
   {
    "id": "251-14021",
    "cycle": 251,
-   "timestamp": "2026-11-24T16:15:25.502Z",
+   "timestamp": "2026-11-24T19:10:00.754Z",
    "strategy": "feeTier",
    "route": "WETH→USDT@uniV3-500 | USDT→WETH@uniV3-3000",
    "borrowToken": "WETH",
@@ -1161,7 +1161,7 @@
   {
    "id": "251-14003",
    "cycle": 251,
-   "timestamp": "2026-11-24T16:15:25.500Z",
+   "timestamp": "2026-11-24T19:10:00.751Z",
    "strategy": "triangular",
    "route": "WETH→USDT@uniV3-500 | USDT→USDC@sushiV2-3000 | USDC→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -1178,7 +1178,7 @@
   {
    "id": "250-13963",
    "cycle": 250,
-   "timestamp": "2026-11-24T16:15:25.495Z",
+   "timestamp": "2026-11-24T19:10:00.747Z",
    "strategy": "feeTier",
    "route": "WETH→USDC@uniV3-3000 | USDC→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -1194,7 +1194,7 @@
   {
    "id": "249-13914",
    "cycle": 249,
-   "timestamp": "2026-11-24T16:15:25.488Z",
+   "timestamp": "2026-11-24T19:10:00.741Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW249x0@sushiV2-3000 | NEW249x0→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -1210,7 +1210,7 @@
   {
    "id": "249-13911",
    "cycle": 249,
-   "timestamp": "2026-11-24T16:15:25.488Z",
+   "timestamp": "2026-11-24T19:10:00.741Z",
    "strategy": "feeTier",
    "route": "WETH→USDT@uniV3-500 | USDT→WETH@uniV3-3000",
    "borrowToken": "WETH",
@@ -1226,7 +1226,7 @@
   {
    "id": "249-13865",
    "cycle": 249,
-   "timestamp": "2026-11-24T16:15:25.482Z",
+   "timestamp": "2026-11-24T19:10:00.735Z",
    "strategy": "crossDex",
    "route": "WETH→USDT@uniV3-500 | USDT→WETH@sushiV2-3000",
    "borrowToken": "WETH",
@@ -1243,7 +1243,7 @@
   {
    "id": "246-13744",
    "cycle": 246,
-   "timestamp": "2026-11-24T16:15:25.466Z",
+   "timestamp": "2026-11-24T19:10:00.721Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW246x1@sushiV2-3000 | NEW246x1→WETH@uniV3-500",
    "borrowToken": "WETH",
@@ -1259,7 +1259,7 @@
   {
    "id": "246-13742",
    "cycle": 246,
-   "timestamp": "2026-11-24T16:15:25.466Z",
+   "timestamp": "2026-11-24T19:10:00.721Z",
    "strategy": "newPoolScanner",
    "route": "WETH→NEW246x0@sushiV2-3000 | NEW246x0→WETH@uniV3-3000",
    "borrowToken": "WETH",

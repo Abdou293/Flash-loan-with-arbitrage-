@@ -51,3 +51,32 @@ export function gapVersusFees(p0: number, p1: number, f0: number, f1: number): G
     sellAIn,
   };
 }
+
+const STABLES = new Set(["USDC", "USDT", "USDCe", "DAI"]);
+
+/**
+ * Rough USD price per token symbol from pool prices ("B per A" for pair A/B): stablecoins = 1, everything else
+ * priced through a stablecoin or WETH pool. Used only to size pools (TVL), not for profit maths.
+ */
+export function usdPricesFrom(quotes: { a: string; b: string; price: number }[]): Map<string, number> {
+  const usd = new Map<string, number>();
+  for (const s of STABLES) usd.set(s, 1);
+  for (let pass = 0; pass < 3; pass++) {
+    for (const q of quotes) {
+      if (!(q.price > 0)) continue;
+      const pb = usd.get(q.b), pa = usd.get(q.a);
+      if (pb !== undefined && pa === undefined) usd.set(q.a, q.price * pb);
+      else if (pa !== undefined && pb === undefined) usd.set(q.b, pa / q.price);
+    }
+  }
+  return usd;
+}
+
+/** Pool value in USD from its raw token balances. Returns undefined if a price or balance is missing. */
+export function poolTvlUsd(
+  balA: bigint | undefined, decA: number, usdA: number | undefined,
+  balB: bigint | undefined, decB: number, usdB: number | undefined,
+): number | undefined {
+  if (balA === undefined || balB === undefined || usdA === undefined || usdB === undefined) return undefined;
+  return (Number(balA) / 10 ** decA) * usdA + (Number(balB) / 10 ** decB) * usdB;
+}

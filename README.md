@@ -1,7 +1,7 @@
 # Flash Loan Arbitrage on Arbitrum
 
 An educational, portfolio-grade implementation of a flash-loan arbitrage system: a Solidity contract that borrows with
-**zero-interest flash loans** (Balancer V2 Vault) and reverts unless the trade is profitable, plus a TypeScript plug-in bot that finds, prices, risk-checks and
+**zero-interest flash loans** (Balancer V2 Vault or Uniswap V4 PoolManager) and reverts unless the trade is profitable, plus a TypeScript plug-in bot that finds, prices, risk-checks and
 **simulates** opportunities, a backtesting pipeline, and a static dashboard.
 
 > **Disclaimer.** Educational / portfolio project. Not financial advice. No profit guarantees. **Not security-audited.**
@@ -12,8 +12,8 @@ An educational, portfolio-grade implementation of a flash-loan arbitrage system:
 
 | Area | State |
 |---|---|
-| Smart contract (zero-interest Balancer V2 loans only) + 21 Foundry logic tests (mocks) | Done, passing |
-| Foundry fork tests against real Arbitrum One | Earlier Aave+Balancer version: **5/5 passing** on a live RPC. Balancer-only version: to re-run |
+| Smart contract (zero-interest loans only: Balancer V2 + Uniswap V4) + 29 Foundry logic tests (mocks) | Done, passing |
+| Foundry fork tests against real Arbitrum One | Balancer: **2/2 passing** on a live RPC (earlier Aave+Balancer version 5/5). Uniswap V4 lender: written, to run |
 | On-chain identity check of all contract addresses (`scripts/verify-addresses.sh`) | **13/13 passing** on Arbitrum One |
 | Bot framework, 4 strategies, risk engine, 33 unit tests | Done, passing (also on a clean machine); dry-run only |
 | Historical collector + RPC price quotes | **Run on real data**: 48 snapshots of Arbitrum One (about 24 h) |
@@ -50,24 +50,27 @@ flowchart LR
   R --> SIM[Pre-send simulation<br/>static call]
   SIM --> L[Opportunity log + stats]
   L --> D[Dashboard<br/>static JSON]
-  SIM -. "future, needs explicit approval" .-> C[FlashArb.sol<br/>Balancer V2 zero-interest flash loan]
+  SIM -. "future, needs explicit approval" .-> C[FlashArb.sol<br/>zero-interest flash loan<br/>Balancer V2 / Uniswap V4]
 ```
 
 The bot has **no code path that sends a transaction**; `DRY_RUN=false` is refused and `PRIVATE_KEY` is never read.
 
 ## The contract (`contracts/src/FlashArb.sol`)
-Borrows one token with a **zero-interest flash loan from the Balancer V2 Vault**, runs a route of swaps (Uniswap V3
-`exactInputSingle` or a Uniswap-V2-style router such as SushiSwap), repays the loan, and **reverts the whole transaction**
-unless the trade itself made at least `minProfit`.
+Borrows one token with a **zero-interest flash loan**, runs a route of swaps (Uniswap V3 `exactInputSingle` and its
+forks such as PancakeSwap V3, or a Uniswap-V2-style router such as SushiSwap), repays the loan, and **reverts the whole
+transaction** unless the trade itself made at least `minProfit`.
 
-- Lender: Balancer V2 Vault. Its flash-loan fee was **0** on Arbitrum when checked on-chain (2026-11-24). If Balancer ever
-  starts charging, the contract repays the fee and the profit check includes it, so a fee change cannot cause a silent loss.
-- Liquidity limit: the Vault then held ~110 WETH but only ~4.2k USDC, so the bot only borrows WETH (`flashLoan.borrowable`
-  in `bot/strategies.config.json`). Routes that would borrow anything else are skipped.
+Two zero-interest lenders, chosen per trade (`execute(lender, ...)`):
+- **Balancer V2 Vault** (`flashLoan`): fee 0 on Arbitrum when checked on-chain (2026-11-24); ~110 WETH, ~4.2k USDC then.
+- **Uniswap V4 PoolManager** (flash accounting: `unlock` -> `take` -> trade -> `sync`/`settle`): no fee by design; the
+  PoolManager reverts the whole `unlock` if the debt is not settled.
+- If a lender ever charges a fee, the contract repays it and the profit check includes it, so a fee change cannot cause a
+  silent loss. Which tokens each lender can supply is set in `flashLoan.lenders` (`bot/strategies.config.json`) and
+  checked on-chain by `scripts/verify-addresses.sh`, which prints each lender's current WETH/USDC balance.
 - Aave V3 was supported in an earlier version (5 bps premium) and removed by design; it is still in the git history.
 
-Safety: owner-only `execute`/`withdraw`/`pause`/`setRouterAllowed`; the callback accepts only the Vault and only the exact
-loan the contract just requested (Balancer does not report the initiator, so foreign loans naming this contract are
+Safety: owner-only `execute`/`withdraw`/`pause`/`setRouterAllowed`; each callback accepts only its lender and only the
+exact loan the contract just requested (Balancer does not report the initiator, so foreign loans naming this contract are
 rejected); router allow-list; pause switch; reentrancy guard. Profit is measured against the balance **before** the loan,
 so old un-withdrawn profits can never hide a losing trade (a bug found and fixed during development, with regression
 tests). On-chain `minProfit` does not include gas (paid by the sending wallet); the bot accounts for it off-chain.

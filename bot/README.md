@@ -56,7 +56,11 @@ The generated report repeats these limitations automatically and flags synthetic
 
 ## Gap monitor ("radar")
 
-    npm run monitor -- --minutes 60 --interval-ms 500
+    npm run monitor -- --minutes 60 --interval-ms 500 [--min-tvl-usd 50000] [--sizes 100,250,500,1000,5000]
+
+Uses `radar.config.json` (which extends `strategies.config.json` with more tokens and venues: Uniswap V3 0.01% tier,
+PancakeSwap V3 tiers, more SushiSwap pairs). Pools that do not exist are skipped; pools holding less than `--min-tvl-usd`
+are skipped as "dead" (their price is stale and any trade moves it). Gaps are re-quoted when they widen.
 
 Reads every configured pool in **one** `eth_call` per poll (Multicall3), compares each pair of pools that trade the same
 two tokens, and records every moment their price gap is **outside the band the two pool fees allow** (the only moments

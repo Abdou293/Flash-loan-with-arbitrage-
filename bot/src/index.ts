@@ -1,7 +1,7 @@
 import "./config/dotenv.js";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { loadConfig, loadEnv } from "./config/load.js";
+import { lenderFor, loadConfig, loadEnv } from "./config/load.js";
 import { RpcMarket } from "./core/market/RpcMarket.js";
 import { SampleMarket } from "./core/market/SampleMarket.js";
 import { RiskEngine } from "./core/risk.js";
@@ -51,7 +51,7 @@ async function main() {
       source !== "rpc"
         ? new SampleSimulator(seed)
         : process.env.FLASH_ARB_ADDRESS && process.env.OWNER_ADDRESS
-          ? new StaticCallSimulator(env.rpcUrl, process.env.FLASH_ARB_ADDRESS, process.env.OWNER_ADDRESS)
+          ? new StaticCallSimulator(env.rpcUrl, process.env.FLASH_ARB_ADDRESS, process.env.OWNER_ADDRESS, (s) => lenderFor(config.flashLoan, s)?.provider)
           : new QuoteOnlySimulator(),
     store,
     risk: new RiskEngine(config.risk),

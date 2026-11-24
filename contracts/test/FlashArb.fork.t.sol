@@ -23,6 +23,8 @@ contract FlashArbForkTest is Test {
     // Balancer V2 Vault (same address on every chain). On 2026-11-24 it reported a 0 flash-loan fee, not paused,
     // ~110 WETH and only ~4.2k USDC of liquidity on Arbitrum, so we only borrow WETH from it.
     address constant BALANCER_VAULT = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // VERIFY
+    // Uniswap V4 PoolManager on Arbitrum One (written from memory: scripts/verify-addresses.sh checks it on-chain).
+    address constant POOL_MANAGER = 0x360E68faCcca8cA495c1B759Fd9EEe466db9FB32; // VERIFY
 
     FlashArb arb;
 
@@ -33,7 +35,7 @@ contract FlashArbForkTest is Test {
             return;
         }
         vm.createSelectFork(rpc);
-        arb = new FlashArb(BALANCER_VAULT);
+        arb = new FlashArb(BALANCER_VAULT, POOL_MANAGER);
         arb.setRouterAllowed(UNI_V3_ROUTER, true);
     }
 
@@ -48,7 +50,7 @@ contract FlashArbForkTest is Test {
     /// must revert with InsufficientProfit. We check the error type only (the numbers depend on the forked block).
     function test_fork_revertsWhenUnprofitable() public {
         FlashArb.SwapStep[] memory r = _route();
-        try arb.execute(WETH, 10 ether, r, 0) {
+        try arb.execute(FlashArb.Lender.BALANCER_V2, WETH, 10 ether, r, 0) {
             fail();
         } catch (bytes memory reason) {
             assertTrue(reason.length >= 4);
@@ -80,10 +82,31 @@ contract FlashArbForkTest is Test {
     function test_fork_profitsWhenSpreadExists() public {
         _createArtificialSpread();
         uint256 vaultBefore = IERC20(WETH).balanceOf(BALANCER_VAULT);
-        arb.execute(WETH, 10 ether, _route(), 0.01 ether);
+        arb.execute(FlashArb.Lender.BALANCER_V2, WETH, 10 ether, _route(), 0.01 ether);
         assertGe(IERC20(WETH).balanceOf(address(arb)), 0.01 ether);
         assertGe(IERC20(WETH).balanceOf(BALANCER_VAULT), vaultBefore); // loan repaid in full
         emit log_named_uint("profit with a zero-interest Balancer loan (wei)", IERC20(WETH).balanceOf(address(arb)));
     }
 
+
+    /// Same checks with the Uniswap V4 PoolManager as the zero-interest lender.
+    function test_fork_v4_revertsWhenUnprofitable() public {
+        FlashArb.SwapStep[] memory r = _route();
+        try arb.execute(FlashArb.Lender.UNISWAP_V4, WETH, 1 ether, r, 0) {
+            fail();
+        } catch (bytes memory reason) {
+            assertTrue(reason.length >= 4);
+            assertTrue(bytes4(reason) == FlashArb.InsufficientProfit.selector);
+        }
+        assertEq(IERC20(WETH).balanceOf(address(arb)), 0);
+    }
+
+    function test_fork_v4_profitsWhenSpreadExists() public {
+        _createArtificialSpread();
+        uint256 managerBefore = IERC20(WETH).balanceOf(POOL_MANAGER);
+        arb.execute(FlashArb.Lender.UNISWAP_V4, WETH, 1 ether, _route(), 0.001 ether);
+        assertGe(IERC20(WETH).balanceOf(address(arb)), 0.001 ether);
+        assertGe(IERC20(WETH).balanceOf(POOL_MANAGER), managerBefore); // loan repaid in full
+        emit log_named_uint("profit with a zero-interest Uniswap V4 loan (wei)", IERC20(WETH).balanceOf(address(arb)));
+    }
 }

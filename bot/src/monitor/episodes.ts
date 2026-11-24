@@ -10,6 +10,9 @@ export interface Episode {
   bestNetUsd?: number; // best estimated net profit found while open (if quoting was enabled)
   bestSizeUsd?: number; // trade size that gave bestNetUsd
   hypothetical?: boolean; // quoted with a token the zero-interest lender cannot supply
+  quotedAtExcessBps?: number; // excess when the last quote was taken (re-quote when the gap widens)
+  quotedAtPoll?: number;
+  quotes?: number;
 }
 
 export class EpisodeTracker {

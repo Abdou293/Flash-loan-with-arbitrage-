@@ -34,8 +34,10 @@ export class QuoteOnlySimulator implements Simulator {
 }
 
 const EXECUTE_ABI = [
-  "function execute(address asset,uint256 amount,(uint8 dex,address router,address tokenOut,uint24 fee)[] steps,uint256 minProfit)",
+  "function execute(uint8 lender,address asset,uint256 amount,(uint8 dex,address router,address tokenOut,uint24 fee)[] steps,uint256 minProfit)",
 ];
+/** FlashArb.Lender enum values */
+export const LENDER_ID = { balancerV2: 0, uniswapV4: 1 } as const;
 
 /**
  * Real simulation: eth_call (static call) of FlashArb.execute from the owner's ADDRESS (no private key
@@ -45,14 +47,21 @@ export class StaticCallSimulator implements Simulator {
   private iface = new Interface(EXECUTE_ABI);
   private provider: JsonRpcProvider;
 
-  constructor(rpcUrl: string, private readonly contract: string, private readonly ownerAddress: string) {
+  constructor(
+    rpcUrl: string,
+    private readonly contract: string,
+    private readonly ownerAddress: string,
+    private readonly pickLender: (symbol: string) => keyof typeof LENDER_ID | undefined,
+  ) {
     this.provider = new JsonRpcProvider(rpcUrl, undefined, { staticNetwork: true });
   }
 
   async simulate(c: Candidate): Promise<SimResult> {
     const steps = c.route.map((s) => [s.venue.kind === "uniV3" ? 0 : 1, s.venue.router, s.tokenOut.address, s.venue.fee]);
     const minProfit = c.profit.net > 0n ? c.profit.net / 2n : 0n;
-    const data = this.iface.encodeFunctionData("execute", [c.borrowToken.address, c.amountIn, steps, minProfit]);
+    const lender = this.pickLender(c.borrowToken.symbol);
+    if (!lender) return { ok: false, reason: `no zero-interest lender for ${c.borrowToken.symbol}` };
+    const data = this.iface.encodeFunctionData("execute", [LENDER_ID[lender], c.borrowToken.address, c.amountIn, steps, minProfit]);
     try {
       await this.provider.call({ from: this.ownerAddress, to: this.contract, data });
       return { ok: true };

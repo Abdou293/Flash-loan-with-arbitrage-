@@ -8,7 +8,7 @@ import { RpcMarket } from "../core/market/RpcMarket.js";
 import { bestSizeCandidate } from "../core/profit.js";
 import type { Step, Token } from "../core/types.js";
 import { durationBlocks, EpisodeTracker, type Episode } from "./episodes.js";
-import { gapVersusFees } from "./math.js";
+import { gapVersusFees, poolTvlUsd, usdPricesFrom } from "./math.js";
 import { GapReader, type PoolInfo } from "./reader.js";
 
 /**
@@ -45,14 +45,34 @@ async function main() {
   const sizes = (arg("sizes", "100,250,500,1000,5000") ?? "").split(",").map(Number).filter((n) => n > 0);
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const outDir = arg("out", join(root, "data"))!;
-  const config = loadConfig(join(root, "strategies.config.json"));
+  const config = loadConfig(join(root, arg("config", "radar.config.json")!));
+  // Pools holding less than this (USD) are treated as dead: their "price" is stale and any trade moves it.
+  const minTvlUsd = Number(arg("min-tvl-usd", "50000"));
+  // While a gap is open, quote again when it has widened by this many bps (at most every 10 polls).
+  const requoteBps = Number(arg("requote-bps", "3"));
   const quoteCfg = { ...config.global, tradeSizesUsd: sizes };
 
   const provider = new JsonRpcProvider(rpcUrl, undefined, { staticNetwork: true });
   const reader = new GapReader(config, (tx) => provider.call(tx));
-  const pools = await reader.init();
-  console.log(`Pools found: ${pools.length}`);
-  for (const p of pools) console.log(`  ${p.id}  ${p.address}`);
+  const discovered = await reader.init();
+  console.log(`Pools found: ${discovered.length}`);
+
+  // size every pool in USD with the first snapshot's prices, then drop the dead ones
+  const first = await reader.read();
+  const usd = usdPricesFrom(
+    discovered.filter((p) => first.prices.has(p.id)).map((p) => ({ a: p.a.symbol, b: p.b.symbol, price: first.prices.get(p.id)! })),
+  );
+  const tvl = new Map<string, number | undefined>();
+  for (const p of discovered) {
+    tvl.set(p.id, poolTvlUsd(p.balanceA, p.a.decimals, usd.get(p.a.symbol), p.balanceB, p.b.decimals, usd.get(p.b.symbol)));
+  }
+  const pools = discovered.filter((p) => (tvl.get(p.id) ?? 0) >= minTvlUsd);
+  const fmt = (v: number | undefined) => (v === undefined ? "unknown" : "$" + Math.round(v).toLocaleString("en-US"));
+  for (const p of discovered) {
+    const keep = pools.includes(p);
+    console.log(`  ${keep ? "use " : "skip"} ${p.id.padEnd(28)} TVL ${fmt(tvl.get(p.id))}${keep ? "" : `  (< $${minTvlUsd.toLocaleString("en-US")})`}`);
+  }
+  console.log(`Pools used: ${pools.length} of ${discovered.length} (minimum TVL $${minTvlUsd.toLocaleString("en-US")})`);
 
   // every pair of pools that trade the same two tokens
   const byPair = new Map<string, PoolInfo[]>();
@@ -123,8 +143,13 @@ async function main() {
         stats.set(key, st);
 
         const opened = tracker.observe(key, snap.block, g.excessBps);
-        if (opened) {
-          console.log(`block ${snap.block}: OUTSIDE fee band  ${key}  gap ${g.gapBps.toFixed(1)} bps vs band ${g.bandBps.toFixed(1)} bps (+${g.excessBps.toFixed(1)})`);
+        const live = opened ?? tracker.get(key);
+        const widened =
+          !opened && live && live.quotedAtExcessBps !== undefined &&
+          g.excessBps >= live.quotedAtExcessBps + requoteBps && polls - (live.quotedAtPoll ?? 0) >= 10;
+        if (opened || widened) {
+          const ep = live!;
+          console.log(`block ${snap.block}: ${opened ? "OUTSIDE fee band" : "gap widened    "}  ${key}  gap ${g.gapBps.toFixed(1)} bps vs band ${g.bandBps.toFixed(1)} bps (+${g.excessBps.toFixed(1)})`);
           // Borrow the token the zero-interest lender can supply. If neither token is borrowable, quote anyway as a
           // HYPOTHETICAL (marked) to size the opportunity: executing it would need an extra hop through WETH.
           const borrowable = [x, y].find((t) => config.flashLoan.borrowable.includes(t.symbol));
@@ -133,11 +158,14 @@ async function main() {
             const other = borrow === x ? y : x;
             const b0 = priceOf(p0, raw0, borrow), b1 = priceOf(p1, raw1, borrow);
             const [hi, lo] = b0 >= b1 ? [p0, p1] : [p1, p0]; // sell `borrow` where it is more expensive
-            opened.hypothetical = !borrowable;
-            await estimate(opened, hi, lo, borrow, other, snap.block);
-            const size = opened.bestSizeUsd ? ` (size $${opened.bestSizeUsd})` : "";
-            const hyp = opened.hypothetical ? "  [hypothetical: token not borrowable]" : "";
-            console.log(`  -> estimated best net at this block: ${opened.bestNetUsd ?? "n/a"} USD${size}${hyp}`);
+            ep.hypothetical = !borrowable;
+            ep.quotedAtExcessBps = g.excessBps;
+            ep.quotedAtPoll = polls;
+            ep.quotes = (ep.quotes ?? 0) + 1;
+            await estimate(ep, hi, lo, borrow, other, snap.block);
+            const size = ep.bestSizeUsd ? ` (size $${ep.bestSizeUsd})` : "";
+            const hyp = ep.hypothetical ? "  [hypothetical: token not borrowable]" : "";
+            console.log(`  -> estimated best net so far: ${ep.bestNetUsd ?? "n/a"} USD${size}${hyp}`);
           }
         }
       }
@@ -188,6 +216,9 @@ async function main() {
     blocks: { first: firstBlock, last: lastBlock, spanned: blocksSpanned },
     errors,
     tradeSizesUsd: sizes,
+    minTvlUsd,
+    poolsDiscovered: discovered.length,
+    poolsSkippedAsDead: discovered.filter((p) => !pools.includes(p)).map((p) => ({ id: p.id, tvlUsd: tvl.get(p.id) ?? null })),
     pools: pools.length,
     poolPairs: combos.length,
     quoting: quote,
@@ -201,7 +232,7 @@ async function main() {
     ``,
     `- Generated: ${meta.generatedAt}`,
     `- Blocks: ${firstBlock}–${lastBlock} (${blocksSpanned} blocks), ${polls} polls every ${intervalMs} ms, ${errors} errors`,
-    `- Pools: ${pools.length}, pool pairs compared: ${combos.length}, net-profit quoting: ${quote ? "on" : "off"}`,
+    `- Pools: ${pools.length} used of ${discovered.length} found (pools under $${minTvlUsd.toLocaleString("en-US")} TVL skipped as dead), pool pairs compared: ${combos.length}, net-profit quoting: ${quote ? "on" : "off"} (re-quoted when a gap widens by ${requoteBps} bps)`,
     ``,
     `| Pool pair | Polls | Polls outside fee band | Episodes | Max excess (bps) | Longest episode (blocks) | Median episode (blocks) | Best est. net (USD) | Episodes with net > min profit |`,
     `|---|---:|---:|---:|---:|---:|---:|---:|---:|`,

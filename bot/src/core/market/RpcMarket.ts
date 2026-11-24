@@ -68,7 +68,7 @@ export class RpcMarket implements MarketData {
     let out = 0n;
     try {
       if (step.venue.kind === "uniV3") {
-        const quoter = new Contract(QUOTER_V2, QUOTER_ABI, this.provider);
+        const quoter = new Contract(step.venue.quoter ?? QUOTER_V2, QUOTER_ABI, this.provider);
         const res = await quoter.getFunction("quoteExactInputSingle").staticCall(
           {
             tokenIn: step.tokenIn.address,

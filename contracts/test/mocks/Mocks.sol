@@ -78,3 +78,45 @@ contract MockBalancerVault {
         }
     }
 }
+
+interface IUnlockCallbackMock {
+    function unlockCallback(bytes calldata data) external returns (bytes memory);
+}
+
+/// @dev Behaves like the Uniswap V4 PoolManager's flash accounting: `unlock` calls back msg.sender; `take` creates a
+///      debt; `sync` + transfer + `settle` pays it; the whole unlock reverts if any debt is left.
+contract MockPoolManager {
+    mapping(address => int256) public delta; // negative = the caller owes the manager
+    address private synced;
+    uint256 private syncedBalance;
+    address[] private touched;
+
+    function unlock(bytes calldata data) external returns (bytes memory result) {
+        result = IUnlockCallbackMock(msg.sender).unlockCallback(data);
+        for (uint256 i = 0; i < touched.length; i++) {
+            require(delta[touched[i]] == 0, "CurrencyNotSettled");
+        }
+        delete touched;
+    }
+
+    function take(address currency, address to, uint256 amount) external {
+        MockToken(currency).mint(to, amount); // manager liquidity
+        delta[currency] -= int256(amount);
+        touched.push(currency);
+    }
+
+    function sync(address currency) external {
+        synced = currency;
+        syncedBalance = IERC20(currency).balanceOf(address(this));
+    }
+
+    function settle() external payable returns (uint256 paid) {
+        paid = IERC20(synced).balanceOf(address(this)) - syncedBalance;
+        delta[synced] += int256(paid);
+    }
+
+    /// @dev Lets tests make the manager call a contract's callback with arbitrary data.
+    function callbackOn(address target, bytes calldata data) external {
+        IUnlockCallbackMock(target).unlockCallback(data);
+    }
+}
