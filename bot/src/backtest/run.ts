@@ -12,6 +12,7 @@ export interface BacktestResult {
   opportunities: Opportunity[];
   stats: Record<string, StrategyStats>;
   enabledStrategies: string[];
+  flashLoanFeeBps: number;
 }
 
 /**
@@ -37,5 +38,6 @@ export async function runBacktest(ds: Dataset, config: BotConfig): Promise<Backt
     opportunities: store.recent,
     stats: store.stats,
     enabledStrategies: engine.enabledStrategies,
+    flashLoanFeeBps: config.global.flashLoanFeeBps,
   };
 }

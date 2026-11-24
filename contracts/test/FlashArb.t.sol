@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {FlashArb} from "../src/FlashArb.sol";
-import {MockToken, MockAavePool, MockRouter} from "./mocks/Mocks.sol";
+import {MockToken, MockAavePool, MockRouter, MockBalancerVault} from "./mocks/Mocks.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
@@ -11,6 +11,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 contract FlashArbTest is Test {
     FlashArb arb;
     MockAavePool pool;
+    MockBalancerVault vault;
     MockRouter v3Router; // "Uniswap V3"
     MockRouter v2Router; // "SushiSwap"
     MockToken weth;
@@ -21,7 +22,8 @@ contract FlashArbTest is Test {
 
     function setUp() public {
         pool = new MockAavePool();
-        arb = new FlashArb(address(pool));
+        vault = new MockBalancerVault();
+        arb = new FlashArb(address(pool), address(vault));
         v3Router = new MockRouter();
         v2Router = new MockRouter();
         weth = new MockToken("WETH");
@@ -167,7 +169,104 @@ contract FlashArbTest is Test {
 
     function test_constructorRejectsZeroPool() public {
         vm.expectRevert(FlashArb.ZeroAddress.selector);
-        new FlashArb(address(0));
+        new FlashArb(address(0), address(vault));
+    }
+
+    // ------------------------------------------------------------ old profits must not hide a losing trade
+
+    function test_aave_leftoverProfitCannotHideALoss() public {
+        weth.mint(address(arb), 5 ether); // un-withdrawn profit from earlier trades
+        _setRates(2000e18, 0.000495e18); // this trade loses ~1 WETH
+        vm.expectRevert();
+        arb.execute(address(weth), LOAN, _route(), 0);
+        assertEq(weth.balanceOf(address(arb)), 5 ether); // old profit untouched
+    }
+
+    function test_balancer_leftoverProfitCannotHideALoss() public {
+        weth.mint(address(arb), 5 ether);
+        _setRates(2000e18, 0.000495e18);
+        vm.expectRevert();
+        arb.executeWithBalancer(address(weth), LOAN, _route(), 0);
+        assertEq(weth.balanceOf(address(arb)), 5 ether);
+    }
+
+    function test_aave_profitWithLeftoverBalanceIsMeasuredCorrectly() public {
+        weth.mint(address(arb), 5 ether);
+        _setRates(2000e18, 0.00052e18); // +4 WETH gross, 0.05 premium
+        arb.execute(address(weth), LOAN, _route(), 3.95 ether); // exactly the trade's own profit
+        assertEq(weth.balanceOf(address(arb)), 5 ether + 3.95 ether);
+    }
+
+    // ------------------------------------------------------------ Balancer V2 (zero-fee) flash loans
+
+    function test_balancer_profitableArbitrageSucceedsWithZeroFee() public {
+        _setRates(2000e18, 0.00052e18); // 100 WETH -> 104 WETH, no loan fee
+        arb.executeWithBalancer(address(weth), LOAN, _route(), 4 ether);
+        assertEq(weth.balanceOf(address(arb)), 4 ether); // the whole gross profit is kept
+    }
+
+    function test_balancer_paysTheFeeIfTheVaultChargesOne() public {
+        vault.setFeeBps(10); // 0.10%
+        _setRates(2000e18, 0.00052e18);
+        arb.executeWithBalancer(address(weth), LOAN, _route(), 0);
+        assertEq(weth.balanceOf(address(arb)), 4 ether - 0.1 ether);
+    }
+
+    function test_balancer_revertsWhenUnprofitable() public {
+        _setRates(2000e18, 0.0004999e18);
+        vm.expectRevert();
+        arb.executeWithBalancer(address(weth), LOAN, _route(), 0);
+    }
+
+    function test_balancer_revertsWhenBelowMinProfit() public {
+        _setRates(2000e18, 0.00052e18); // profit 4 WETH
+        vm.expectRevert(abi.encodeWithSelector(FlashArb.InsufficientProfit.selector, 104 ether, 105 ether));
+        arb.executeWithBalancer(address(weth), LOAN, _route(), 5 ether);
+    }
+
+    function test_balancer_foreignLoanToOurContractReverts() public {
+        // Anyone can ask the Vault for a loan and name our contract as recipient. It must be refused.
+        _setRates(2000e18, 0.00052e18);
+        address[] memory tokens = new address[](1);
+        tokens[0] = address(weth);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = LOAN;
+        bytes memory userData = abi.encode(_route(), uint256(0), uint256(0));
+        vm.prank(attacker);
+        vm.expectRevert(FlashArb.UnexpectedFlashLoan.selector);
+        vault.flashLoan(address(arb), tokens, amounts, userData);
+    }
+
+    function test_balancer_nonVaultCannotCallCallback() public {
+        address[] memory tokens = new address[](1);
+        uint256[] memory amounts = new uint256[](1);
+        uint256[] memory fees = new uint256[](1);
+        vm.prank(attacker);
+        vm.expectRevert(FlashArb.NotVault.selector);
+        arb.receiveFlashLoan(tokens, amounts, fees, "");
+    }
+
+    function test_balancer_nonOwnerCannotExecute() public {
+        FlashArb.SwapStep[] memory r = _route();
+        vm.prank(attacker);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, attacker));
+        arb.executeWithBalancer(address(weth), LOAN, r, 0);
+    }
+
+    function test_balancer_pauseBlocksExecution() public {
+        arb.pause();
+        FlashArb.SwapStep[] memory r = _route();
+        vm.expectRevert(Pausable.EnforcedPause.selector);
+        arb.executeWithBalancer(address(weth), LOAN, r, 0);
+    }
+
+    function test_balancer_disabledWhenVaultNotConfigured() public {
+        FlashArb noBalancer = new FlashArb(address(pool), address(0));
+        noBalancer.setRouterAllowed(address(v3Router), true);
+        noBalancer.setRouterAllowed(address(v2Router), true);
+        FlashArb.SwapStep[] memory r = _route();
+        vm.expectRevert(FlashArb.BalancerDisabled.selector);
+        noBalancer.executeWithBalancer(address(weth), LOAN, r, 0);
     }
 
     /// Fuzz: whatever the rates, a run never succeeds with less than minProfit left over.

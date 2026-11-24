@@ -52,6 +52,7 @@ export function renderMarkdown(r: BacktestResult): string {
     `- Data source: \`${r.dataset.source}\` (created ${r.dataset.createdAt})`,
     `- Snapshots replayed: ${r.snapshots}` + (r.dataset.fromBlock ? ` (blocks ${r.dataset.fromBlock}–${r.dataset.toBlock})` : ""),
     `- Note: ${r.dataset.note}`,
+    `- Flash-loan fee assumed: ${r.flashLoanFeeBps} bps` + (r.flashLoanFeeBps === 0 ? " (Balancer V2 Vault, zero fee)" : ""),
     "",
     "| Strategy | Routes evaluated | Profitable before risk | Passed risk | Snapshots with an opportunity | Est. net profit (USD) | Best (USD) | Median (USD) | Closest to break-even (USD) |",
     "|---|---:|---:|---:|---:|---:|---:|---:|---:|",

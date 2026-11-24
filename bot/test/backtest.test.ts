@@ -95,6 +95,17 @@ describe("backtest run + report", () => {
     expect(s.estimatedNetProfitUsd).toBeLessThanOrEqual(s.bestNetProfitUsd! * 5 + 0.01);
   });
 
+  it("a zero flash-loan fee never makes results worse, and the report states the fee used", async () => {
+    const skew = (v: string, a: string, b: string) => (v === "sushiV2-3000" && a === "WETH" && b === "USDC" ? 1.004 : 1);
+    const ds = await dataset(4, skew);
+    const withFee = await runBacktest(ds, config);
+    const zeroFee = await runBacktest(ds, { ...config, global: { ...config.global, flashLoanFeeBps: 0 } });
+    const best = (r: any, k: string) => summarize(r).find((x) => x.strategy === k)!.closestToBreakEvenUsd!;
+    expect(best(zeroFee, "crossDex")).toBeGreaterThan(best(withFee, "crossDex"));
+    expect(renderMarkdown(zeroFee)).toMatch(/Flash-loan fee assumed: 0 bps/);
+    expect(renderMarkdown(withFee)).toMatch(/Flash-loan fee assumed: 5 bps/);
+  });
+
   it("is deterministic", async () => {
     const skew = (v: string) => (v === "sushiV2-3000" ? 1.01 : 1);
     const ds = await dataset(4, skew);

@@ -1,6 +1,7 @@
 # contracts/
 
-`src/FlashArb.sol` borrows one token from Aave V3 (`flashLoanSimple`), runs a route of swaps
+`src/FlashArb.sol` borrows one token from Aave V3 (`execute`) or from the zero-fee Balancer V2 Vault
+(`executeWithBalancer`), runs a route of swaps
 (Uniswap V3 `exactInputSingle` or Uniswap-V2-style routers such as SushiSwap), repays loan + premium,
 and **reverts the whole transaction** if net profit < `minProfit`.
 

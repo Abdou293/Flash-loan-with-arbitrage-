@@ -71,3 +71,39 @@ contract MockRouter {
         amounts[1] = _swap(path[0], path[1], amountIn, to);
     }
 }
+
+interface IBalancerRecipient {
+    function receiveFlashLoan(
+        address[] calldata tokens,
+        uint256[] calldata amounts,
+        uint256[] calldata feeAmounts,
+        bytes calldata userData
+    ) external;
+}
+
+/// @dev Behaves like Balancer V2 Vault.flashLoan: anyone may call it for any recipient; the recipient must
+///      transfer amount + fee back before returning, otherwise the whole call reverts.
+contract MockBalancerVault {
+    uint256 public feeBps; // 0 like Balancer V2 on Arbitrum at the time of writing
+
+    function setFeeBps(uint256 b) external {
+        feeBps = b;
+    }
+
+    function flashLoan(address recipient, address[] memory tokens, uint256[] memory amounts, bytes memory userData)
+        external
+    {
+        uint256[] memory fees = new uint256[](tokens.length);
+        uint256[] memory before = new uint256[](tokens.length);
+        for (uint256 i = 0; i < tokens.length; i++) {
+            fees[i] = (amounts[i] * feeBps) / 10_000;
+            MockToken(tokens[i]).mint(address(this), amounts[i]); // vault liquidity
+            before[i] = IERC20(tokens[i]).balanceOf(address(this));
+            IERC20(tokens[i]).transfer(recipient, amounts[i]);
+        }
+        IBalancerRecipient(recipient).receiveFlashLoan(tokens, amounts, fees, userData);
+        for (uint256 i = 0; i < tokens.length; i++) {
+            require(IERC20(tokens[i]).balanceOf(address(this)) >= before[i] + fees[i], "BAL#602"); // not repaid
+        }
+    }
+}

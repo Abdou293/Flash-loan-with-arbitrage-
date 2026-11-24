@@ -12,7 +12,7 @@ Aave V3 and reverts unless the trade is profitable, plus a TypeScript plug-in bo
 
 | Area | State |
 |---|---|
-| Smart contract + 17 Foundry logic tests (mocks) | Done, passing (also on a clean Ubuntu/WSL2 machine) |
+| Smart contract + 29 Foundry logic tests (mocks) | Done, passing; Aave V3 **and** zero-fee Balancer V2 flash loans |
 | Foundry fork tests against real Arbitrum One (Aave V3 + Uniswap V3) | **Passing, 2/2**, run against a live Arbitrum RPC (see below) |
 | On-chain identity check of all contract addresses (`scripts/verify-addresses.sh`) | **13/13 passing** on Arbitrum One |
 | Bot framework, 4 strategies, risk engine, 33 unit tests | Done, passing (also on a clean machine); dry-run only |
@@ -53,11 +53,20 @@ flowchart LR
 The bot has **no code path that sends a transaction**; `DRY_RUN=false` is refused and `PRIVATE_KEY` is never read.
 
 ## The contract (`contracts/src/FlashArb.sol`)
-Borrows one token via Aave V3 `flashLoanSimple`, runs a route of swaps (Uniswap V3 `exactInputSingle` or a Uniswap-V2-style
-router such as SushiSwap), repays loan + premium, and **reverts the whole transaction** if net profit < `minProfit`.
-Safety: owner-only `execute`/`withdraw`/`pause`/`setRouterAllowed`; callback accepts only the Aave pool and only when the
-contract itself started the loan; router allow-list; pause switch; reentrancy guard. On-chain `minProfit` does not include
-gas (gas is paid by the sending wallet); the bot accounts for it off-chain.
+Borrows one token, runs a route of swaps (Uniswap V3 `exactInputSingle` or a Uniswap-V2-style router such as SushiSwap),
+repays the loan, and **reverts the whole transaction** unless the trade itself made at least `minProfit`.
+
+Two lenders:
+- `execute(...)`: Aave V3 `flashLoanSimple` (5 bps premium on Arbitrum, measured on-chain).
+- `executeWithBalancer(...)`: Balancer V2 Vault flash loan, **0 fee** on Arbitrum when checked on 2026-11-24
+  (vault liquidity then: ~110 WETH but only ~4.2k USDC, so it is used for WETH borrows).
+
+Safety: owner-only `execute*`/`withdraw`/`pause`/`setRouterAllowed`; the Aave callback accepts only the Aave pool and only
+for loans the contract started; the Balancer callback accepts only the Vault and only the exact loan the contract just
+requested (Balancer does not report the initiator, so foreign loans naming this contract are rejected); router allow-list;
+pause switch; reentrancy guard. Profit is measured against the balance **before** the loan, so old un-withdrawn profits can
+never hide a losing trade (a bug found and fixed while adding Balancer, with regression tests). On-chain `minProfit` does
+not include gas (paid by the sending wallet); the bot accounts for it off-chain.
 
 ## The strategies (`bot/src/strategies/`)
 Each strategy is a separate module implementing one `Strategy` interface and is switched on/off in `bot/strategies.config.json`.

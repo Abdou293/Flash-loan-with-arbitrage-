@@ -16,6 +16,7 @@ AAVE_POOL=0x794a61358D6845594F94dc1DB02A252b5b4814aD
 UNI_V3_ROUTER=0xE592427A0AEce92De3Edee1F18E0157C05861564
 UNI_V3_FACTORY=0x1F98431c8aD98523631AE4a59f267346ea31F984   # canonical Uniswap V3 factory
 SUSHI_V2_ROUTER=0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506
+BALANCER_V2_VAULT=0xBA12222222228d8Ba445958a75a0704d566BF2C8  # zero-fee flash loans
 UNI_V3_QUOTER_V2=0x61fFE014bA17989E743c5F6cB21bF9697530B21e  # used by the bot for price quotes
 
 # Preflight: fail fast with a readable reason (API key is redacted from any message).
@@ -65,6 +66,10 @@ if [ -n "$PROVIDER" ]; then
   echo "INFO  Aave PoolAddressesProvider = $PROVIDER"
   echo "INFO  Compare it with AaveV3Arbitrum.POOL_ADDRESSES_PROVIDER in https://github.com/bgd-labs/aave-address-book"
 fi
+COLLECTOR="$(call $BALANCER_V2_VAULT 'getProtocolFeesCollector()(address)')"
+check "Balancer V2 vault answers (fees collector exists)" yes "$([ -n "$COLLECTOR" ] && echo yes)"
+check "Balancer V2 vault is not paused" false "$(call $BALANCER_V2_VAULT 'getPausedState()(bool,uint256,uint256)')"
+[ -n "$COLLECTOR" ] && echo "INFO  Balancer flash-loan fee (1e18 = 100%) = $(call "$COLLECTOR" 'getFlashLoanFeePercentage()(uint256)')"
 echo "INFO  Aave flash-loan premium (bps) = $(call $AAVE_POOL 'FLASHLOAN_PREMIUM_TOTAL()(uint128)')"
 echo "INFO  Sushi factory = $(call $SUSHI_V2_ROUTER 'factory()(address)')  (compare with Sushi's official docs)"
 

@@ -16,6 +16,9 @@ async function main() {
   const outDir = arg("out", join(root, "data"))!;
   const label = arg("label", "report")!;
   const config = loadConfig(join(root, "strategies.config.json"));
+  // --flash-fee-bps 0 replays the same data as if the loan came from a zero-fee lender (Balancer V2 Vault).
+  const feeOverride = arg("flash-fee-bps");
+  if (feeOverride !== undefined) config.global.flashLoanFeeBps = Number(feeOverride);
   const result = await runBacktest(readDataset(path), config);
   mkdirSync(outDir, { recursive: true });
   const md = renderMarkdown(result);
