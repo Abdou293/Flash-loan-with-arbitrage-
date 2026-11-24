@@ -152,6 +152,11 @@ blocks, 0 errors. Best estimated nets were between **-$0.12 and -$0.47** (vs -$2
 Uniswap and PancakeSwap 0.01% pools sat outside its fee band 64% of the time (50 episodes, median ~23 s), still slightly
 negative after a 10 bps safety reserve. Report: [docs/reports/gap-monitor-2026-11-24-1h-expanded.md](docs/reports/gap-monitor-2026-11-24-1h-expanded.md).
 
+### Results: same radar, net before the safety reserve (2026-11-24)
+Even with the 10 bps slippage reserve removed, no episode was positive: best -$0.02 (WBTC/WETH), and the best trade size
+was always the smallest ($100), because larger trades lose more to price impact. The remaining gaps are worth a few cents,
+about the cost of gas. Report: [docs/reports/gap-monitor-2026-11-24-1h-before-reserve.md](docs/reports/gap-monitor-2026-11-24-1h-before-reserve.md).
+
 **No profitable opportunity was found.** Every route lost money after the flash-loan premium, DEX fees, price impact,
 slippage reserve and gas. `feeTier` came closest. This is the expected result for liquid pools that professional bots keep
 in line, and it is the reason this project stays in dry-run mode. Sampling every 30 minutes cannot see gaps that last seconds.
