@@ -42,11 +42,18 @@ contract FlashArbForkTest is Test {
         s[1] = FlashArb.SwapStep(FlashArb.DexType.UNISWAP_V3, UNI_V3_ROUTER, WETH, 3000);
     }
 
-    /// On an untouched market the round trip only pays fees, so the whole tx must revert.
+    /// On an untouched market the round trip only pays fees, so the whole tx must revert with
+    /// InsufficientProfit(balanceAfter, required). We check the error type only, because the two
+    /// numbers depend on the live market at the forked block.
     function test_fork_revertsWhenUnprofitable() public {
         FlashArb.SwapStep[] memory r = _route();
-        vm.expectRevert(FlashArb.InsufficientProfit.selector);
-        arb.execute(WETH, 10 ether, r, 0);
+        try arb.execute(WETH, 10 ether, r, 0) {
+            fail(); // must not succeed
+        } catch (bytes memory reason) {
+            assertTrue(reason.length >= 4);
+            assertTrue(bytes4(reason) == FlashArb.InsufficientProfit.selector);
+        }
+        assertEq(IERC20(WETH).balanceOf(address(arb)), 0); // nothing left behind
     }
 
     /// We CREATE an artificial spread (push the 0.05% pool's WETH price up with a huge buy), then
