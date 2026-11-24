@@ -142,6 +142,8 @@ because the generator gives new pools large random mispricings; that is **not** 
   check, not a substitute for the official sources (Aave address book, Uniswap and Sushi docs, Arbiscan).
 - **Smart-contract risk.** The contract is unaudited. Bugs, approvals, router behaviour or token quirks (fee-on-transfer, honeypots) can lose funds.
 - **Untested paths.** The bot's live dry-run loop over RPC, the static-call simulator and testnet deployment have not been run yet.
+- **Dependencies.** `npm audit --omit=dev` reports 0 vulnerabilities in the bot's runtime dependencies (checked 2026-11-24).
+  The advisories `npm audit` shows without that flag are in development tooling only (test runner/bundler).
 - **Not implemented:** live execution, new-pool discovery from chain events, MEV protection.
 
 ## How I built it
