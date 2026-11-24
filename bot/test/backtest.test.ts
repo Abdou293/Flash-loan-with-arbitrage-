@@ -75,10 +75,14 @@ describe("dataset file + replay market", () => {
 });
 
 describe("backtest run + report", () => {
-  it("finds nothing on a market with no spreads", async () => {
+  it("finds nothing on a market with no spreads, and reports how far from break-even it was", async () => {
     const r = await runBacktest(await dataset(5, () => 1), config);
     expect(r.snapshots).toBe(5);
     expect(r.opportunities.filter((o) => o.status === "simulated_ok")).toEqual([]);
+    const s = summarize(r).find((x) => x.strategy === "crossDex")!;
+    expect(s.closestToBreakEvenUsd).not.toBeNull();
+    expect(s.closestToBreakEvenUsd!).toBeLessThan(0); // fees make every round trip lose money
+    expect(renderMarkdown(r)).toMatch(/Closest to break-even/);
   });
 
   it("finds crossDex opportunities when one venue is 2% off, and attributes them to the right strategy", async () => {
