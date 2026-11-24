@@ -53,3 +53,18 @@ rate limits, then widen it. `collect` and `RpcMarket` were not run against a liv
 **What the backtest can and cannot tell you:** it assumes every opportunity is filled at the recorded price, so it is an
 upper bound; it cannot see competing bots or latency; `newPoolScanner` is not backtestable with this data format.
 The generated report repeats these limitations automatically and flags synthetic data in a banner.
+
+## Gap monitor ("radar")
+
+    npm run monitor -- --minutes 60 --interval-ms 500
+
+Reads every configured pool in **one** `eth_call` per poll (Multicall3), compares each pair of pools that trade the same
+two tokens, and records every moment their price gap is **outside the band the two pool fees allow** (the only moments
+an arbitrage can exist). For gaps involving a borrowable token (WETH) it quotes the real round trip at that block and
+computes the net result with the bot's profit calculator (zero-interest loan). Read-only; it never sends a transaction.
+
+Output (git-ignored): `data/gaps.<time>.local.md` and `.json`, with per pool pair: polls outside the band, episodes,
+maximum excess over the band (bps), longest/median episode in blocks, and the best estimated net profit.
+
+Limits: polling every 500 ms sees roughly one Arbitrum block in two; gaps that live less than that can be missed.
+Mid prices ignore depth, so "outside the band" is necessary but not sufficient for profit (the quote settles it).
