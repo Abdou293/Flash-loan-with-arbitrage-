@@ -13,7 +13,7 @@ Aave V3 and reverts unless the trade is profitable, plus a TypeScript plug-in bo
 | Area | State |
 |---|---|
 | Smart contract + 29 Foundry logic tests (mocks) | Done, passing; Aave V3 **and** zero-fee Balancer V2 flash loans |
-| Foundry fork tests against real Arbitrum One (Aave V3 + Uniswap V3) | **Passing, 2/2**, run against a live Arbitrum RPC (see below) |
+| Foundry fork tests against real Arbitrum One (Aave V3, Balancer V2, Uniswap V3) | **Passing, 5/5**, run against a live Arbitrum RPC (see below) |
 | On-chain identity check of all contract addresses (`scripts/verify-addresses.sh`) | **13/13 passing** on Arbitrum One |
 | Bot framework, 4 strategies, risk engine, 33 unit tests | Done, passing (also on a clean machine); dry-run only |
 | Historical collector + RPC price quotes | **Run on real data**: 48 snapshots of Arbitrum One (about 24 h) |
@@ -29,6 +29,8 @@ Aave V3 and reverts unless the trade is profitable, plus a TypeScript plug-in bo
 - **Profitable path works end to end.** After the test itself pushes one pool's price with a large swap (an
   **artificial** spread created inside the test), the contract borrows, swaps, repays and keeps the profit.
   This proves the mechanics, not that such spreads exist in the market.
+- **Zero-fee lender confirmed.** The same artificial-spread trade funded by Balancer kept 8.744061 WETH versus 8.739061 WETH
+  via Aave: exactly 0.005 WETH more, the 5 bps Aave premium on 10 WETH.
 - Running on a real fork surfaced and fixed four issues the sandboxed build could not see (EVM version, a forge-std import,
   dependency installation, and an over-strict revert assertion).
 
@@ -126,6 +128,9 @@ Free RPC plans rate-limit requests. The bot caches per cycle, throttles calls (`
 | triangular | 1728 | 0 | 0 | -15.69 |
 | feeTier | 480 | 0 | 0 | -2.51 |
 | newPoolScanner | 0 (not backtestable with this data) | 0 | 0 | - |
+
+Re-run on the same data with a **zero-fee lender** (Balancer V2): closest to break-even became -63.47 / -15.19 / **-2.01**,
+exactly $0.50 better each (the 5 bps Aave premium on a $1,000 trade). Still no profitable route.
 
 **No profitable opportunity was found.** Every route lost money after the flash-loan premium, DEX fees, price impact,
 slippage reserve and gas. `feeTier` came closest. This is the expected result for liquid pools that professional bots keep

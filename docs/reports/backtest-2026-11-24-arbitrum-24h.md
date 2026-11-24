@@ -32,3 +32,25 @@ The table below is the tool's output, pasted unedited.
 - Results are an upper bound: fills at the recorded quote, no competing bots, no latency.
 - `newPoolScanner` cannot be backtested with this dataset format.
 - One day of data, a fixed set of 13 pairs/venues, and fixed trade sizes.
+
+## Re-run with a zero-fee lender (Balancer V2 Vault)
+
+Same 48 snapshots, replayed with `--flash-fee-bps 0` (the Balancer V2 Vault charged no flash-loan fee on Arbitrum when
+checked on-chain on 2026-11-24). Output pasted unedited:
+
+- Flash-loan fee assumed: 0 bps (Balancer V2 Vault, zero fee)
+
+| Strategy | Routes evaluated | Profitable before risk | Passed risk | Snapshots with an opportunity | Est. net profit (USD) | Best (USD) | Median (USD) | Closest to break-even (USD) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| crossDex | 768 | 0 | 0 | 0 | 0 | - | - | -63.47 |
+| triangular | 1728 | 0 | 0 | 0 | 0 | - | - | -15.19 |
+| feeTier | 480 | 0 | 0 | 0 | 0 | - | - | -2.01 |
+| newPoolScanner | 0 | 0 | 0 | 0 | 0 | - | - | - |
+
+Every "closest to break-even" value improved by exactly $0.50, which is the 5 bps Aave premium on a $1,000 trade: the
+routes that came closest were all at the smallest trade size. Removing the loan fee did not make any route profitable.
+
+Why: on the closest route (WETH -> USDC on the 0.05% pool, back on the 0.30% pool), the two pool fees alone cost about
+0.35% of the trade. Arbitrage keeps the price gap between two pools inside that fee band, so a sample taken at a random
+moment almost always finds a gap smaller than the fees. Profit exists only in the short moment right after a large swap
+pushes a pool outside the band, and it goes to whoever acts first.
