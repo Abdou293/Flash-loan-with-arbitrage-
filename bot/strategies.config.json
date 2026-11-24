@@ -13,7 +13,7 @@
     ]
   },
   "flashLoan": {
-    "_note": "Zero-interest lenders only. 'borrowable' must match what each lender actually holds: run scripts/verify-addresses.sh (it prints the balances) and edit these lists. Balancer V2 on 2026-11-24: ~110 WETH, ~4.2k USDC. Uniswap V4 PoolManager: to be confirmed on-chain.",
+    "_note": "Zero-interest lenders only, in order of preference. 'borrowable' must match what each lender actually holds: scripts/verify-addresses.sh prints the balances. Checked on-chain 2026-11-24: Balancer V2 ~110.9 WETH / ~4.7k USDC; Uniswap V4 PoolManager ~27.8 WETH / ~9.04M USDC.",
     "lenders": [
       {
         "provider": "balancerV2",
