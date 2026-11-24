@@ -50,7 +50,11 @@ async function main() {
   const minTvlUsd = Number(arg("min-tvl-usd", "50000"));
   // While a gap is open, quote again when it has widened by this many bps (at most every 10 polls).
   const requoteBps = Number(arg("requote-bps", "3"));
-  const quoteCfg = { ...config.global, tradeSizesUsd: sizes };
+  // The quote is an exact on-chain quote at that block (price impact included). The slippage reserve is an extra
+  // safety margin for the price moving before inclusion; with the contract's revert-on-loss check, a failed attempt
+  // costs gas, not principal. Override it to see its effect: --slippage-bps 2
+  const slippageBps = Number(arg("slippage-bps", String(config.global.slippageBps)));
+  const quoteCfg = { ...config.global, tradeSizesUsd: sizes, slippageBps };
 
   const provider = new JsonRpcProvider(rpcUrl, undefined, { staticNetwork: true });
   const reader = new GapReader(config, (tx) => provider.call(tx));
@@ -111,8 +115,13 @@ async function main() {
     try {
       const c = await bestSizeCandidate({ strategy: "gap", route, market, cfg: quoteCfg, maxTradeSizeUsd: config.risk.maxTradeSizeUsd, weth });
       if (c) {
-        ep.bestNetUsd = Math.max(ep.bestNetUsd ?? -Infinity, Math.round(c.profit.netUsd * 100) / 100);
-        ep.bestSizeUsd = c.amountInUsd;
+        const net = Math.round(c.profit.netUsd * 100) / 100;
+        if (ep.bestNetUsd === undefined || net > ep.bestNetUsd) {
+          ep.bestNetUsd = net;
+          ep.bestSizeUsd = c.amountInUsd; // size of the BEST quote, not of the latest one
+        }
+        const beforeReserve = Math.round((c.profit.netUsd + c.profit.slippageReserveUsd) * 100) / 100;
+        ep.bestNetBeforeReserveUsd = Math.max(ep.bestNetBeforeReserveUsd ?? -Infinity, beforeReserve);
       }
     } catch (e) {
       console.log(`  (quote failed: ${redact(String(e)).slice(0, 120)})`);
@@ -201,6 +210,15 @@ async function main() {
       longestEpisodeBlocks: durations.length ? durations[durations.length - 1]! : 0,
       medianEpisodeBlocks: durations.length ? durations[Math.floor(durations.length / 2)]! : 0,
       bestEstimatedNetUsd: nets.length ? Math.max(...nets) : null,
+      bestSizeUsd: (() => {
+        const best = eps.filter((e) => e.bestNetUsd !== undefined).sort((a, b) => b.bestNetUsd! - a.bestNetUsd!)[0];
+        return best?.bestSizeUsd ?? null;
+      })(),
+      bestNetBeforeReserveUsd: (() => {
+        const v = eps.map((e) => e.bestNetBeforeReserveUsd).filter((x): x is number => x !== undefined);
+        return v.length ? Math.max(...v) : null;
+      })(),
+      episodesPositiveBeforeReserve: eps.filter((e) => (e.bestNetBeforeReserveUsd ?? -1) > 0).length,
       hypothetical: eps.some((e) => e.hypothetical),
       profitableEpisodes: nets.filter((n) => n > config.risk.minNetProfitUsd).length,
     };
@@ -216,6 +234,7 @@ async function main() {
     blocks: { first: firstBlock, last: lastBlock, spanned: blocksSpanned },
     errors,
     tradeSizesUsd: sizes,
+    slippageReserveBps: slippageBps,
     minTvlUsd,
     poolsDiscovered: discovered.length,
     poolsSkippedAsDead: discovered.filter((p) => !pools.includes(p)).map((p) => ({ id: p.id, tvlUsd: tvl.get(p.id) ?? null })),
@@ -234,12 +253,13 @@ async function main() {
     `- Blocks: ${firstBlock}–${lastBlock} (${blocksSpanned} blocks), ${polls} polls every ${intervalMs} ms, ${errors} errors`,
     `- Pools: ${pools.length} used of ${discovered.length} found (pools under $${minTvlUsd.toLocaleString("en-US")} TVL skipped as dead), pool pairs compared: ${combos.length}, net-profit quoting: ${quote ? "on" : "off"} (re-quoted when a gap widens by ${requoteBps} bps)`,
     ``,
-    `| Pool pair | Polls | Polls outside fee band | Episodes | Max excess (bps) | Longest episode (blocks) | Median episode (blocks) | Best est. net (USD) | Episodes with net > min profit |`,
-    `|---|---:|---:|---:|---:|---:|---:|---:|---:|`,
-    ...rows.map((r) => `| ${r.pair} | ${r.polls} | ${r.pollsOutsideBand} | ${r.episodes} | ${r.maxExcessBps} | ${r.longestEpisodeBlocks} | ${r.medianEpisodeBlocks} | ${r.bestEstimatedNetUsd ?? "-"}${r.hypothetical && r.bestEstimatedNetUsd !== null ? " (hyp.)" : ""} | ${r.profitableEpisodes} |`),
+    `| Pool pair | Polls | Polls outside fee band | Episodes | Max excess (bps) | Longest episode (blocks) | Median episode (blocks) | Best est. net (USD) | at size | Best net before safety reserve (USD) | Episodes > 0 before reserve | Episodes with net > min profit |`,
+    `|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|`,
+    ...rows.map((r) => `| ${r.pair} | ${r.polls} | ${r.pollsOutsideBand} | ${r.episodes} | ${r.maxExcessBps} | ${r.longestEpisodeBlocks} | ${r.medianEpisodeBlocks} | ${r.bestEstimatedNetUsd ?? "-"}${r.hypothetical && r.bestEstimatedNetUsd !== null ? " (hyp.)" : ""} | ${r.bestSizeUsd ? "$" + r.bestSizeUsd : "-"} | ${r.bestNetBeforeReserveUsd ?? "-"} | ${r.episodesPositiveBeforeReserve} | ${r.profitableEpisodes} |`),
     ``,
     `"Max excess" is how far the price gap went beyond what the two pool fees allow (negative = never left the band).`,
     `Blocks are Arbitrum (L2) blocks, about 0.25 s each. Trade sizes quoted: ${sizes.map((n) => "$" + n).join(", ")}.`,
+    `Net = on-chain quote - DEX fees/price impact (in the quote) - ${slippageBps} bps safety reserve - estimated gas. "Before safety reserve" drops only the reserve.`,
     `(hyp.) = hypothetical: neither token can be borrowed from the zero-interest lender; executing would need an extra hop via WETH.`,
     `An episode is a run of polls outside the band. Read-only measurement; nothing was traded.`,
     ``,

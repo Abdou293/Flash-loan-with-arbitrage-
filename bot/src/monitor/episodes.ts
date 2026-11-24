@@ -9,6 +9,8 @@ export interface Episode {
   openAtEnd: boolean; // still open when monitoring stopped
   bestNetUsd?: number; // best estimated net profit found while open (if quoting was enabled)
   bestSizeUsd?: number; // trade size that gave bestNetUsd
+  /** best net BEFORE the configured slippage safety reserve (the on-chain quote already includes price impact) */
+  bestNetBeforeReserveUsd?: number;
   hypothetical?: boolean; // quoted with a token the zero-interest lender cannot supply
   quotedAtExcessBps?: number; // excess when the last quote was taken (re-quote when the gap widens)
   quotedAtPoll?: number;

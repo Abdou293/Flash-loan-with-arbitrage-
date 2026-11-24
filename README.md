@@ -146,6 +146,12 @@ exactly $0.50 better each (the 5 bps Aave premium on a $1,000 trade). Still no p
 that did were in thin SushiSwap pools where every quote, even at $100, lost money after price impact (best: -$0.77).
 Full report: [docs/reports/gap-monitor-2026-11-24-1h.md](docs/reports/gap-monitor-2026-11-24-1h.md).
 
+### Results: expanded radar, one more hour (2026-11-24)
+91 pools discovered (29 alive above $50k TVL; PancakeSwap V3 and the Uniswap 0.01% tier added), 32 pool pairs, 12,299
+blocks, 0 errors. Best estimated nets were between **-$0.12 and -$0.47** (vs -$2.09 before). WETH/USDC between the
+Uniswap and PancakeSwap 0.01% pools sat outside its fee band 64% of the time (50 episodes, median ~23 s), still slightly
+negative after a 10 bps safety reserve. Report: [docs/reports/gap-monitor-2026-11-24-1h-expanded.md](docs/reports/gap-monitor-2026-11-24-1h-expanded.md).
+
 **No profitable opportunity was found.** Every route lost money after the flash-loan premium, DEX fees, price impact,
 slippage reserve and gas. `feeTier` came closest. This is the expected result for liquid pools that professional bots keep
 in line, and it is the reason this project stays in dry-run mode. Sampling every 30 minutes cannot see gaps that last seconds.
