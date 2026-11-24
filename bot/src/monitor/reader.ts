@@ -13,6 +13,10 @@ export const mcIface = new Interface([
   "function aggregate3((address target,bool allowFailure,bytes callData)[] calls) payable returns ((bool success,bytes returnData)[] returnData)",
   "function getBlockNumber() view returns (uint256)",
 ]);
+/** Arbitrum's ArbSys precompile. On Arbitrum, `block.number` returns the L1 (Ethereum) block number, so the real L2
+ *  block number has to come from ArbSys.arbBlockNumber(). On other chains this call fails and we fall back. */
+export const ARBSYS = "0x0000000000000000000000000000000000000064";
+export const arbSysIface = new Interface(["function arbBlockNumber() view returns (uint256)"]);
 export const routerIface = new Interface(["function factory() view returns (address)"]);
 export const v3FactoryIface = new Interface(["function getPool(address,address,uint24) view returns (address)"]);
 export const v2FactoryIface = new Interface(["function getPair(address,address) view returns (address)"]);
@@ -107,7 +111,10 @@ export class GapReader {
 
   /** ONE eth_call: block number + the state of every pool. */
   async read(): Promise<Snapshot> {
-    const calls: Call[] = [{ target: MULTICALL3, callData: mcIface.encodeFunctionData("getBlockNumber") }];
+    const calls: Call[] = [
+      { target: ARBSYS, callData: arbSysIface.encodeFunctionData("arbBlockNumber") },
+      { target: MULTICALL3, callData: mcIface.encodeFunctionData("getBlockNumber") },
+    ];
     for (const p of this.pools) {
       calls.push({
         target: p.address,
@@ -115,10 +122,15 @@ export class GapReader {
       });
     }
     const res = await this.multicall(calls);
-    const block = Number(mcIface.decodeFunctionResult("getBlockNumber", res[0]!.returnData)[0]);
+    const arb = res[0]!;
+    const block =
+      arb.success && arb.returnData !== "0x"
+        ? Number(arbSysIface.decodeFunctionResult("arbBlockNumber", arb.returnData)[0])
+        : Number(mcIface.decodeFunctionResult("getBlockNumber", res[1]!.returnData)[0]);
+    const POOL_OFFSET = 2;
     const prices = new Map<string, number>();
     this.pools.forEach((p, i) => {
-      const r = res[i + 1];
+      const r = res[i + POOL_OFFSET];
       if (!r?.success) return;
       const [dec0, dec1] = p.aIsToken0 ? [p.a.decimals, p.b.decimals] : [p.b.decimals, p.a.decimals];
       let t1PerT0: number;

@@ -41,9 +41,12 @@ async function main() {
   const minutes = Number(arg("minutes", "60"));
   const intervalMs = Number(arg("interval-ms", "500"));
   const quote = !flag("no-quote");
+  // Small sizes matter on Arbitrum: gas is cents, so a $100-$500 trade can clear costs that a $1k trade cannot.
+  const sizes = (arg("sizes", "100,250,500,1000,5000") ?? "").split(",").map(Number).filter((n) => n > 0);
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const outDir = arg("out", join(root, "data"))!;
   const config = loadConfig(join(root, "strategies.config.json"));
+  const quoteCfg = { ...config.global, tradeSizesUsd: sizes };
 
   const provider = new JsonRpcProvider(rpcUrl, undefined, { staticNetwork: true });
   const reader = new GapReader(config, (tx) => provider.call(tx));
@@ -86,8 +89,11 @@ async function main() {
       { venue: lo.venue, tokenIn: other, tokenOut: borrow },
     ];
     try {
-      const c = await bestSizeCandidate({ strategy: "gap", route, market, cfg: config.global, maxTradeSizeUsd: config.risk.maxTradeSizeUsd, weth });
-      if (c) ep.bestNetUsd = Math.max(ep.bestNetUsd ?? -Infinity, Math.round(c.profit.netUsd * 100) / 100);
+      const c = await bestSizeCandidate({ strategy: "gap", route, market, cfg: quoteCfg, maxTradeSizeUsd: config.risk.maxTradeSizeUsd, weth });
+      if (c) {
+        ep.bestNetUsd = Math.max(ep.bestNetUsd ?? -Infinity, Math.round(c.profit.netUsd * 100) / 100);
+        ep.bestSizeUsd = c.amountInUsd;
+      }
     } catch (e) {
       console.log(`  (quote failed: ${redact(String(e)).slice(0, 120)})`);
     }
@@ -119,15 +125,19 @@ async function main() {
         const opened = tracker.observe(key, snap.block, g.excessBps);
         if (opened) {
           console.log(`block ${snap.block}: OUTSIDE fee band  ${key}  gap ${g.gapBps.toFixed(1)} bps vs band ${g.bandBps.toFixed(1)} bps (+${g.excessBps.toFixed(1)})`);
-          // quote only when the loan token can actually be borrowed (zero-interest lender)
+          // Borrow the token the zero-interest lender can supply. If neither token is borrowable, quote anyway as a
+          // HYPOTHETICAL (marked) to size the opportunity: executing it would need an extra hop through WETH.
           const borrowable = [x, y].find((t) => config.flashLoan.borrowable.includes(t.symbol));
-          if (quote && borrowable) {
-            const other = borrowable === x ? y : x;
-            // pool where `borrowable` is more expensive (in units of `other`)
-            const b0 = priceOf(p0, raw0, borrowable), b1 = priceOf(p1, raw1, borrowable);
-            const [hi, lo] = b0 >= b1 ? [p0, p1] : [p1, p0];
-            await estimate(opened, hi, lo, borrowable, other, snap.block);
-            console.log(`  -> estimated best net at this block: ${opened.bestNetUsd ?? "n/a"} USD`);
+          if (quote) {
+            const borrow = borrowable ?? x;
+            const other = borrow === x ? y : x;
+            const b0 = priceOf(p0, raw0, borrow), b1 = priceOf(p1, raw1, borrow);
+            const [hi, lo] = b0 >= b1 ? [p0, p1] : [p1, p0]; // sell `borrow` where it is more expensive
+            opened.hypothetical = !borrowable;
+            await estimate(opened, hi, lo, borrow, other, snap.block);
+            const size = opened.bestSizeUsd ? ` (size $${opened.bestSizeUsd})` : "";
+            const hyp = opened.hypothetical ? "  [hypothetical: token not borrowable]" : "";
+            console.log(`  -> estimated best net at this block: ${opened.bestNetUsd ?? "n/a"} USD${size}${hyp}`);
           }
         }
       }
@@ -163,6 +173,7 @@ async function main() {
       longestEpisodeBlocks: durations.length ? durations[durations.length - 1]! : 0,
       medianEpisodeBlocks: durations.length ? durations[Math.floor(durations.length / 2)]! : 0,
       bestEstimatedNetUsd: nets.length ? Math.max(...nets) : null,
+      hypothetical: eps.some((e) => e.hypothetical),
       profitableEpisodes: nets.filter((n) => n > config.risk.minNetProfitUsd).length,
     };
   }).sort((a, b) => b.maxExcessBps - a.maxExcessBps);
@@ -176,6 +187,7 @@ async function main() {
     pollsSeeingSameBlock: sameBlock,
     blocks: { first: firstBlock, last: lastBlock, spanned: blocksSpanned },
     errors,
+    tradeSizesUsd: sizes,
     pools: pools.length,
     poolPairs: combos.length,
     quoting: quote,
@@ -193,9 +205,11 @@ async function main() {
     ``,
     `| Pool pair | Polls | Polls outside fee band | Episodes | Max excess (bps) | Longest episode (blocks) | Median episode (blocks) | Best est. net (USD) | Episodes with net > min profit |`,
     `|---|---:|---:|---:|---:|---:|---:|---:|---:|`,
-    ...rows.map((r) => `| ${r.pair} | ${r.polls} | ${r.pollsOutsideBand} | ${r.episodes} | ${r.maxExcessBps} | ${r.longestEpisodeBlocks} | ${r.medianEpisodeBlocks} | ${r.bestEstimatedNetUsd ?? "-"} | ${r.profitableEpisodes} |`),
+    ...rows.map((r) => `| ${r.pair} | ${r.polls} | ${r.pollsOutsideBand} | ${r.episodes} | ${r.maxExcessBps} | ${r.longestEpisodeBlocks} | ${r.medianEpisodeBlocks} | ${r.bestEstimatedNetUsd ?? "-"}${r.hypothetical && r.bestEstimatedNetUsd !== null ? " (hyp.)" : ""} | ${r.profitableEpisodes} |`),
     ``,
     `"Max excess" is how far the price gap went beyond what the two pool fees allow (negative = never left the band).`,
+    `Blocks are Arbitrum (L2) blocks, about 0.25 s each. Trade sizes quoted: ${sizes.map((n) => "$" + n).join(", ")}.`,
+    `(hyp.) = hypothetical: neither token can be borrowed from the zero-interest lender; executing would need an extra hop via WETH.`,
     `An episode is a run of polls outside the band. Read-only measurement; nothing was traded.`,
     ``,
   ].join("\n");

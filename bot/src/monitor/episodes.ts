@@ -8,6 +8,8 @@ export interface Episode {
   peakBlock: number;
   openAtEnd: boolean; // still open when monitoring stopped
   bestNetUsd?: number; // best estimated net profit found while open (if quoting was enabled)
+  bestSizeUsd?: number; // trade size that gave bestNetUsd
+  hypothetical?: boolean; // quoted with a token the zero-interest lender cannot supply
 }
 
 export class EpisodeTracker {

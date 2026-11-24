@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { GapReader, MULTICALL3, mcIface, poolIface, routerIface, v2FactoryIface, v3FactoryIface, type CallFn } from "../src/monitor/reader.js";
+import { ARBSYS, arbSysIface, GapReader, MULTICALL3, mcIface, poolIface, routerIface, v2FactoryIface, v3FactoryIface, type CallFn } from "../src/monitor/reader.js";
 import { config } from "./helpers.js";
 
 /**
  * A fake chain behind Multicall3: every inner call is decoded and answered from a small in-memory model,
  * so the real ABI encoding/decoding of the reader is exercised without any network.
  */
-function fakeChain(opts: { block: number; wethUsdcV3: number; wethUsdcV2: number }) {
+function fakeChain(opts: { block: number; wethUsdcV3: number; wethUsdcV2: number; l2Block?: number }) {
   const weth = config.tokens["WETH"]!.address.toLowerCase();
   const usdc = config.tokens["USDC"]!.address.toLowerCase();
   const V3F = "0x00000000000000000000000000000000000000f3";
@@ -19,6 +19,10 @@ function fakeChain(opts: { block: number; wethUsdcV3: number; wethUsdcV2: number
     const t = target.toLowerCase();
     const sel = data.slice(0, 10);
     if (t === MULTICALL3.toLowerCase()) return mcIface.encodeFunctionResult("getBlockNumber", [opts.block]);
+    if (t === ARBSYS.toLowerCase()) {
+      if (opts.l2Block === undefined) throw new Error("not arbitrum");
+      return arbSysIface.encodeFunctionResult("arbBlockNumber", [opts.l2Block]);
+    }
     if (sel === routerIface.getFunction("factory")!.selector) {
       const v2 = config.venues.find((v) => v.kind === "uniV2")!.router.toLowerCase();
       return routerIface.encodeFunctionResult("factory", [t === v2 ? V2F : V3F]);
@@ -73,8 +77,17 @@ describe("GapReader (Multicall3)", () => {
     const before = chain.count();
     const snap = await reader.read();
     expect(chain.count() - before).toBe(1);
-    expect(snap.block).toBe(777);
+    expect(snap.block).toBe(777); // not Arbitrum: falls back to Multicall3's block.number
     expect(snap.prices.get("uniV3-500:WETH/USDC")).toBeCloseTo(3000, 3);
     expect(snap.prices.get("sushiV2-3000:WETH/USDC")).toBeCloseTo(3010, 6);
+  });
+
+  it("on Arbitrum uses the L2 block number from ArbSys, not block.number (which is the L1 block there)", async () => {
+    const chain = fakeChain({ block: 26_486_437, l2Block: 526_966_102, wethUsdcV3: 3000, wethUsdcV2: 3010 });
+    const reader = new GapReader(config, chain.call);
+    await reader.init();
+    const snap = await reader.read();
+    expect(snap.block).toBe(526_966_102);
+    expect(snap.prices.get("uniV3-500:WETH/USDC")).toBeCloseTo(3000, 3); // pool data still lines up after the extra call
   });
 });
