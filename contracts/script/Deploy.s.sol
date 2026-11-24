@@ -8,9 +8,8 @@ import {FlashArb} from "../src/FlashArb.sol";
 ///
 /// Environment variables (set them in your shell; never commit them):
 ///   PRIVATE_KEY   private key of a dedicated BURNER wallet funded with testnet ETH only
-///   AAVE_POOL     Aave V3 Pool address for the target testnet, taken from the Aave address book
-///                 (https://github.com/bgd-labs/aave-address-book). Do not guess it.
-///   BALANCER_VAULT optional: Balancer V2 Vault for zero-fee flash loans (leave unset to disable Balancer)
+///   BALANCER_VAULT Balancer V2 Vault on the target network (zero-interest flash loans). Verify it on-chain
+///                 (scripts/verify-addresses.sh) and confirm the Vault actually holds the token you will borrow.
 ///   ROUTER        optional: a DEX router to allow-list right away (verify it from the DEX's official docs)
 ///
 /// Example (Arbitrum Sepolia, chain id 421614):
@@ -23,12 +22,11 @@ contract Deploy is Script {
         require(block.chainid != ARBITRUM_ONE, "mainnet deployment is blocked in this script");
 
         uint256 pk = vm.envUint("PRIVATE_KEY");
-        address pool = vm.envAddress("AAVE_POOL");
-        address balancerVault = vm.envOr("BALANCER_VAULT", address(0));
+        address balancerVault = vm.envAddress("BALANCER_VAULT");
         address router = vm.envOr("ROUTER", address(0));
 
         vm.startBroadcast(pk);
-        arb = new FlashArb(pool, balancerVault);
+        arb = new FlashArb(balancerVault);
         if (router != address(0)) arb.setRouterAllowed(router, true);
         vm.stopBroadcast();
     }

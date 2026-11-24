@@ -1,8 +1,16 @@
 import { readFileSync } from "node:fs";
 import type { GlobalConfig, RiskConfig, Token, Venue } from "../core/types.js";
 
+export interface FlashLoanConfig {
+  provider: string;
+  vault: string;
+  /** Token symbols the lender can actually supply. Routes starting with any other token are skipped. */
+  borrowable: string[];
+}
+
 export interface BotConfig {
   global: GlobalConfig;
+  flashLoan: FlashLoanConfig;
   risk: RiskConfig;
   tokens: Record<string, Token>;
   tokenUsd: Record<string, number>;
@@ -21,7 +29,9 @@ export function loadConfig(path: string): BotConfig {
   for (const v of raw.venues as Venue[])
     for (const p of v.pairs) for (const s of p.split("/")) if (!tokens[s]) throw new Error(`venue ${v.id}: unknown token ${s}`);
   if (!tokens["WETH"]) throw new Error("config must define WETH (used to price gas)");
-  return { global: raw.global, risk: raw.risk, tokens, tokenUsd, venues: raw.venues, strategies: raw.strategies };
+  const flashLoan: FlashLoanConfig = raw.flashLoan ?? { provider: "none", vault: "", borrowable: Object.keys(tokens) };
+  for (const s of flashLoan.borrowable) if (!tokens[s]) throw new Error(`flashLoan.borrowable: unknown token ${s}`);
+  return { global: raw.global, flashLoan, risk: raw.risk, tokens, tokenUsd, venues: raw.venues, strategies: raw.strategies };
 }
 
 export interface EnvConfig {

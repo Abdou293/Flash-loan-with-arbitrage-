@@ -98,7 +98,7 @@ describe("backtest run + report", () => {
   it("a zero flash-loan fee never makes results worse, and the report states the fee used", async () => {
     const skew = (v: string, a: string, b: string) => (v === "sushiV2-3000" && a === "WETH" && b === "USDC" ? 1.004 : 1);
     const ds = await dataset(4, skew);
-    const withFee = await runBacktest(ds, config);
+    const withFee = await runBacktest(ds, { ...config, global: { ...config.global, flashLoanFeeBps: 5 } });
     const zeroFee = await runBacktest(ds, { ...config, global: { ...config.global, flashLoanFeeBps: 0 } });
     const best = (r: any, k: string) => summarize(r).find((x) => x.strategy === k)!.closestToBreakEvenUsd!;
     expect(best(zeroFee, "crossDex")).toBeGreaterThan(best(withFee, "crossDex"));

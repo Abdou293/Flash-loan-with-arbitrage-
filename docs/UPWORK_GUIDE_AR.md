@@ -12,9 +12,9 @@
 ## Suggested Upwork project description (English)
 **Flash Loan Arbitrage System on Arbitrum (educational portfolio project)**
 
-A full-stack DeFi engineering project: a Solidity contract that borrows from Aave V3 and reverts the whole transaction unless a
-minimum profit is met (owner-only execution, pause switch, callback restricted to the Aave pool, router allow-list), tested with
-Foundry; a TypeScript plug-in bot with four strategy modules (cross-DEX, triangular, fee-tier, new-pool scanner), a profit
+A full-stack DeFi engineering project: a Solidity contract that borrows with zero-interest flash loans (Balancer V2) and reverts
+the whole transaction unless a minimum profit is met (owner-only execution, pause switch, callback restricted to the lender and to
+loans the contract itself started, router allow-list), tested with Foundry on mocks and on a real Arbitrum fork; a TypeScript plug-in bot with four strategy modules (cross-DEX, triangular, fee-tier, new-pool scanner), a profit
 calculator (flash-loan fee, DEX fees, gas, slippage), a risk engine (min profit, max gas, size cap, auto-pause) and pre-send
 simulation; a backtesting pipeline; and a static dashboard deployable on Vercel's free tier. Runs in dry-run mode only, with
 gitleaks secret scanning and CI.

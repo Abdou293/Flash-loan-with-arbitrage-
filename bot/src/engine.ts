@@ -51,6 +51,8 @@ export class Engine {
     for (const { strategy, params } of this.strategies) {
       const routes = await strategy.routes({ market, tokens: config.tokens, venues: config.venues, params });
       for (const route of routes) {
+        // Only borrow what the zero-interest lender can actually supply.
+        if (!config.flashLoan.borrowable.includes(route[0]!.tokenIn.symbol)) continue;
         const c = await bestSizeCandidate({
           strategy: strategy.name,
           route,

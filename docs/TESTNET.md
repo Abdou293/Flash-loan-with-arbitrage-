@@ -7,14 +7,15 @@ never held real funds. Never use your main wallet. Never deploy to mainnet.
 1. Create a new burner wallet (e.g. `cast wallet new`). Store its private key only in your shell/`.env`, never in git.
 2. Get free Arbitrum Sepolia ETH from a public faucet.
 3. Get a free Arbitrum Sepolia RPC URL (Alchemy/Infura free plan) and put it in `.env` as `ARBITRUM_SEPOLIA_RPC_URL`.
-4. Find the **Aave V3 Pool address for Arbitrum Sepolia** in the official Aave address book
-   (<https://github.com/bgd-labs/aave-address-book>). Do not guess it. Confirm Aave actually has the asset you want to borrow on that testnet.
+4. Find the **Balancer V2 Vault on Arbitrum Sepolia** in Balancer's official deployment list. Do not guess it, and check with
+   `cast` that it exists there and **holds the token you want to borrow**: testnet vaults are often empty, in which case a
+   real testnet flash loan is impossible and the mainnet fork tests are the meaningful end-to-end test.
 
 ## 2. Deploy
 
     cd contracts
     export PRIVATE_KEY=<burner key>        # shell only
-    export AAVE_POOL=<address from the Aave address book>
+    export BALANCER_VAULT=<Balancer V2 Vault address on Arbitrum Sepolia, verified>
     export ROUTER=<official Uniswap V3 SwapRouter for Arbitrum Sepolia>   # optional, verify in Uniswap docs
     forge script script/Deploy.s.sol --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast
 

@@ -12,12 +12,11 @@ import {IUniswapV3Router} from "../src/interfaces/IUniswapV3Router.sol";
 /// ADDRESS NOTE: the addresses below were written from memory. Their on-chain identity was checked
 /// with `scripts/verify-addresses.sh` (token symbols/decimals, router -> canonical factory/WETH, Aave
 /// pool <-> provider). That is NOT the same as checking the official sources, so still confirm each one:
-///   - Aave V3 Pool (Arbitrum):  https://github.com/bgd-labs/aave-address-book  (AaveV3Arbitrum.POOL)
+///   - Balancer V2 Vault:        https://docs.balancer.fi (deployment addresses) and Arbiscan
 ///   - Uniswap V3 SwapRouter:    https://docs.uniswap.org/contracts/v3/reference/deployments/arbitrum-deployments
 ///   - WETH / native USDC:       https://arbiscan.io  (check the verified token pages)
 /// A wrong address makes tests fail loudly; it cannot silently pass.
 contract FlashArbForkTest is Test {
-    address constant AAVE_POOL = 0x794a61358D6845594F94dc1DB02A252b5b4814aD; // VERIFY
     address constant UNI_V3_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564; // VERIFY
     address constant WETH = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1; // VERIFY
     address constant USDC = 0xaf88d065e77c8cC2239327C5EDb3A432268e5831; // VERIFY (native USDC)
@@ -34,7 +33,7 @@ contract FlashArbForkTest is Test {
             return;
         }
         vm.createSelectFork(rpc);
-        arb = new FlashArb(AAVE_POOL, BALANCER_VAULT);
+        arb = new FlashArb(BALANCER_VAULT);
         arb.setRouterAllowed(UNI_V3_ROUTER, true);
     }
 
@@ -45,24 +44,11 @@ contract FlashArbForkTest is Test {
         s[1] = FlashArb.SwapStep(FlashArb.DexType.UNISWAP_V3, UNI_V3_ROUTER, WETH, 3000);
     }
 
-    /// On an untouched market the round trip only pays fees, so the whole tx must revert with
-    /// InsufficientProfit(balanceAfter, required). We check the error type only, because the two
-    /// numbers depend on the live market at the forked block.
+    /// On an untouched market the round trip only pays DEX fees, so even with a zero-interest loan the whole tx
+    /// must revert with InsufficientProfit. We check the error type only (the numbers depend on the forked block).
     function test_fork_revertsWhenUnprofitable() public {
         FlashArb.SwapStep[] memory r = _route();
         try arb.execute(WETH, 10 ether, r, 0) {
-            fail(); // must not succeed
-        } catch (bytes memory reason) {
-            assertTrue(reason.length >= 4);
-            assertTrue(bytes4(reason) == FlashArb.InsufficientProfit.selector);
-        }
-        assertEq(IERC20(WETH).balanceOf(address(arb)), 0); // nothing left behind
-    }
-
-    /// Same unprofitable round trip, funded by Balancer (no loan fee): must still revert.
-    function test_fork_balancer_revertsWhenUnprofitable() public {
-        FlashArb.SwapStep[] memory r = _route();
-        try arb.executeWithBalancer(WETH, 10 ether, r, 0) {
             fail();
         } catch (bytes memory reason) {
             assertTrue(reason.length >= 4);
@@ -72,7 +58,7 @@ contract FlashArbForkTest is Test {
     }
 
     /// We CREATE an artificial spread (push the 0.05% pool's WETH price up with a huge buy), then
-    /// run the arbitrage. This proves the plumbing works end-to-end with real Aave/Balancer + Uniswap.
+    /// run the arbitrage. This proves the plumbing works end-to-end with the real Balancer Vault + Uniswap.
     /// It does NOT show that such spreads exist in the wild.
     function _createArtificialSpread() internal {
         deal(USDC, address(this), 20_000_000e6); // StdCheats.deal for ERC20
@@ -93,27 +79,11 @@ contract FlashArbForkTest is Test {
 
     function test_fork_profitsWhenSpreadExists() public {
         _createArtificialSpread();
+        uint256 vaultBefore = IERC20(WETH).balanceOf(BALANCER_VAULT);
         arb.execute(WETH, 10 ether, _route(), 0.01 ether);
         assertGe(IERC20(WETH).balanceOf(address(arb)), 0.01 ether);
+        assertGe(IERC20(WETH).balanceOf(BALANCER_VAULT), vaultBefore); // loan repaid in full
+        emit log_named_uint("profit with a zero-interest Balancer loan (wei)", IERC20(WETH).balanceOf(address(arb)));
     }
 
-    function test_fork_balancer_profitsWhenSpreadExists() public {
-        _createArtificialSpread();
-        arb.executeWithBalancer(WETH, 10 ether, _route(), 0.01 ether);
-        assertGe(IERC20(WETH).balanceOf(address(arb)), 0.01 ether);
-    }
-
-    /// Same trade, both lenders: the Balancer-funded one must keep at least as much (no 5 bps Aave premium).
-    function test_fork_balancerKeepsMoreThanAave() public {
-        _createArtificialSpread();
-        uint256 snap = vm.snapshotState();
-        arb.execute(WETH, 10 ether, _route(), 0);
-        uint256 viaAave = IERC20(WETH).balanceOf(address(arb));
-        vm.revertToState(snap);
-        arb.executeWithBalancer(WETH, 10 ether, _route(), 0);
-        uint256 viaBalancer = IERC20(WETH).balanceOf(address(arb));
-        assertGe(viaBalancer, viaAave);
-        emit log_named_uint("profit via Aave (wei)", viaAave);
-        emit log_named_uint("profit via Balancer (wei)", viaBalancer);
-    }
 }

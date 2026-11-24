@@ -1,7 +1,7 @@
 # Flash Loan Arbitrage on Arbitrum
 
-An educational, portfolio-grade implementation of a flash-loan arbitrage system: a Solidity contract that borrows from
-Aave V3 and reverts unless the trade is profitable, plus a TypeScript plug-in bot that finds, prices, risk-checks and
+An educational, portfolio-grade implementation of a flash-loan arbitrage system: a Solidity contract that borrows with
+**zero-interest flash loans** (Balancer V2 Vault) and reverts unless the trade is profitable, plus a TypeScript plug-in bot that finds, prices, risk-checks and
 **simulates** opportunities, a backtesting pipeline, and a static dashboard.
 
 > **Disclaimer.** Educational / portfolio project. Not financial advice. No profit guarantees. **Not security-audited.**
@@ -12,8 +12,8 @@ Aave V3 and reverts unless the trade is profitable, plus a TypeScript plug-in bo
 
 | Area | State |
 |---|---|
-| Smart contract + 29 Foundry logic tests (mocks) | Done, passing; Aave V3 **and** zero-fee Balancer V2 flash loans |
-| Foundry fork tests against real Arbitrum One (Aave V3, Balancer V2, Uniswap V3) | **Passing, 5/5**, run against a live Arbitrum RPC (see below) |
+| Smart contract (zero-interest Balancer V2 loans only) + 21 Foundry logic tests (mocks) | Done, passing |
+| Foundry fork tests against real Arbitrum One | Earlier Aave+Balancer version: **5/5 passing** on a live RPC. Balancer-only version: to re-run |
 | On-chain identity check of all contract addresses (`scripts/verify-addresses.sh`) | **13/13 passing** on Arbitrum One |
 | Bot framework, 4 strategies, risk engine, 33 unit tests | Done, passing (also on a clean machine); dry-run only |
 | Historical collector + RPC price quotes | **Run on real data**: 48 snapshots of Arbitrum One (about 24 h) |
@@ -22,7 +22,8 @@ Aave V3 and reverts unless the trade is profitable, plus a TypeScript plug-in bo
 | Testnet end-to-end test | Instructions in [docs/TESTNET.md](docs/TESTNET.md), **not yet run** |
 | Dashboard | Done; shows **synthetic** demo data |
 
-### What the fork tests showed (real Arbitrum state)
+### What the fork tests showed (real Arbitrum state, earlier version with both Aave V3 and Balancer V2)
+Aave was later removed so that the contract only uses zero-interest loans; these measurements explain that decision.
 - **Unprofitable round trip is rejected.** Borrow 10 WETH from Aave, sell on the Uniswap V3 0.05% pool, buy back on the
   0.30% pool: the route returned **9.923 WETH** against **10.005 WETH** owed (loan + 5 bps Aave premium), so the contract
   reverted with `InsufficientProfit`. A plain round trip loses about 0.8% to fees and price impact.
@@ -49,26 +50,27 @@ flowchart LR
   R --> SIM[Pre-send simulation<br/>static call]
   SIM --> L[Opportunity log + stats]
   L --> D[Dashboard<br/>static JSON]
-  SIM -. "future, needs explicit approval" .-> C[FlashArb.sol<br/>Aave V3 flash loan]
+  SIM -. "future, needs explicit approval" .-> C[FlashArb.sol<br/>Balancer V2 zero-interest flash loan]
 ```
 
 The bot has **no code path that sends a transaction**; `DRY_RUN=false` is refused and `PRIVATE_KEY` is never read.
 
 ## The contract (`contracts/src/FlashArb.sol`)
-Borrows one token, runs a route of swaps (Uniswap V3 `exactInputSingle` or a Uniswap-V2-style router such as SushiSwap),
-repays the loan, and **reverts the whole transaction** unless the trade itself made at least `minProfit`.
+Borrows one token with a **zero-interest flash loan from the Balancer V2 Vault**, runs a route of swaps (Uniswap V3
+`exactInputSingle` or a Uniswap-V2-style router such as SushiSwap), repays the loan, and **reverts the whole transaction**
+unless the trade itself made at least `minProfit`.
 
-Two lenders:
-- `execute(...)`: Aave V3 `flashLoanSimple` (5 bps premium on Arbitrum, measured on-chain).
-- `executeWithBalancer(...)`: Balancer V2 Vault flash loan, **0 fee** on Arbitrum when checked on 2026-11-24
-  (vault liquidity then: ~110 WETH but only ~4.2k USDC, so it is used for WETH borrows).
+- Lender: Balancer V2 Vault. Its flash-loan fee was **0** on Arbitrum when checked on-chain (2026-11-24). If Balancer ever
+  starts charging, the contract repays the fee and the profit check includes it, so a fee change cannot cause a silent loss.
+- Liquidity limit: the Vault then held ~110 WETH but only ~4.2k USDC, so the bot only borrows WETH (`flashLoan.borrowable`
+  in `bot/strategies.config.json`). Routes that would borrow anything else are skipped.
+- Aave V3 was supported in an earlier version (5 bps premium) and removed by design; it is still in the git history.
 
-Safety: owner-only `execute*`/`withdraw`/`pause`/`setRouterAllowed`; the Aave callback accepts only the Aave pool and only
-for loans the contract started; the Balancer callback accepts only the Vault and only the exact loan the contract just
-requested (Balancer does not report the initiator, so foreign loans naming this contract are rejected); router allow-list;
-pause switch; reentrancy guard. Profit is measured against the balance **before** the loan, so old un-withdrawn profits can
-never hide a losing trade (a bug found and fixed while adding Balancer, with regression tests). On-chain `minProfit` does
-not include gas (paid by the sending wallet); the bot accounts for it off-chain.
+Safety: owner-only `execute`/`withdraw`/`pause`/`setRouterAllowed`; the callback accepts only the Vault and only the exact
+loan the contract just requested (Balancer does not report the initiator, so foreign loans naming this contract are
+rejected); router allow-list; pause switch; reentrancy guard. Profit is measured against the balance **before** the loan,
+so old un-withdrawn profits can never hide a losing trade (a bug found and fixed during development, with regression
+tests). On-chain `minProfit` does not include gas (paid by the sending wallet); the bot accounts for it off-chain.
 
 ## The strategies (`bot/src/strategies/`)
 Each strategy is a separate module implementing one `Strategy` interface and is switched on/off in `bot/strategies.config.json`.
@@ -152,8 +154,8 @@ because the generator gives new pools large random mispricings; that is **not** 
   movement before inclusion are not modelled. Snapshot sampling can miss or double-count short-lived gaps.
 - **Gas is estimated** from config values (Arbitrum also charges an L1 data fee).
 - **Addresses** were written from memory, then checked on-chain with `scripts/verify-addresses.sh` (token symbols and decimals,
-  routers pointing to the canonical Uniswap factory and WETH, Aave pool and provider pointing to each other). That is an identity
-  check, not a substitute for the official sources (Aave address book, Uniswap and Sushi docs, Arbiscan).
+  routers pointing to the canonical Uniswap factory and WETH, Balancer Vault live and unpaused, Multicall3 present). That is an
+  identity check, not a substitute for the official sources (Balancer, Uniswap and Sushi docs, Arbiscan).
 - **Smart-contract risk.** The contract is unaudited. Bugs, approvals, router behaviour or token quirks (fee-on-transfer, honeypots) can lose funds.
 - **Untested paths.** The bot's live dry-run loop over RPC, the static-call simulator and testnet deployment have not been run yet.
 - **Dependencies.** `npm audit --omit=dev` reports 0 vulnerabilities in the bot's runtime dependencies (checked 2026-11-24).

@@ -7,15 +7,15 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-import {IAavePool} from "./interfaces/IAavePool.sol";
 import {IBalancerVault} from "./interfaces/IBalancerVault.sol";
 import {IUniswapV3Router} from "./interfaces/IUniswapV3Router.sol";
 import {IUniswapV2Router} from "./interfaces/IUniswapV2Router.sol";
 
 /// @title FlashArb
-/// @notice Educational flash-loan arbitrage executor. Borrows one token (from Aave V3, or from the Balancer V2 Vault,
-///         which charges no flash-loan fee), runs a list of swaps across DEX routers, repays the loan, and reverts
-///         the whole transaction unless the trade itself made at least `minProfit`.
+/// @notice Educational flash-loan arbitrage executor funded ONLY by zero-interest flash loans from the Balancer V2
+///         Vault. Borrows one token, runs a list of swaps across DEX routers, repays the loan (plus whatever fee the
+///         Vault charges, zero at the time of writing), and reverts the whole transaction unless the trade itself
+///         made at least `minProfit`.
 /// @dev NOT security-audited. Educational / portfolio use only.
 contract FlashArb is Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -36,36 +36,30 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
         uint24 fee;
     }
 
-    /// @notice Aave V3 Pool. The only address allowed to call `executeOperation`.
-    address public immutable POOL;
-    /// @notice Balancer V2 Vault (zero = Balancer disabled). The only address allowed to call `receiveFlashLoan`.
-    address public immutable BALANCER_VAULT;
+    /// @notice Balancer V2 Vault: the lender, and the only address allowed to call `receiveFlashLoan`.
+    address public immutable VAULT;
 
     mapping(address => bool) public allowedRouters;
 
-    /// @dev Hash of the Balancer loan this contract itself just requested; 0 when no loan is in flight.
+    /// @dev Hash of the loan this contract itself just requested; 0 when no loan is in flight.
     ///      Balancer does not report who initiated a loan, so this is how foreign loans are rejected.
-    bytes32 private _pendingBalancerLoan;
+    bytes32 private _pendingLoan;
 
     event RouterAllowed(address indexed router, bool allowed);
     event ArbExecuted(address indexed asset, uint256 amountBorrowed, uint256 fee, uint256 profit);
     event Withdrawn(address indexed token, address indexed to, uint256 amount);
 
-    error NotPool();
     error NotVault();
-    error BadInitiator();
     error UnexpectedFlashLoan();
-    error BalancerDisabled();
     error RouterNotAllowed(address router);
     error EmptyRoute();
     error RouteMustEndInBorrowedAsset();
     error InsufficientProfit(uint256 balanceAfter, uint256 required);
     error ZeroAddress();
 
-    constructor(address pool_, address balancerVault_) Ownable(msg.sender) {
-        if (pool_ == address(0)) revert ZeroAddress();
-        POOL = pool_;
-        BALANCER_VAULT = balancerVault_;
+    constructor(address vault_) Ownable(msg.sender) {
+        if (vault_ == address(0)) revert ZeroAddress();
+        VAULT = vault_;
     }
 
     // ---------------------------------------------------------------- owner controls
@@ -91,59 +85,38 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
         emit Withdrawn(token, to, amount);
     }
 
-    // ---------------------------------------------------------------- entry points
+    // ---------------------------------------------------------------- entry point
 
-    /// @notice Arbitrage funded by an Aave V3 flash loan (premium charged by Aave). Owner only, blocked while paused.
-    /// @param minProfit Minimum profit of THIS trade, in `asset` units, after the loan fee, or the tx reverts.
+    /// @notice Start an arbitrage funded by a Balancer V2 flash loan. Owner only, blocked while paused.
+    /// @param asset      Token to borrow (and the token the route must end in).
+    /// @param amount     Amount to borrow.
+    /// @param steps      Swap route.
+    /// @param minProfit  Minimum profit of THIS trade, in `asset` units, after any loan fee, or the tx reverts.
     function execute(address asset, uint256 amount, SwapStep[] calldata steps, uint256 minProfit)
         external
         onlyOwner
         whenNotPaused
         nonReentrant
     {
-        _validateRoute(asset, steps);
-        uint256 balanceBefore = IERC20(asset).balanceOf(address(this));
-        IAavePool(POOL).flashLoanSimple(address(this), asset, amount, abi.encode(steps, minProfit, balanceBefore), 0);
-    }
+        if (steps.length == 0) revert EmptyRoute();
+        if (steps[steps.length - 1].tokenOut != asset) revert RouteMustEndInBorrowedAsset();
+        for (uint256 i = 0; i < steps.length; i++) {
+            if (!allowedRouters[steps[i].router]) revert RouterNotAllowed(steps[i].router);
+        }
 
-    /// @notice Same as `execute`, but funded by the Balancer V2 Vault flash loan (no loan fee at the time of writing;
-    ///         the fee is whatever Balancer charges and is always repaid). Owner only, blocked while paused.
-    function executeWithBalancer(address asset, uint256 amount, SwapStep[] calldata steps, uint256 minProfit)
-        external
-        onlyOwner
-        whenNotPaused
-        nonReentrant
-    {
-        if (BALANCER_VAULT == address(0)) revert BalancerDisabled();
-        _validateRoute(asset, steps);
         uint256 balanceBefore = IERC20(asset).balanceOf(address(this));
         bytes memory userData = abi.encode(steps, minProfit, balanceBefore);
-
         address[] memory tokens = new address[](1);
         tokens[0] = asset;
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amount;
 
-        _pendingBalancerLoan = keccak256(abi.encode(asset, amount, userData));
-        IBalancerVault(BALANCER_VAULT).flashLoan(address(this), tokens, amounts, userData);
-        _pendingBalancerLoan = bytes32(0);
+        _pendingLoan = keccak256(abi.encode(asset, amount, userData));
+        IBalancerVault(VAULT).flashLoan(address(this), tokens, amounts, userData);
+        _pendingLoan = bytes32(0);
     }
 
-    // ---------------------------------------------------------------- flash-loan callbacks
-
-    /// @notice Aave V3 callback. Only the Aave pool may call it, and only for a loan this contract started.
-    function executeOperation(address asset, uint256 amount, uint256 premium, address initiator, bytes calldata params)
-        external
-        returns (bool)
-    {
-        if (msg.sender != POOL) revert NotPool();
-        if (initiator != address(this)) revert BadInitiator();
-
-        uint256 owed = amount + premium;
-        _runAndCheck(asset, amount, premium, params);
-        IERC20(asset).forceApprove(POOL, owed); // Aave pulls the repayment
-        return true;
-    }
+    // ---------------------------------------------------------------- flash-loan callback
 
     /// @notice Balancer V2 callback. Only the Vault may call it, and only for the exact loan this contract requested.
     function receiveFlashLoan(
@@ -152,32 +125,18 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
         uint256[] calldata feeAmounts,
         bytes calldata userData
     ) external {
-        if (msg.sender != BALANCER_VAULT || BALANCER_VAULT == address(0)) revert NotVault();
+        if (msg.sender != VAULT) revert NotVault();
         if (tokens.length != 1 || amounts.length != 1 || feeAmounts.length != 1) revert UnexpectedFlashLoan();
-        bytes32 expected = _pendingBalancerLoan;
+        bytes32 expected = _pendingLoan;
         if (expected == bytes32(0) || keccak256(abi.encode(tokens[0], amounts[0], userData)) != expected) {
             revert UnexpectedFlashLoan();
         }
 
-        _runAndCheck(tokens[0], amounts[0], feeAmounts[0], userData);
-        IERC20(tokens[0]).safeTransfer(BALANCER_VAULT, amounts[0] + feeAmounts[0]); // Balancer expects a transfer
-    }
-
-    // ---------------------------------------------------------------- internals
-
-    function _validateRoute(address asset, SwapStep[] calldata steps) internal view {
-        if (steps.length == 0) revert EmptyRoute();
-        if (steps[steps.length - 1].tokenOut != asset) revert RouteMustEndInBorrowedAsset();
-        for (uint256 i = 0; i < steps.length; i++) {
-            if (!allowedRouters[steps[i].router]) revert RouterNotAllowed(steps[i].router);
-        }
-    }
-
-    /// @dev Runs the route and enforces: balanceAfter >= balanceBefore + amount + fee + minProfit.
-    ///      `balanceBefore` (measured before the loan) keeps old, un-withdrawn profits from hiding a losing trade.
-    function _runAndCheck(address asset, uint256 amount, uint256 fee, bytes calldata data) internal {
+        address asset = tokens[0];
+        uint256 amount = amounts[0];
+        uint256 fee = feeAmounts[0];
         (SwapStep[] memory steps, uint256 minProfit, uint256 balanceBefore) =
-            abi.decode(data, (SwapStep[], uint256, uint256));
+            abi.decode(userData, (SwapStep[], uint256, uint256));
 
         address currentToken = asset;
         uint256 currentAmount = amount;
@@ -186,12 +145,16 @@ contract FlashArb is Ownable, Pausable, ReentrancyGuard {
             currentToken = steps[i].tokenOut;
         }
 
+        // Measured against the balance BEFORE the loan, so old un-withdrawn profits can never hide a losing trade.
         uint256 required = balanceBefore + amount + fee + minProfit;
         uint256 balanceAfter = IERC20(asset).balanceOf(address(this));
         if (balanceAfter < required) revert InsufficientProfit(balanceAfter, required);
 
+        IERC20(asset).safeTransfer(VAULT, amount + fee); // Balancer expects the repayment by transfer
         emit ArbExecuted(asset, amount, fee, balanceAfter - balanceBefore - amount - fee);
     }
+
+    // ---------------------------------------------------------------- internals
 
     function _swap(SwapStep memory s, address tokenIn, uint256 amountIn) internal returns (uint256 amountOut) {
         IERC20(tokenIn).forceApprove(s.router, amountIn);

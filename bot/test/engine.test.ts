@@ -41,6 +41,14 @@ describe("engine (dry-run)", () => {
     expect(found.some((o) => o.status === "simulated_ok" && o.netProfitUsd > 0)).toBe(true);
   });
 
+  it("never proposes a loan the zero-interest lender cannot supply (only WETH is borrowable)", async () => {
+    const m = new FakeMarket((v, a) => (v === "sushiV2-3000" && a === "ARB" ? 1.05 : v === "sushiV2-3000" && a === "WETH" ? 1.02 : 1));
+    const found = await mkEngine(m, new QuoteOnlySimulator()).runCycle();
+    expect(found.length).toBeGreaterThan(0);
+    expect(found.every((o) => config.flashLoan.borrowable.includes(o.borrowToken))).toBe(true);
+    expect(found.some((o) => o.borrowToken === "ARB")).toBe(false);
+  });
+
   it("auto-pauses after consecutive simulation failures and then skips opportunities", async () => {
     const failing: Simulator = { simulate: async () => ({ ok: false, reason: "boom" }) };
     const risk = new RiskEngine({ ...config.risk, maxConsecutiveFailures: 2 });
