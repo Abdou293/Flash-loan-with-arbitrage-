@@ -16,6 +16,7 @@ AAVE_POOL=0x794a61358D6845594F94dc1DB02A252b5b4814aD
 UNI_V3_ROUTER=0xE592427A0AEce92De3Edee1F18E0157C05861564
 UNI_V3_FACTORY=0x1F98431c8aD98523631AE4a59f267346ea31F984   # canonical Uniswap V3 factory
 SUSHI_V2_ROUTER=0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506
+UNI_V3_QUOTER_V2=0x61fFE014bA17989E743c5F6cB21bF9697530B21e  # used by the bot for price quotes
 
 # Preflight: fail fast with a readable reason (API key is redacted from any message).
 redact() { sed -E 's#(/v2/)[^[:space:]"]+#\1***#g'; }
@@ -53,6 +54,8 @@ check "ARB symbol"    ARB  "$(call $ARB 'symbol()(string)')"
 
 check "Uniswap V3 router -> factory is the canonical V3 factory" "$UNI_V3_FACTORY" "$(call $UNI_V3_ROUTER 'factory()(address)')"
 check "Uniswap V3 router -> WETH9 is our WETH"                   "$WETH"           "$(call $UNI_V3_ROUTER 'WETH9()(address)')"
+check "Uniswap QuoterV2 -> factory is the canonical V3 factory" "$UNI_V3_FACTORY" "$(call $UNI_V3_QUOTER_V2 'factory()(address)')"
+check "Uniswap QuoterV2 -> WETH9 is our WETH"                   "$WETH"           "$(call $UNI_V3_QUOTER_V2 'WETH9()(address)')"
 check "SushiSwap V2 router -> WETH is our WETH"                  "$WETH"           "$(call $SUSHI_V2_ROUTER 'WETH()(address)')"
 
 PROVIDER="$(call $AAVE_POOL 'ADDRESSES_PROVIDER()(address)')"

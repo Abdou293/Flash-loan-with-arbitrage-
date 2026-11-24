@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "../config/dotenv.js";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "../config/load.js";
