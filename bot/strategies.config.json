@@ -1,5 +1,5 @@
 {
-  "_note": "Token/router addresses below are NOT verified (written from memory). Check them against official sources before any live use. Sample (synthetic) mode ignores addresses.",
+  "_note": "Addresses were written from memory and their on-chain identity was checked with scripts/verify-addresses.sh (13/13 on Arbitrum One). Still confirm them against official sources before any live use. Sample (synthetic) mode ignores addresses.",
   "global": {
     "flashLoanFeeBps": 5,
     "slippageBps": 10,

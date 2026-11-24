@@ -24,5 +24,9 @@ Fork tests against real Arbitrum (needs a free RPC URL in your shell, never in a
     export ARBITRUM_RPC_URL="<your free Alchemy/Infura/public Arbitrum URL>"
     forge test --match-contract Fork -vv
 
-**Verify the addresses** at the top of `test/FlashArb.fork.t.sol` against the Aave address book and
-Uniswap docs before trusting fork results.
+Status: both fork tests pass against a live Arbitrum One RPC. The addresses at the top of
+`test/FlashArb.fork.t.sol` pass the on-chain identity check (`bash ../scripts/verify-addresses.sh`); still confirm them
+against the Aave address book and Uniswap docs.
+
+Note: `evm_version` must be `cancun` (or newer). With an older value, fork tests fail inside Aave's code with
+`EvmError: NotActivated` and burn all the gas.

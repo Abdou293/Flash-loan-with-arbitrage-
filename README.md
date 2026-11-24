@@ -12,14 +12,25 @@ Aave V3 and reverts unless the trade is profitable, plus a TypeScript plug-in bo
 
 | Area | State |
 |---|---|
-| Smart contract + 17 Foundry logic tests (mocks) | Done, passing |
-| Foundry fork tests against real Arbitrum (Aave + Uniswap) | Written, **not yet run** (needs an RPC URL) |
-| Bot framework, 4 strategies, risk engine, 33 unit tests | Done, passing; dry-run only |
+| Smart contract + 17 Foundry logic tests (mocks) | Done, passing (also on a clean Ubuntu/WSL2 machine) |
+| Foundry fork tests against real Arbitrum One (Aave V3 + Uniswap V3) | **Passing, 2/2**, run against a live Arbitrum RPC (see below) |
+| On-chain identity check of all contract addresses (`scripts/verify-addresses.sh`) | **13/13 passing** on Arbitrum One |
+| Bot framework, 4 strategies, risk engine, 33 unit tests | Done, passing (also on a clean machine); dry-run only |
 | Live RPC market data, static-call simulator, historical collector | Written, **not yet exercised on a live network** |
 | Backtest engine + report generator | Done, tested on synthetic data |
 | **Real backtest / dry-run results** | **None yet.** See "Results" |
 | Testnet end-to-end test | Instructions in [docs/TESTNET.md](docs/TESTNET.md), **not yet run** |
 | Dashboard | Done; shows **synthetic** demo data |
+
+### What the fork tests showed (real Arbitrum state)
+- **Unprofitable round trip is rejected.** Borrow 10 WETH from Aave, sell on the Uniswap V3 0.05% pool, buy back on the
+  0.30% pool: the route returned **9.923 WETH** against **10.005 WETH** owed (loan + 5 bps Aave premium), so the contract
+  reverted with `InsufficientProfit`. A plain round trip loses about 0.8% to fees and price impact.
+- **Profitable path works end to end.** After the test itself pushes one pool's price with a large swap (an
+  **artificial** spread created inside the test), the contract borrows, swaps, repays and keeps the profit.
+  This proves the mechanics, not that such spreads exist in the market.
+- Running on a real fork surfaced and fixed four issues the sandboxed build could not see (EVM version, a forge-std import,
+  dependency installation, and an over-strict revert assertion).
 
 ## Architecture
 
@@ -112,10 +123,13 @@ because the generator gives new pools large random mispricings; that is **not** 
   a laptop or free VM, finding opportunities that survive fees and gas is unlikely. Treat profitability as unproven.
 - **Backtests are an upper bound**: opportunities are assumed to fill at the recorded quote; competing bots, latency and price
   movement before inclusion are not modelled. Snapshot sampling can miss or double-count short-lived gaps.
-- **Gas is estimated** from config values (Arbitrum also charges an L1 data fee). Addresses in `strategies.config.json` and the fork
-  tests were written from memory and must be verified against official sources (Aave address book, Uniswap docs, Arbiscan).
+- **Gas is estimated** from config values (Arbitrum also charges an L1 data fee).
+- **Addresses** were written from memory, then checked on-chain with `scripts/verify-addresses.sh` (token symbols and decimals,
+  routers pointing to the canonical Uniswap factory and WETH, Aave pool and provider pointing to each other). That is an identity
+  check, not a substitute for the official sources (Aave address book, Uniswap and Sushi docs, Arbiscan).
 - **Smart-contract risk.** The contract is unaudited. Bugs, approvals, router behaviour or token quirks (fee-on-transfer, honeypots) can lose funds.
-- **Untested paths.** Live RPC, collector, static-call simulator, fork tests and testnet deployment have not been run by the author.
+- **Untested paths.** The bot's live RPC mode, the historical collector, the static-call simulator and testnet deployment
+  have not been run yet.
 - **Not implemented:** live execution, new-pool discovery from chain events, MEV protection.
 
 ## How I built it
