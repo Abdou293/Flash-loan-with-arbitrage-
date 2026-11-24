@@ -13,7 +13,7 @@ An educational, portfolio-grade implementation of a flash-loan arbitrage system:
 | Area | State |
 |---|---|
 | Smart contract (zero-interest loans only: Balancer V2 + Uniswap V4) + 29 Foundry logic tests (mocks) | Done, passing |
-| Foundry fork tests against real Arbitrum One | Balancer: **2/2 passing** on a live RPC (earlier Aave+Balancer version 5/5). Uniswap V4 lender: written, to run |
+| Foundry fork tests against real Arbitrum One | **4/4 passing** on a live RPC: Balancer V2 and Uniswap V4 lenders (earlier Aave+Balancer version: 5/5) |
 | On-chain identity check of all contract addresses (`scripts/verify-addresses.sh`) | **13/13 passing** on Arbitrum One |
 | Bot framework, 4 strategies, risk engine, 33 unit tests | Done, passing (also on a clean machine); dry-run only |
 | Historical collector + RPC price quotes | **Run on real data**: 48 snapshots of Arbitrum One (about 24 h) |
@@ -30,6 +30,10 @@ Aave was later removed so that the contract only uses zero-interest loans; these
 - **Profitable path works end to end.** After the test itself pushes one pool's price with a large swap (an
   **artificial** spread created inside the test), the contract borrows, swaps, repays and keeps the profit.
   This proves the mechanics, not that such spreads exist in the market.
+- **Second zero-interest lender confirmed (Uniswap V4).** Borrowing 1 WETH through the PoolManager's flash accounting,
+  the same artificial-spread trade kept 0.882 WETH (Balancer: 8.731 WETH on a 10 WETH loan, the same ~0.87-0.88 per WETH),
+  and the unprofitable trade reverted with `InsufficientProfit`. On-chain on 2026-11-24 the PoolManager held ~27.8 WETH
+  and ~9.04M USDC, so it is also the lender that makes USDC borrowing possible (Balancer held only ~4.7k USDC).
 - **Zero-fee lender confirmed.** The same artificial-spread trade funded by Balancer kept 8.744061 WETH versus 8.739061 WETH
   via Aave: exactly 0.005 WETH more, the 5 bps Aave premium on 10 WETH.
 - Running on a real fork surfaced and fixed four issues the sandboxed build could not see (EVM version, a forge-std import,
