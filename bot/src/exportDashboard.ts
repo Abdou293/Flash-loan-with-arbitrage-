@@ -60,7 +60,7 @@ async function main() {
 
   const names = Object.keys(config.strategies);
   const cum: Record<string, number> = Object.fromEntries(names.map((n) => [n, 0]));
-  const series: { cycle: number; cumNetUsd: Record<string, number> }[] = [];
+  const series: { cycle: number; cumNetUsd: Record<string, number | null> }[] = [];
   const all: Opportunity[] = [];
   const startedAt = new Date().toISOString();
   const r2 = (x: number) => Math.round(x * 100) / 100;
@@ -82,6 +82,7 @@ async function main() {
             "Quote-only: the pre-send static-call simulation needs the deployed contract (testnet phase), so 'simulated' here means the quote said the route is profitable, nothing more.",
             "Gas is an estimate. Quotes are taken at different moments, so a route that looks profitable may not have been executable at one single block.",
             "Only the pools listed in strategies.config.json are checked. This says nothing about the rest of the market.",
+            "A strategy that priced no route is shown as 'no data', not $0. newPoolScanner needs new-pool discovery, which is not implemented over RPC.",
           ],
           note: "Real on-chain quotes in shadow mode. Not a profit claim.",
         }
@@ -136,14 +137,15 @@ async function main() {
     all.push(...found);
     for (const o of found) if (o.status === "simulated_ok") cum[o.strategy] = (cum[o.strategy] ?? 0) + o.netProfitUsd;
     if (real) {
+      // null = this strategy priced no route (e.g. newPoolScanner has no new-pool discovery over RPC): shown as "no data", never as $0
       const best = (n: string) => {
         const v = store.stats[n]?.bestNetProfitUsd;
-        return v !== undefined && Number.isFinite(v) ? r2(v) : 0;
+        return (store.stats[n]?.routesEvaluated ?? 0) > 0 && v !== undefined && Number.isFinite(v) ? r2(v) : null;
       };
       series.push({ cycle: c, cumNetUsd: Object.fromEntries(names.map((n) => [n, best(n)])) });
       write(c);
       const evaluated = names.reduce((a, n) => a + (store.stats[n]?.routesEvaluated ?? 0), 0);
-      console.log(`cycle ${c}: ${found.length} candidate(s), ${evaluated} routes priced so far. Best net so far: ` + names.map((n) => `${n} $${best(n)}`).join(", "));
+      console.log(`cycle ${c}: ${found.length} candidate(s), ${evaluated} routes priced so far. Best net so far: ` + names.map((n) => (best(n) === null ? `${n} no data` : `${n} $${best(n)}`)).join(", "));
       if (evaluated === 0) console.log("  WARNING: no route could be priced yet. Check ARBITRUM_RPC_URL and that the pools in strategies.config.json exist. A '$0' above does NOT mean break-even here.");
       if (c < cycles) await new Promise((r) => setTimeout(r, intervalMs));
     } else if (c % 5 === 0 || c === cycles) {

@@ -67,7 +67,7 @@ function renderStrategies(d) {
     const cls = s.estimatedNetProfitUsd > 0 ? "n pos" : "n";
     return el("tr", {},
       el("td", {}, s.name),
-      el("td", {}, el("span", { class: "tag" }, s.enabled ? "enabled" : "disabled")),
+      el("td", {}, el("span", { class: "tag" }, !s.enabled ? "disabled" : s.routesEvaluated === 0 ? "enabled · no data" : "enabled")),
       el("td", { class: "n" }, s.routesEvaluated.toLocaleString("en-US")),
       el("td", { class: "n" }, String(s.profitableBeforeRisk)),
       el("td", { class: "n" }, String(s.rejectedByRisk)),
@@ -102,8 +102,9 @@ function svg(tag, attrs = {}, text) {
 }
 
 function renderChart(d) {
-  const names = d.strategies.map((s) => s.name);
   const pts = d.series;
+  // a strategy with no value at any point (it priced no route) is left out of the chart instead of drawn as $0
+  const names = d.strategies.map((s) => s.name).filter((n) => pts.some((p) => p.cumNetUsd[n] !== null && p.cumNetUsd[n] !== undefined));
   const box = $("chart");
   if (!pts.length) { box.replaceChildren(el("div", { class: "empty" }, "No data.")); return; }
   const W = 720, H = 280, L = 52, R = 16, T = 12, B = 28;
