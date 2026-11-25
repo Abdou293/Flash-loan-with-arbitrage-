@@ -92,6 +92,14 @@ contract FlashLiquidatorTest is Test {
         assertEq(debt.balanceOf(address(liq)), 38.775 ether);
     }
 
+    function test_minProfitIsMeasuredAfterTheLoanFee() public {
+        // Balancer starts charging 0.10% (1 token). The trade makes 39.775 before the fee but only 38.775 after it.
+        // minProfit 39 sits between the two: it must revert, because the promise is a profit AFTER the loan fee.
+        vault.setFeeBps(10);
+        vm.expectRevert(abi.encodeWithSelector(FlashLiquidator.InsufficientProfit.selector, 1039.775 ether, 1040 ether));
+        liq.execute(BAL, _liquidation(), _route(), 39 ether);
+    }
+
     function test_feeThatEatsTheProfitReverts() public {
         vault.setFeeBps(500); // 5% = 50 > 39.775
         vm.expectRevert();

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Mutation check for contracts/src/FlashLiquidator.sol: breaks the contract on purpose in several ways and verifies that
 # the test-suite FAILS each time. A mutation the tests do not catch means a safety property is not really tested.
-# The original file is always restored (also on Ctrl+C). Usage: bash scripts/mutation-check-liquidator.sh
+# Only the deterministic unit tests are used (the fuzz test is excluded): fuzzing is random, so a mutation that only a lucky
+# fuzz run catches is NOT really covered. The original file is always restored (also on Ctrl+C).
+# Usage: bash scripts/mutation-check-liquidator.sh
 set -u
 cd "$(dirname "$0")/../contracts"
 SRC=src/FlashLiquidator.sol
@@ -20,7 +22,7 @@ s = open(p).read()
 assert old in s, "mutation target not found: " + old
 open(p, "w").write(s.replace(old, new, 1))
 PY
-  failed=$(forge test $FLAGS --match-contract FlashLiquidatorTest 2>&1 | grep -cE "^\[FAIL")
+  failed=$(forge test $FLAGS --match-contract FlashLiquidatorTest --no-match-test testFuzz 2>&1 | grep -cE "^\[FAIL")
   if [ "$failed" -gt 0 ]; then echo "CAUGHT  ($failed failing test(s))  $1"; else echo "MISSED  $1"; missed=$((missed + 1)); fi
 }
 
