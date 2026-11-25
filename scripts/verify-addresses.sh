@@ -17,6 +17,7 @@ BALANCER_V2_VAULT=0xBA12222222228d8Ba445958a75a0704d566BF2C8  # zero-fee flash l
 UNI_V4_POOL_MANAGER=0x360E68faCcca8cA495c1B759Fd9EEe466db9FB32  # second zero-interest lender
 PCS_V3_ROUTER=0x1b81D678ffb9C0263b24A97847620C99d213eB14       # PancakeSwap V3 SwapRouter (radar venue)
 PCS_V3_QUOTER=0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997       # PancakeSwap V3 QuoterV2
+AAVE_POOL=0x794a61358D6845594F94dc1DB02A252b5b4814aD  # Aave V3 Pool: only READ by the liquidation measurement tools
 MULTICALL3=0xcA11bde05977b3631167028862bE2a173976CA11  # batches many reads into one RPC call (gap monitor)
 UNI_V3_QUOTER_V2=0x61fFE014bA17989E743c5F6cB21bF9697530B21e  # used by the bot for price quotes
 
@@ -80,6 +81,26 @@ for L in "Balancer-V2-Vault:$BALANCER_V2_VAULT" "Uniswap-V4-PoolManager:$UNI_V4_
   U="$(cast call $USDC 'balanceOf(address)(uint256)' $ADDR --rpc-url "$RPC" 2>/dev/null | awk '{printf "%.0f", $1/1e6}')"
   echo "INFO  $NAME can lend up to ${W:-?} WETH and ${U:-?} USDC right now"
 done
+
+# Aave V3 (read-only use: liquidation measurement). Provider and oracle are discovered from the pool, never hard-coded.
+AAVE_PROVIDER="$(call $AAVE_POOL 'ADDRESSES_PROVIDER()(address)')"
+check "Aave pool exposes an ADDRESSES_PROVIDER" yes "$([ -n "$AAVE_PROVIDER" ] && echo yes)"
+if [ -n "$AAVE_PROVIDER" ]; then
+  check "Aave provider.getPool() points back to the pool" "$AAVE_POOL" "$(call "$AAVE_PROVIDER" 'getPool()(address)')"
+  AAVE_ORACLE="$(call "$AAVE_PROVIDER" 'getPriceOracle()(address)')"
+  check "Aave provider exposes a price oracle" yes "$([ -n "$AAVE_ORACLE" ] && echo yes)"
+  if [ -n "$AAVE_ORACLE" ]; then
+    check "Aave oracle price unit is 1e8 (USD, 8 decimals)" 100000000 "$(call "$AAVE_ORACLE" 'BASE_CURRENCY_UNIT()(uint256)')"
+    WETH_PRICE="$(call "$AAVE_ORACLE" 'getAssetPrice(address)(uint256)' $WETH 2>/dev/null)"
+    check "Aave oracle prices WETH between 100 and 100000 USD" yes "$(awk -v p="${WETH_PRICE:-0}" 'BEGIN{print (p>=100*1e8 && p<=100000*1e8) ? "yes" : "no"}')"
+    echo "INFO  Aave oracle WETH price = $(awk -v p="${WETH_PRICE:-0}" 'BEGIN{printf "%.2f", p/1e8}') USD"
+  fi
+  echo "INFO  Aave PoolAddressesProvider = $AAVE_PROVIDER"
+  echo "INFO  Compare it with AaveV3Arbitrum.POOL_ADDRESSES_PROVIDER in https://github.com/bgd-labs/aave-address-book"
+fi
+# getUserAccountData returns 6 values; for an address with no position the last one (health factor) is max uint256
+HF_NONE="$(cast call $AAVE_POOL 'getUserAccountData(address)(uint256,uint256,uint256,uint256,uint256,uint256)' 0x000000000000000000000000000000000000dEaD --rpc-url "$RPC" 2>/dev/null | tail -1 | awk '{print $1}')"
+check "Aave getUserAccountData(...) answers with a health factor (no position = max uint256)" 115792089237316195423570985008687907853269984665640564039457584007913129639935 "$HF_NONE"
 
 check "Multicall3 is deployed and reports chain 42161" 42161 "$(call $MULTICALL3 'getChainId()(uint256)')"
 echo "INFO  Sushi factory = $(call $SUSHI_V2_ROUTER 'factory()(address)')  (compare with Sushi's official docs)"

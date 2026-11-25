@@ -35,3 +35,6 @@ Thumbs.db
 
 # Dashboard local data
 dashboard/data/live.json
+
+# Liquidation measurement cache (raw logs, enriched events)
+bot/data/liquidations/

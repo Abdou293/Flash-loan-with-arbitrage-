@@ -201,6 +201,8 @@ export interface ReportInput {
   chunkInfo?: string;
   lookback: number;
   eventsWithoutPrice: number;
+  /** liquidations of a borrower already liquidated within the lookback (not sampled for speed) */
+  repeatEvents?: number;
   poolAddress: string;
 }
 
@@ -269,7 +271,7 @@ export function renderReport(r: ReportInput): string {
   );
   L.push(`| Measure | Value |`, `|---|---:|`);
   L.push(`| Samples used (clean) | ${speed.clean} |`);
-  L.push(`| Excluded: same borrower liquidated again within ${r.lookback} blocks | ${speed.repeatExcluded} |`);
+  L.push(`| Liquidations not sampled: same borrower already liquidated within ${r.lookback} blocks (partial liquidations) | ${(r.repeatEvents ?? 0) + speed.repeatExcluded} |`);
   L.push(`| Failed to read (RPC error / archive state unavailable) | ${speed.errors} |`);
   L.push(`| Same block (0 blocks) | ${pct(speed.sameBlockShare === undefined ? undefined : speed.sameBlockShare * 100, 0)} |`);
   L.push(`| Within ${INSTANT_MAX_BLOCKS} blocks (about ${(INSTANT_MAX_BLOCKS * 0.25).toFixed(1)} s) | ${pct(speed.instantShare === undefined ? undefined : speed.instantShare * 100, 0)} |`);

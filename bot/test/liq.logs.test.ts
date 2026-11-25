@@ -134,3 +134,12 @@ describe("ThrottledRpc", () => {
     await bad.request("x", []).catch((e) => expect(String(e.message)).not.toMatch(/KEY999/));
   });
 });
+
+describe("error text", () => {
+  it("prefers the provider's own message over ethers' wrapper", async () => {
+    const { errorText } = await import("../src/liquidations/rpc.js");
+    const wrapped = Object.assign(new Error('could not coalesce error (error={ "code": -32000, "message": "limit hit" }, payload={...})'), { error: { message: "limit hit" } });
+    expect(errorText(wrapped)).toBe("limit hit");
+    expect(errorText(new Error("plain"))).toBe("plain");
+  });
+});

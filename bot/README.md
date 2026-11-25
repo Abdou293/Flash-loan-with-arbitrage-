@@ -72,3 +72,30 @@ maximum excess over the band (bps), longest/median episode in blocks, and the be
 
 Limits: polling every 500 ms sees roughly one Arbitrum block in two; gaps that live less than that can be missed.
 Mid prices ignore depth, so "outside the band" is necessary but not sufficient for profit (the quote settles it).
+
+## Liquidation measurement (Aave V3 on Arbitrum, step 1 of a possible liquidation module)
+
+Read-only measurement of how liquidations really happen, **before** building anything that would compete for them.
+
+    npm run liquidations -- --probe            # 1) which eth_getLogs block ranges does my RPC accept? (cheap)
+    npm run liquidations -- --days 3           # 2) scan, price, sample speed, write the report
+
+What it does:
+- Scans `LiquidationCall` events of the Aave V3 Pool in **adaptive, resumable chunks**. Free RPC plans may only accept a few
+  blocks per `eth_getLogs` request; the scanner learns the limit from the provider's own error message, shrinks or grows the
+  range, throttles requests (`--interval-ms`), retries rate limits with backoff, and caches progress in
+  `data/liquidations/` (git-ignored). Run the same command again to continue; `--reset` starts over.
+- Prices every event with the Aave oracle **at the block of the event** (Multicall3) and reports size in USD and the
+  liquidation bonus actually earned (gross of Aave's protocol fee).
+- Measures **speed** on a sample: for each sampled liquidation it reads the borrower's health factor at past blocks (binary
+  search) to find how many blocks the position had been liquidatable. "0 blocks" = it became liquidatable in the very block
+  it was liquidated. This needs an archive-capable RPC.
+- Writes `data/liquidations.<from>-<to>.local.md` (and `.json`): per-day table, prize-size buckets, assets, who liquidates,
+  speed statistics and a **computed verdict** (rules and thresholds are printed in the report).
+
+Cost on a free plan: `--probe` prints the number of requests and compute units a day of scanning needs for the range size
+your RPC accepts. If it only accepts ~10 blocks, scan fewer days or give `--logs-rpc-url` another free RPC for `eth_getLogs`.
+
+Status: tested offline (43 unit tests for this tool, plus an end-to-end run against a fake JSON-RPC node that enforces a 10-block
+`eth_getLogs` limit: 40/40 sampled delays matched the planted ground truth, resume re-scanned nothing, the API key never
+appeared in any output). **Not yet run against the real Arbitrum network.**

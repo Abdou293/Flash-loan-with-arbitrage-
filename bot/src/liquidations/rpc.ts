@@ -10,11 +10,15 @@ export interface SendLike {
 export const redact = (s: string) =>
   s.replace(/(\/v2\/)[^\s"'?&)]+/g, "$1***").replace(/(api[_-]?key=)[^\s"'&)]+/gi, "$1***");
 
-/** ethers hides the provider's real message in nested fields: gather all of them. */
+/**
+ * ethers wraps provider errors ("could not coalesce error (error={...}, payload=...)"): prefer the provider's own
+ * message when it is there, otherwise gather whatever text the error carries.
+ */
 export function errorText(e: unknown): string {
   const x = e as any;
-  const parts = [x?.message, x?.error?.message, x?.info?.responseBody, x?.info?.error?.message, x?.shortMessage]
-    .filter((p): p is string => typeof p === "string" && p.length > 0);
+  const inner = [x?.error?.message, x?.info?.error?.message].find((p) => typeof p === "string" && p.length > 0);
+  if (inner) return inner;
+  const parts = [x?.message, x?.info?.responseBody, x?.shortMessage].filter((p): p is string => typeof p === "string" && p.length > 0);
   return [...new Set(parts)].join(" | ") || String(e);
 }
 
