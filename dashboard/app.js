@@ -211,6 +211,95 @@ function renderShadow(sh) {
     el("div", {}, `Source: ${m.dataSource}. Generated ${new Date(m.generatedAt).toLocaleString()}.`)));
 }
 
+// ---------------------------------------------------------------- measured studies (parsed from docs/reports)
+const num = (t) => Number(String(t).replace(/[$,%\s]/g, "").replace(/^-$/, "NaN"));
+const looksNumeric = (t) => /^[-+]?\$?-?[\d,]+(\.\d+)?%?$/.test(String(t).trim());
+
+function studyTable(t) {
+  const wrap = el("div", { class: "scroll" });
+  const table = el("table", {});
+  table.append(el("thead", {}, el("tr", {}, ...t.columns.map((c, i) => el("th", { class: i > 0 && t.rows.some((r) => looksNumeric(r[i] || "")) ? "n" : "" }, c)))));
+  table.append(el("tbody", {}, ...t.rows.map((r) => el("tr", {}, ...t.columns.map((_, i) => el("td", { class: i > 0 && looksNumeric(r[i] || "") ? "n" : "" }, r[i] ?? ""))))));
+  wrap.append(table);
+  return wrap;
+}
+
+function renderStudyBlocks(blocks) {
+  const out = [];
+  for (const b of blocks) {
+    if (b.type === "heading") out.push(el("h" + Math.min(5, b.level + 2), {}, b.text));
+    else if (b.type === "text") out.push(el("p", { class: "study-text" }, b.text));
+    else if (b.type === "list") out.push(el("ul", { class: "study-list" }, ...b.items.map((t) => el("li", {}, t))));
+    else if (b.type === "table") out.push(studyTable(b));
+  }
+  return out;
+}
+
+function barChart(boxId, labels, values, color) {
+  const W = 720, H = 220, L = 52, R = 12, T = 12, B = 30;
+  const max = Math.max(1, ...values);
+  const bw = (W - L - R) / values.length;
+  const y = (v) => T + (1 - v / max) * (H - T - B);
+  const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Bar chart" });
+  for (let i = 0; i <= 4; i++) {
+    const v = (max * i) / 4;
+    s.append(svg("line", { class: "grid", x1: L, x2: W - R, y1: y(v), y2: y(v) }), svg("text", { x: L - 6, y: y(v) + 4, "text-anchor": "end" }, "$" + Math.round(v).toLocaleString("en-US")));
+  }
+  values.forEach((v, i) => {
+    const r = svg("rect", { x: L + i * bw + 1, y: y(v), width: Math.max(1, bw - 2), height: Math.max(0, H - B - y(v)), fill: color });
+    r.append(svg("title", {}, `${labels[i]}: $${Math.round(v).toLocaleString("en-US")}`));
+    s.append(r);
+  });
+  s.append(svg("text", { x: L, y: H - 8 }, labels[0]), svg("text", { x: W - R, y: H - 8, "text-anchor": "end" }, labels[labels.length - 1]));
+  $(boxId).replaceChildren(s);
+}
+
+function renderStudies(d) {
+  if (!d || !d.studies || !d.studies.length) { $("studies-empty").hidden = false; return; }
+  // headline numbers are sums of the per-day table of the 30-day liquidation report (computed here, labelled as such)
+  const liq = d.studies.find((s) => s.id === "liq-30d");
+  const perDay = liq && liq.blocks.find((b) => b.type === "table" && b.columns[0] === "Day" && b.columns.includes("Gross bonus total (USD)"));
+  if (perDay) {
+    const ci = perDay.columns.indexOf("Liquidations"), gi = perDay.columns.indexOf("Gross bonus total (USD)");
+    const labels = perDay.rows.map((r) => r[0]);
+    const gross = perDay.rows.map((r) => num(r[gi]) || 0);
+    const n = perDay.rows.reduce((a, r) => a + (num(r[ci]) || 0), 0);
+    const total = gross.reduce((a, b) => a + b, 0);
+    const top7 = [...gross].sort((a, b) => b - a).slice(0, 7).reduce((a, b) => a + b, 0);
+    const speed = liq.blocks.find((b) => b.type === "table" && b.columns[0] === "Measure");
+    const sameBlock = speed && speed.rows.find((x) => x[0].startsWith("Same block"));
+    const tiles = [
+      ["Liquidations, 30 days", n.toLocaleString("en-US"), "sum of the per-day table"],
+      ["Gross bonus, whole market", usd(total), "all liquidators together, before swap cost, gas and fees"],
+      ["Share in the 7 best days", Math.round((top7 / total) * 100) + "%", "the prize comes in bursts"],
+      ["Taken in the same block", sameBlock ? sameBlock[1] : "n/a", "of the sampled liquidations (see the speed table)"],
+    ];
+    $("studies-kpis").hidden = false;
+    $("studies-kpis").replaceChildren(...tiles.map(([label, value, note]) => el("div", { class: "kpi" }, el("div", { class: "label" }, label), el("div", { class: "value" }, String(value)), el("div", { class: "note" }, note))));
+    $("studies-chart-wrap").hidden = false;
+    $("studies-chart-h").textContent = "Gross liquidation bonus per day, all liquidators (USD, Aave V3 on Arbitrum)";
+    barChart("studies-chart", labels, gross, "var(--c2)");
+  }
+  const groups = [["liquidation", "Liquidation module"], ["arbitrage", "Arbitrage module"]];
+  $("studies-body").replaceChildren(...groups.flatMap(([mod, title]) => {
+    const list = d.studies.filter((s) => s.module === mod);
+    if (!list.length) return [];
+    return [el("h3", {}, title), ...list.map((s) => {
+      const det = el("details", { class: "study" });
+      det.append(el("summary", {}, s.label), el("div", { class: "study-body" }, ...renderStudyBlocks(s.blocks), el("p", { class: "hint" }, `Source file: docs/reports/${s.source}`)));
+      return det;
+    })];
+  }));
+}
+
+async function loadStudies() {
+  try {
+    const r = await fetch("data/studies.json", { cache: "no-store" });
+    return r.ok ? await r.json() : null;
+  } catch (_) { return null; }
+}
+loadStudies().then(renderStudies);
+
 loadShadow().then(renderShadow);
 
 load().then((d) => {

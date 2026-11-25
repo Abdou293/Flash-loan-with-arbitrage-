@@ -16,7 +16,8 @@
     "monitor": "tsx src/monitor/cli.ts",
     "liquidations": "tsx src/liquidations/cli.ts",
     "liq-watch": "tsx src/liquidations/watchCli.ts",
-    "export-shadow": "tsx src/exportShadow.ts"
+    "export-shadow": "tsx src/exportShadow.ts",
+    "export-studies": "tsx src/exportStudies.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

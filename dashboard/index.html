@@ -81,6 +81,17 @@
         </table>
       </div>
     </section>
+    <section id="studies" aria-labelledby="studies-h">
+      <h2 id="studies-h" class="module">Measured studies <span class="tag real">real data · past read-only runs</span></h2>
+      <p class="hint">Reports produced from real Arbitrum data (30 days of Aave liquidations, 24 h of arbitrage quotes, block-level gap radar). Tables are parsed straight from the report files, nothing is retyped.</p>
+      <div id="studies-empty" class="banner inline" hidden><div>No studies published yet. Run <code>npm run export-studies</code>.</div></div>
+      <div id="studies-kpis" class="kpis" hidden></div>
+      <div id="studies-chart-wrap" hidden>
+        <h3 id="studies-chart-h"></h3>
+        <div id="studies-chart" class="chart"></div>
+      </div>
+      <div id="studies-body"></div>
+    </section>
   </main>
 
   <footer>
