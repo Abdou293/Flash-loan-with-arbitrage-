@@ -7,7 +7,7 @@ import { loadConfig } from "../config/load.js";
 import { AAVE_POOL_ARBITRUM } from "./aave.js";
 import { fetchPrices, resolveAave } from "./enrich.js";
 import { scanLogs, type ScanState } from "./logs.js";
-import { redact, ThrottledRpc, num } from "./rpc.js";
+import { errorText, redact, ThrottledRpc, num } from "./rpc.js";
 import { safeHead } from "./sample.js";
 import { BORROW_SIG, borrowerFromLog, DEFAULT_THRESHOLDS, resolveDataProvider } from "./watch.js";
 import { formatCycle, runCycle } from "./watchRun.js";
@@ -135,16 +135,25 @@ async function main() {
   // ---- cycles ----------------------------------------------------------------------------------
   const intervalS = arg("interval-s") ? Math.max(5, Number(arg("interval-s"))) : 0;
   const maxCycles = arg("cycles") ? Number(arg("cycles")) : intervalS ? Infinity : 1;
+  let errorsInARow = 0;
   for (let i = 0; i < maxCycles; i++) {
-    const gasHex = (await rpc.request("eth_gasPrice", [])) as string;
-    const gasPriceGwei = Number(BigInt(gasHex)) / 1e9;
-    const weth = cfg.tokens["WETH"]!.address;
-    const price = (await fetchPrices(rpc, aave.oracle, [weth], num(await rpc.request("eth_blockNumber", [])))).get(weth);
-    const ethUsd = price ? Number(price) / Number(aave.baseUnit) : cfg.tokenUsd["WETH"]!;
-    const res = await runCycle(rpc, { pool: aave.pool, baseUnit: aave.baseUnit, dataProvider, cfg, thresholds, assumptions: { bonusPct, gasPriceGwei, ethUsd } }, list);
-    log(`\n[${res.timestamp}] gas ${gasPriceGwei.toFixed(4)} gwei, ETH $${ethUsd.toFixed(0)}\n${formatCycle(res)}`);
-    appendFileSync(files.history, JSON.stringify({ ...res, rows: res.rows.slice(0, 50) }) + "\n");
-    atomicWrite(files.latest, JSON.stringify({ ...res, source: "liq-watch", assumptions: { bonusPct, note: "estimates use a flat bonus and ignore swap costs" } }, null, 2));
+    try {
+      const gasHex = (await rpc.request("eth_gasPrice", [])) as string;
+      const gasPriceGwei = Number(BigInt(gasHex)) / 1e9;
+      const weth = cfg.tokens["WETH"]!.address;
+      const price = (await fetchPrices(rpc, aave.oracle, [weth], num(await rpc.request("eth_blockNumber", [])))).get(weth);
+      const ethUsd = price ? Number(price) / Number(aave.baseUnit) : cfg.tokenUsd["WETH"]!;
+      const res = await runCycle(rpc, { pool: aave.pool, baseUnit: aave.baseUnit, dataProvider, cfg, thresholds, assumptions: { bonusPct, gasPriceGwei, ethUsd } }, list);
+      log(`\n[${res.timestamp}] gas ${gasPriceGwei.toFixed(4)} gwei, ETH $${ethUsd.toFixed(0)}\n${formatCycle(res)}`);
+      appendFileSync(files.history, JSON.stringify({ ...res, rows: res.rows.slice(0, 50) }) + "\n");
+      atomicWrite(files.latest, JSON.stringify({ ...res, source: "liq-watch", assumptions: { bonusPct, note: "estimates use a flat bonus and ignore swap costs" } }, null, 2));
+      errorsInARow = 0;
+    } catch (e) {
+      // A free RPC times out now and then: one failed cycle must not end a day-long collection.
+      errorsInARow++;
+      log(`[${new Date().toISOString()}] cycle skipped, RPC error: ${redact(errorText(e)).slice(0, 160)} (${errorsInARow} in a row; stops at 20)`);
+      if (errorsInARow >= 20) throw e;
+    }
     if (i + 1 < maxCycles) await sleep(intervalS * 1000);
   }
   log("\nDone. This was a DRY RUN: nothing was signed or sent. Estimates use a flat assumed bonus and ignore swap costs and competition (see the liquidation reports: profitable ones are taken within the same block).");

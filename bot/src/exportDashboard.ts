@@ -1,4 +1,4 @@
-import { mkdirSync, renameSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import "./config/dotenv.js";
@@ -10,6 +10,7 @@ import { QuoteOnlySimulator, SampleSimulator } from "./core/simulator.js";
 import { Store } from "./core/store.js";
 import type { MarketData, Opportunity, Step } from "./core/types.js";
 import { Engine } from "./engine.js";
+import { errorText, redact } from "./liquidations/rpc.js";
 
 /**
  * Runs the bot in dry-run on SYNTHETIC data and writes the JSON file the dashboard displays.
@@ -62,8 +63,37 @@ async function main() {
   const cum: Record<string, number> = Object.fromEntries(names.map((n) => [n, 0]));
   const series: { cycle: number; cumNetUsd: Record<string, number | null> }[] = [];
   const all: Opportunity[] = [];
-  const startedAt = new Date().toISOString();
+  let startedAt = new Date().toISOString();
   const r2 = (x: number) => Math.round(x * 100) / 100;
+
+  // Shadow mode keeps going across restarts: earlier cycles are read back from the output file (use --fresh to start over).
+  let cycleBase = 0;
+  if (real && !process.argv.includes("--fresh") && existsSync(outFile)) {
+    try {
+      const prev = JSON.parse(readFileSync(outFile, "utf8"));
+      if (String(prev?.meta?.dataSource ?? "").startsWith("rpc")) {
+        for (const s of prev.strategies ?? []) {
+          store.stats[s.name] = {
+            routesEvaluated: s.routesEvaluated ?? 0,
+            profitable: s.profitableBeforeRisk ?? 0,
+            rejectedRisk: s.rejectedByRisk ?? 0,
+            simulatedOk: s.simulatedOk ?? 0,
+            simulatedRevert: s.simulatedRevert ?? 0,
+            estimatedNetProfitUsd: s.estimatedNetProfitUsd ?? 0,
+            bestNetProfitUsd: typeof s.bestNetProfitUsd === "number" ? s.bestNetProfitUsd : Number.NEGATIVE_INFINITY,
+          };
+        }
+        series.push(...(prev.series ?? []));
+        all.push(...[...(prev.recentOpportunities ?? [])].reverse());
+        cycleBase = Number(prev.status?.cyclesRun ?? series[series.length - 1]?.cycle ?? 0);
+        startedAt = prev.meta.startedAt ?? startedAt;
+        console.log(`Resuming from ${outFile}: ${cycleBase} earlier cycles kept (pass --fresh to start over).`);
+      }
+    } catch {
+      console.log("(could not read the previous file: starting fresh)");
+    }
+  }
+  let errorsInARow = 0;
 
   const build = (cyclesRun: number) => {
     const ok = all.filter((o) => o.status === "simulated_ok");
@@ -132,8 +162,21 @@ async function main() {
   };
 
   if (real) console.log(`SHADOW MODE: real quotes, read-only, nothing is sent. One cycle every ${intervalMs / 1000} s; writing ${outFile} after every cycle (Ctrl+C to stop).`);
-  for (let c = 1; c <= cycles; c++) {
-    const found = await engine.runCycle();
+  for (let i = 1; i <= cycles; i++) {
+    const c = cycleBase + i; // cycle number, continuing from an earlier run when resuming
+    let found: Opportunity[];
+    try {
+      found = await engine.runCycle();
+      errorsInARow = 0;
+    } catch (e) {
+      // A free RPC times out now and then: one failed cycle must not end a day-long collection.
+      if (!real) throw e;
+      errorsInARow++;
+      console.log(`cycle ${c}: skipped, RPC error: ${redact(errorText(e)).slice(0, 160)} (${errorsInARow} in a row; stops at 20)`);
+      if (errorsInARow >= 20) throw e;
+      await new Promise((r) => setTimeout(r, intervalMs));
+      continue;
+    }
     all.push(...found);
     for (const o of found) if (o.status === "simulated_ok") cum[o.strategy] = (cum[o.strategy] ?? 0) + o.netProfitUsd;
     if (real) {
@@ -147,8 +190,8 @@ async function main() {
       const evaluated = names.reduce((a, n) => a + (store.stats[n]?.routesEvaluated ?? 0), 0);
       console.log(`cycle ${c}: ${found.length} candidate(s), ${evaluated} routes priced so far. Best net so far: ` + names.map((n) => (best(n) === null ? `${n} no data` : `${n} $${best(n)}`)).join(", "));
       if (evaluated === 0) console.log("  WARNING: no route could be priced yet. Check ARBITRUM_RPC_URL and that the pools in strategies.config.json exist. A '$0' above does NOT mean break-even here.");
-      if (c < cycles) await new Promise((r) => setTimeout(r, intervalMs));
-    } else if (c % 5 === 0 || c === cycles) {
+      if (i < cycles) await new Promise((r) => setTimeout(r, intervalMs));
+    } else if (c % 5 === 0 || i === cycles) {
       series.push({ cycle: c, cumNetUsd: Object.fromEntries(names.map((n) => [n, r2(cum[n] ?? 0)])) });
     }
   }
