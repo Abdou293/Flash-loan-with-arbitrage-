@@ -13,7 +13,7 @@ An educational, portfolio-grade implementation of a flash-loan arbitrage system:
 | Area | State |
 |---|---|
 | Smart contract (zero-interest loans only: Balancer V2 + Uniswap V4) + 29 Foundry logic tests (mocks) | Done, passing |
-| `FlashLiquidator.sol` (Aave V3 liquidations, zero-interest loans) + 32 mock tests, mutation-checked | Written, passing; fork tests **not yet written** |
+| `FlashLiquidator.sol` (Aave V3 liquidations, zero-interest loans) + 32 mock tests, mutation-checked | Written, passing; 6 fork tests written (`FlashLiquidator.fork.t.sol`), **not yet run on a live RPC** |
 | Foundry fork tests against real Arbitrum One | **4/4 passing** on a live RPC: Balancer V2 and Uniswap V4 lenders (earlier Aave+Balancer version: 5/5) |
 | On-chain identity check of all contract addresses (`scripts/verify-addresses.sh`) | **13/13 passing** on Arbitrum One |
 | Bot framework, 4 strategies, risk engine, 33 unit tests | Done, passing (also on a clean machine); dry-run only |
