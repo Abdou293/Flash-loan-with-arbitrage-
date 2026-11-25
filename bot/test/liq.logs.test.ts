@@ -185,3 +185,16 @@ describe("time-budgeted scan and coverage", () => {
     expect(ids(got)).toEqual(ids(all));
   });
 });
+
+describe("a logs RPC that lags behind the state RPC", () => {
+  it("fails with a clear hint instead of a confusing 'range' message when the end block is beyond its head", async () => {
+    const chain = new FakeChain({ latest: 1000, logs: [], strictHead: true });
+    await expect(run(chain, 900, 1010, { done: [] }, 50)).rejects.toThrow(/BEHIND the other RPC: pass --to-block/);
+  });
+
+  it("scanning up to its own head works", async () => {
+    const chain = new FakeChain({ latest: 1000, logs: mkLogs([990, 1000]), strictHead: true });
+    const { seen } = await run(chain, 900, 1000, { done: [] }, 50);
+    expect(ids(seen)).toEqual(ids(mkLogs([990, 1000])));
+  });
+});

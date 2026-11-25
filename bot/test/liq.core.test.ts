@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { decodeLiquidationLog, eventId, LIQUIDATION_CALL_TOPIC } from "../src/liquidations/aave.js";
 import { liquidatableForBlocks } from "../src/liquidations/delay.js";
 import { accountAt, blockTimestamp, computeEconomics, fetchPrices, fetchTokenMeta, isLiquidatableAt, multicall, resolveAave } from "../src/liquidations/enrich.js";
-import { markRepeats, parseEvent, pickSample, serializeEvent } from "../src/liquidations/sample.js";
+import { markRepeats, parseEvent, pickSample, safeHead, serializeEvent } from "../src/liquidations/sample.js";
 import type { EnrichedEvent } from "../src/liquidations/report.js";
 import { BOT1, FakeChain, liqLog, ONE, ORACLE, POOL, PROVIDER, USDC, WETH } from "./liq.fakechain.js";
 
@@ -129,5 +129,13 @@ describe("sampling helpers", () => {
     const back = parseEvent(JSON.parse(serializeEvent(e)));
     expect(back.debtToCover).toBe(5n);
     expect(back.collateralAmount).toBe(6n);
+  });
+});
+
+describe("safe end block", () => {
+  it("uses the lowest head of all RPCs minus a margin", () => {
+    expect(safeHead([527_000_100, 527_000_093])).toBe(527_000_073);
+    expect(safeHead([500], 20)).toBe(480);
+    expect(safeHead([5], 20)).toBe(1);
   });
 });

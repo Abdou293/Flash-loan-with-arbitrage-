@@ -135,7 +135,12 @@ export async function scanLogs(o: ScanOptions): Promise<ScanStats> {
         const c = classifyLogsError(msg);
         if (c.kind !== "range") throw e;
         stats.rangeErrors++;
-        if (chunk <= o.chunk.min) throw new Error(`eth_getLogs fails even for ${chunk} block(s): ${msg}`);
+        if (chunk <= o.chunk.min) {
+          const behind = /beyond (?:the )?(?:current )?head|not yet (?:synced|available)|future block/i.test(msg)
+            ? " The logs RPC seems to be a few blocks BEHIND the other RPC: pass --to-block with a lower number."
+            : "";
+          throw new Error(`eth_getLogs fails even for ${chunk} block(s): ${msg}${behind}`);
+        }
         const size = end - start + 1;
         const next = c.suggestedSize && c.suggestedSize < size ? c.suggestedSize : Math.floor(size / 2);
         chunk = Math.max(o.chunk.min, next);
@@ -169,7 +174,7 @@ export async function probeLogLimit(
   address: string,
   topic0: string,
   latest: number,
-  sizes = [100_000, 10_000, 2_000, 1_000, 500, 100, 10, 1],
+  sizes = [100_000, 50_000, 10_000, 5_000, 2_000, 1_000, 500, 100, 10, 1],
 ): Promise<ProbeResult[]> {
   const out: ProbeResult[] = [];
   for (const size of sizes) {

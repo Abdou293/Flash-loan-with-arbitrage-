@@ -16,6 +16,8 @@ export interface FakeChainOptions {
   logs: RawLog[];
   /** reject getLogs ranges wider than this, with an Alchemy-style message */
   maxRange?: number;
+  /** reject getLogs whose end is beyond this node's head, like a public RPC that lags behind */
+  strictHead?: boolean;
   /** reject getLogs that would return more than this many logs */
   maxResults?: number;
   prices?: (asset: string, block: number) => bigint;
@@ -51,6 +53,7 @@ export class FakeChain implements Rpc {
         const f = p[0];
         const from = num(f.fromBlock), to = num(f.toBlock);
         this.getLogsCalls.push({ from, to });
+        if (this.o.strictHead && to > this.o.latest) throw new Error("block range extends beyond current head block");
         if (this.o.maxRange && to - from + 1 > this.o.maxRange) {
           throw new Error(`Under the Free tier plan, you can make eth_getLogs requests with up to a ${this.o.maxRange} block range. Upgrade to PAYG.`);
         }

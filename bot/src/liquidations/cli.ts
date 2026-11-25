@@ -23,7 +23,7 @@ import {
 import { coveredBlocks, probeLogLimit, scanLogs, type ScanState } from "./logs.js";
 import { renderReport, type EnrichedEvent } from "./report.js";
 import { redact, ThrottledRpc, hex, num } from "./rpc.js";
-import { BLOCKS_PER_DAY, markRepeats, parseEvent, pickSample, serializeEvent } from "./sample.js";
+import { BLOCKS_PER_DAY, markRepeats, parseEvent, pickSample, safeHead, serializeEvent } from "./sample.js";
 
 /**
  * Aave V3 liquidation measurement on Arbitrum One. READ-ONLY: only eth_getLogs, eth_call and eth_getBlockByNumber.
@@ -89,12 +89,14 @@ async function main() {
   const chainId = num(await stateRpc.request("eth_chainId", []));
   if (chainId !== 42161) log(`WARNING: chain id is ${chainId}, expected 42161 (Arbitrum One). Aborting is safer.`);
   const latest = num(await stateRpc.request("eth_blockNumber", []));
+  // A different RPC for logs may be a few blocks behind this one: use ITS head when talking to it.
+  const logsLatest = logsRpc === stateRpc ? latest : num(await logsRpc.request("eth_blockNumber", []));
   const pool = AAVE_POOL_ARBITRUM;
 
   // ---- probe mode -----------------------------------------------------------------------------
   if (flag("probe")) {
     log(`Probing eth_getLogs on ${logsUrl === stateUrl ? "your RPC" : "the logs RPC"} (latest block ${latest}). Read-only.\n`);
-    const res = await probeLogLimit(logsRpc, pool, LIQUIDATION_CALL_TOPIC, latest);
+    const res = await probeLogLimit(logsRpc, pool, LIQUIDATION_CALL_TOPIC, Math.max(1, logsLatest - 5));
     for (const r of res) log(`  ${String(r.size).padStart(7)} blocks: ${r.ok ? "accepted" : "REFUSED  " + redact(r.error ?? "")}`);
     const best = res.find((r) => r.ok)?.size;
     if (!best) {
@@ -116,7 +118,7 @@ async function main() {
 
   // ---- range ----------------------------------------------------------------------------------
   const days = Number(arg("days", "3"));
-  const to = arg("to-block") ? Number(arg("to-block")) : latest;
+  const to = arg("to-block") ? Number(arg("to-block")) : safeHead([latest, logsLatest]);
   const from = arg("from-block") ? Number(arg("from-block")) : Math.max(1, to - Math.round(days * BLOCKS_PER_DAY));
   if (!(from > 0 && to >= from)) throw new Error("Invalid block range");
   const startChunk = Number(arg("chunk-blocks", "5000"));

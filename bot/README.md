@@ -109,3 +109,15 @@ at 250 ms spacing, about 1.9M compute units). Ways to cope, all free:
 - `--logs-rpc-url URL` (or `ARBITRUM_LOGS_RPC_URL`) uses another free RPC only for `eth_getLogs`; check what it accepts first with
   `npm run liquidations -- --probe --logs-rpc-url URL`. Health-factor queries (which need old state) still go to `ARBITRUM_RPC_URL`.
 - Scan a short window first (`--days 0.25`) to see how many liquidations there are per day before committing to a long scan.
+
+Free public RPCs probed by the owner on 2026-11-25 for `eth_getLogs` (the limits can change at any time; always re-run `--probe`):
+
+| RPC | Largest range accepted | One day of scanning |
+|---|---:|---:|
+| Alchemy free plan | 10 blocks | about 32,000 requests |
+| PublicNode (public endpoint) | 10 blocks (larger ranges need a personal token) | about 32,000 requests |
+| dRPC free plan | 100 blocks | about 3,200 requests |
+| Arbitrum public RPC (`arb1.arbitrum.io/rpc`) | at least 2000 blocks | about 160 requests |
+
+When a different RPC is used for logs, the end block defaults to the lowest head of the two RPCs minus 20 blocks, because a
+public RPC can lag a few blocks behind; the probe also uses the logs RPC's own head.

@@ -36,3 +36,8 @@ export function pickSample<T>(items: T[], n: number): T[] {
 /** Plain-JSON (de)serialisation of events: bigint fields travel as strings. */
 export const serializeEvent = (e: EnrichedEvent) => JSON.stringify(e, (_k, v) => (typeof v === "bigint" ? v.toString() : v));
 export const parseEvent = (o: any): EnrichedEvent => ({ ...o, debtToCover: BigInt(o.debtToCover), collateralAmount: BigInt(o.collateralAmount) });
+
+/** Newest block that every RPC involved can be expected to know: the lowest head minus a safety margin. */
+export function safeHead(heads: number[], margin = 20): number {
+  return Math.max(1, Math.min(...heads) - margin);
+}
