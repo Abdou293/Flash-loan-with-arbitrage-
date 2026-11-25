@@ -20,7 +20,10 @@ export interface ShadowSummary {
   cycles: number;
   firstCycle: string | null;
   lastCycle: string | null;
+  /** time actually watched (gaps longer than 10 minutes between cycles are not counted) */
   hoursObserved: number;
+  /** first cycle to last cycle, including any time the monitor was not running */
+  spanHours: number;
   accountsWatched: number;
   cyclesWithLiquidatable: number;
   /** cycles in which the dry-run decision was "would attempt" for at least one account */
@@ -83,7 +86,15 @@ export function buildShadow(cycles: CycleResult[], now: Date = new Date(), maxPo
   const series = points.filter((_, i) => i % step === 0 || i === points.length - 1);
   const first = sorted[0]?.timestamp ?? null;
   const last = sorted[sorted.length - 1]?.timestamp ?? null;
-  const hours = first && last ? (Date.parse(last) - Date.parse(first)) / 3_600_000 : 0;
+  const spanHours = first && last ? (Date.parse(last) - Date.parse(first)) / 3_600_000 : 0;
+  // Time actually watched: only gaps between consecutive cycles up to 10 minutes count. A longer gap means the monitor
+  // was not running (stopped, asleep, restarted), so that time is NOT observation.
+  let coveredMs = 0;
+  for (let i = 1; i < sorted.length; i++) {
+    const gap = Date.parse(sorted[i]!.timestamp) - Date.parse(sorted[i - 1]!.timestamp);
+    if (gap > 0 && gap <= 10 * 60_000) coveredMs += gap;
+  }
+  const hours = coveredMs / 3_600_000;
   return {
     meta: {
       dataSource: "real on-chain reads, shadow mode (dry-run)",
@@ -92,6 +103,7 @@ export function buildShadow(cycles: CycleResult[], now: Date = new Date(), maxPo
       firstCycle: first,
       lastCycle: last,
       hoursObserved: Math.round(hours * 100) / 100,
+      spanHours: Math.round(spanHours * 100) / 100,
       accountsWatched: sorted[sorted.length - 1]?.watched ?? 0,
       cyclesWithLiquidatable: withLiq,
       cyclesWithWouldAttempt: withAttempt,

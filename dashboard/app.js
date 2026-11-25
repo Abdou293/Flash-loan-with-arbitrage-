@@ -161,7 +161,7 @@ function renderShadow(sh) {
   const m = sh.meta, last = sh.latest;
   $("shadow-body").hidden = false;
   const tiles = [
-    ["Observed", `${m.hoursObserved} h`, `${m.cycles} cycles · ${m.accountsWatched} accounts watched`],
+    ["Observed", `${m.hoursObserved} h`, `${m.cycles} cycles · ${m.accountsWatched} accounts watched` + (m.spanHours > m.hoursObserved + 0.5 ? ` · monitor was off for part of a ${m.spanHours} h span` : "")],
     ["Cycles with a liquidatable account", m.cyclesWithLiquidatable, "health factor below 1"],
     ["Dry-run 'would attempt'", m.cyclesWithWouldAttempt, "passed the same risk limits as module 1"],
     ["Est. gross bonus if all won", usd(m.estimatedGrossBonusUsdIfAllWon), "ESTIMATE, not earnings: ignores swap cost and competition"],
