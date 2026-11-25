@@ -133,3 +133,26 @@ sample) and reports it in its own "Focus" section, with the gross bonus of the o
 extra measurements are kept out of the general statistics and the verdict, which stay based on the random sample (re-run with
 the same `--sample-hf` to keep the same sample). Motivation: in the 30-day report the only valuable slow liquidation repaid an
 LUSD debt; the hypothesis is that debt assets that are hard to source on Arbitrum are left to wait.
+
+## Borrower health monitor (`npm run liq-watch`, dry-run only)
+
+Step 2c of the liquidation module. It watches Aave V3 borrowers on Arbitrum and says what the bot **would** do. It has
+**no wallet and no signer and never sends a transaction**; it only reads the chain.
+
+```
+npm run liq-watch -- --users 0xabc...,0xdef... --once            # watch specific accounts, one pass
+npm run liq-watch -- --discover-blocks 20000 --once              # find recent borrowers from Borrow events, one pass
+npm run liq-watch -- --discover-blocks 20000 --interval-s 30     # keep watching (Ctrl+C)
+```
+
+- **Reads:** `getUserAccountData` for every borrower, 100 per `eth_call` through Multicall3, all at the same block.
+- **Bands:** liquidatable (health factor < 1), at-risk (< 1.02), watch (< 1.10); thresholds are options.
+- **Shared config:** uses the same `strategies.config.json` as the arbitrage bot: risk limits (`minNetProfitUsd`,
+  `maxGasPriceGwei`, `maxTradeSizeUsd`), gas units, and the zero-interest lenders (`lenderFor` says which lender could
+  fund the debt asset, or "NONE").
+- **Output:** a table on screen, plus `data/liquidations/watch-latest.<chain>.json` and `watch-history.<chain>.jsonl`
+  (git-ignored) for the dashboard.
+- **Limits, stated honestly:** the profit shown is an **estimate** (flat assumed bonus of 5%, no swap costs, no
+  competition). Our own measurements show that profitable liquidations are normally taken within the same block by
+  specialised bots, so "would attempt" does not mean "would win". Asset detection only covers tokens listed in the
+  config. Borrower discovery needs an RPC that allows large `eth_getLogs` ranges (see the RPC table above).
