@@ -120,3 +120,52 @@ contract MockPoolManager {
         IUnlockCallbackMock(target).unlockCallback(data);
     }
 }
+
+/// @dev Behaves like Aave V3's liquidationCall (all tokens 18 decimals here):
+///      - reverts with Aave's error code "45" unless the borrower was flagged liquidatable;
+///      - pulls the repaid debt from the caller (needs an allowance), at most `closeFactorBps` of `debtToCover`;
+///      - pays the caller collateral worth the repaid debt plus the bonus, minus Aave's protocol fee on the bonus.
+///      Prices are USD per token, scaled 1e18.
+contract MockAaveLiquidationPool {
+    mapping(address => bool) public liquidatable;
+    mapping(address => uint256) public price; // token -> USD price (1e18)
+    uint256 public bonusBps = 500; // 5% liquidation bonus
+    uint256 public protocolFeeBps = 1000; // 10% of the bonus goes to Aave's treasury
+    uint256 public closeFactorBps = 10_000; // share of debtToCover that may be liquidated
+
+    uint256 public lastDebtTaken;
+
+    function setLiquidatable(address user, bool v) external {
+        liquidatable[user] = v;
+    }
+
+    function setPrice(address token, uint256 p) external {
+        price[token] = p;
+    }
+
+    function setBonusBps(uint256 b) external {
+        bonusBps = b;
+    }
+
+    function setProtocolFeeBps(uint256 b) external {
+        protocolFeeBps = b;
+    }
+
+    function setCloseFactorBps(uint256 b) external {
+        closeFactorBps = b;
+    }
+
+    function liquidationCall(address collateral, address debt, address user, uint256 debtToCover, bool receiveAToken)
+        external
+    {
+        require(liquidatable[user], "45"); // HEALTH_FACTOR_NOT_BELOW_THRESHOLD
+        require(!receiveAToken, "mock supports underlying only");
+        uint256 taken = (debtToCover * closeFactorBps) / 10_000;
+        lastDebtTaken = taken;
+        IERC20(debt).transferFrom(msg.sender, address(this), taken);
+        uint256 base = (taken * price[debt]) / price[collateral];
+        uint256 bonus = (base * bonusBps) / 10_000;
+        uint256 fee = (bonus * protocolFeeBps) / 10_000;
+        MockToken(collateral).mint(msg.sender, base + bonus - fee);
+    }
+}
