@@ -1,18 +1,25 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadConfig } from "./config/load.js";
+import "./config/dotenv.js";
+import { loadConfig, loadEnv } from "./config/load.js";
+import { RpcMarket } from "./core/market/RpcMarket.js";
 import { SampleMarket } from "./core/market/SampleMarket.js";
 import { RiskEngine } from "./core/risk.js";
-import { SampleSimulator } from "./core/simulator.js";
+import { QuoteOnlySimulator, SampleSimulator } from "./core/simulator.js";
 import { Store } from "./core/store.js";
-import type { Opportunity } from "./core/types.js";
+import type { MarketData, Opportunity, Step } from "./core/types.js";
 import { Engine } from "./engine.js";
 
 /**
  * Runs the bot in dry-run on SYNTHETIC data and writes the JSON file the dashboard displays.
  *   npm run export-dashboard                      -> ../dashboard/data/sample.json  (committed demo data)
  *   npm run export-dashboard -- --out live.json   -> ../dashboard/data/live.json    (git-ignored, local use)
+ *
+ * SHADOW MODE (real data): reads REAL Uniswap/Sushi quotes over your RPC (read-only eth_call) and runs the same
+ * strategies, risk engine and profit maths. Nothing is ever sent. The file is rewritten after every cycle, so you can
+ * leave it running and publish whenever you like:
+ *   npm run export-dashboard -- --source rpc --interval-ms 60000      -> ../dashboard/data/arbitrage-shadow.json
  */
 async function main() {
   const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -20,15 +27,36 @@ async function main() {
     const i = process.argv.indexOf(`--${n}`);
     return i >= 0 && process.argv[i + 1] ? process.argv[i + 1]! : d;
   };
-  const cycles = Number(arg("cycles", "300"));
+  const source = arg("source", "sample"); // sample | rpc
+  const real = source === "rpc";
+  const cycles = Number(arg("cycles", real ? "100000" : "300"));
   const seed = Number(arg("seed", "42"));
-  const outFile = join(root, "..", "dashboard", "data", arg("out", "sample.json"));
+  const intervalMs = Number(arg("interval-ms", "60000"));
+  const outFile = join(root, "..", "dashboard", "data", arg("out", real ? "arbitrage-shadow.json" : "sample.json"));
 
-  const config = loadConfig(join(root, "strategies.config.json"));
-  const market = new SampleMarket({ seed, tokenUsd: config.tokenUsd, venues: config.venues, tokens: config.tokens });
+  const config = loadConfig(join(root, arg("config", "strategies.config.json")));
+  let market: MarketData;
+  if (real) {
+    const env = loadEnv();
+    if (!env.rpcUrl) throw new Error("Set ARBITRUM_RPC_URL in .env for --source rpc");
+    const lookup = (a: any, b: any): Step | undefined => {
+      const v = config.venues.find((x) => x.pairs.includes(`${a.symbol}/${b.symbol}`) || x.pairs.includes(`${b.symbol}/${a.symbol}`));
+      return v ? { venue: v, tokenIn: a, tokenOut: b } : undefined;
+    };
+    market = new RpcMarket({ rpcUrl: env.rpcUrl }, config.tokens, lookup);
+  } else {
+    market = new SampleMarket({ seed, tokenUsd: config.tokenUsd, venues: config.venues, tokens: config.tokens });
+  }
   const store = new Store(null);
   const risk = new RiskEngine(config.risk);
-  const engine = new Engine({ config, market, simulator: new SampleSimulator(seed), store, risk, dryRun: true });
+  const engine = new Engine({
+    config,
+    market,
+    simulator: real ? new QuoteOnlySimulator() : new SampleSimulator(seed),
+    store,
+    risk,
+    dryRun: true,
+  });
 
   const names = Object.keys(config.strategies);
   const cum: Record<string, number> = Object.fromEntries(names.map((n) => [n, 0]));

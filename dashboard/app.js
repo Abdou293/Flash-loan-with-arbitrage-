@@ -15,15 +15,18 @@ function el(tag, props = {}, ...kids) {
 }
 
 async function load() {
-  // data/live.json (local, git-ignored) wins over the committed demo data.
+  // Published site: ONLY real shadow-mode data (data/arbitrage-shadow.json). The synthetic demo file is used on
+  // localhost only, so a visitor never mistakes demo numbers for real ones.
   const local = ["localhost", "127.0.0.1", ""].includes(location.hostname);
-  for (const url of local ? ["data/live.json", "data/sample.json"] : ["data/sample.json"]) {
+  for (const url of local ? ["data/live.json", "data/arbitrage-shadow.json", "data/sample.json"] : ["data/arbitrage-shadow.json"]) {
     try {
       const r = await fetch(url, { cache: "no-store" });
       if (r.ok) return r.json();
     } catch (_) { /* try next */ }
   }
-  throw new Error("Could not load data/sample.json. Serve this folder over HTTP (e.g. `npx serve dashboard`); opening index.html directly from disk is blocked by the browser.");
+  throw new Error(local
+    ? "Could not load any data file. Serve this folder over HTTP (e.g. `npx serve dashboard`); opening index.html directly from disk is blocked by the browser."
+    : "No arbitrage shadow-mode data published yet (module 1). It appears here after `npm run export-dashboard -- --source rpc` has run and its output has been pushed.");
 }
 
 function renderStatus(d) {
@@ -33,11 +36,15 @@ function renderStatus(d) {
     el("span", { class: "pill " + (d.status.paused ? "bad" : "ok") }, d.status.paused ? "Auto-paused by risk engine" : "Risk engine: active"),
     el("span", { class: "pill" }, `Module 1 data: ${d.meta.dataSource}`),
   );
-  if (d.meta.dataSource === "synthetic") {
-    const b = $("banner");
-    b.hidden = false;
-    b.replaceChildren(el("div", {}, el("strong", {}, "Module 1 (arbitrage) shows synthetic demo data. "), d.meta.note + " Module 2 (liquidation monitor) is separate and uses real on-chain reads."));
-  }
+  const real = d.meta.dataSource !== "synthetic";
+  const tag = $("m1-tag");
+  tag.textContent = real ? "real on-chain data · shadow mode" : "synthetic demo data";
+  if (real) tag.classList.add("real");
+  const b = $("banner");
+  b.hidden = false;
+  b.replaceChildren(d.meta.dataSource === "synthetic"
+    ? el("div", {}, el("strong", {}, "Module 1 (arbitrage) shows synthetic demo data. "), d.meta.note + " Module 2 (liquidation monitor) is separate and uses real on-chain reads.")
+    : el("div", {}, el("strong", {}, "Shadow mode: real on-chain data, nothing is sent. "), d.meta.note));
 }
 
 function renderKpis(d) {
@@ -105,7 +112,10 @@ function renderChart(d) {
   const x = (i) => L + (i / Math.max(1, pts.length - 1)) * (W - L - R);
   const y = (v) => T + (1 - (v - min) / (max - min)) * (H - T - B);
   const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-labelledby": "ct cd" });
-  s.append(svg("title", { id: "ct" }, "Cumulative estimated net profit per strategy"),
+  const label = d.meta.seriesLabel || "Cumulative estimated net profit per strategy";
+  $("chart-h").textContent = label;
+  if (d.meta.seriesHint) $("chart-hint").textContent = d.meta.seriesHint;
+  s.append(svg("title", { id: "ct" }, label),
            svg("desc", { id: "cd" }, "Line chart over scan cycles; values are simulated estimates."));
   for (let i = 0; i <= 4; i++) {
     const v = min + ((max - min) * i) / 4;
@@ -135,7 +145,7 @@ function renderCaveats(d) {
 }
 
 function renderMeta(d) {
-  $("meta").textContent = `Generated ${new Date(d.meta.generatedAt).toLocaleString()} · ${d.status.cyclesRun} scan cycles · seed ${d.meta.seed ?? "n/a"}`;
+  $("meta").textContent = `Generated ${new Date(d.meta.generatedAt).toLocaleString()} · ${d.status.cyclesRun} scan cycles${d.meta.seed !== undefined ? ` · seed ${d.meta.seed}` : ""}`;
 }
 
 async function loadShadow() {

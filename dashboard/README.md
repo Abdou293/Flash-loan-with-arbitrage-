@@ -1,7 +1,7 @@
 # dashboard/
 
 Static, dependency-free dashboard (HTML + CSS + vanilla JS). No wallet, no keys, no backend.
-It reads `data/live.json` if present (local, git-ignored), otherwise the committed demo file `data/sample.json`.
+The published site reads **only real shadow-mode data**: `data/arbitrage-shadow.json` (module 1) and `data/shadow.json` (module 2). On localhost it also falls back to `data/live.json` and the synthetic demo file `data/sample.json`, which is labelled as synthetic.
 
 ## Run locally
 
@@ -36,3 +36,11 @@ The section at the top of the page reads `data/shadow.json`, produced from real 
 
 Without that file the section says no data has been published yet. Nothing in it is simulated: every row comes from
 `getUserAccountData` at a real block. The profit figure is an estimate and the page says so. This tool has no wallet.
+
+## Module 1: arbitrage in shadow mode (real quotes)
+
+    cd bot
+    npm run export-dashboard -- --source rpc --interval-ms 60000     # leave running; rewrites dashboard/data/arbitrage-shadow.json every cycle
+
+It reads real DEX quotes over your RPC (read-only) and runs the same strategies, profit maths and risk limits. The chart
+shows the best net profit seen so far per strategy: a value below $0 means no route has been profitable yet. Nothing is sent.
