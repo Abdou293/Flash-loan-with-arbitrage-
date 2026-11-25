@@ -62,64 +62,95 @@ async function main() {
   const cum: Record<string, number> = Object.fromEntries(names.map((n) => [n, 0]));
   const series: { cycle: number; cumNetUsd: Record<string, number> }[] = [];
   const all: Opportunity[] = [];
+  const startedAt = new Date().toISOString();
+  const r2 = (x: number) => Math.round(x * 100) / 100;
+
+  const build = (cyclesRun: number) => {
+    const ok = all.filter((o) => o.status === "simulated_ok");
+    const reverted = all.filter((o) => o.status === "simulated_revert");
+    const meta = real
+      ? {
+          dataSource: "rpc (real on-chain quotes, shadow mode)",
+          startedAt,
+          generatedAt: new Date().toISOString(),
+          cycles: cyclesRun,
+          seriesLabel: "Best net profit seen so far, per strategy (USD)",
+          seriesHint:
+            "Real quotes, after DEX fees, slippage reserve and estimated gas. Zero-interest lenders, so no loan fee. A value below $0 means no route has been profitable yet.",
+          caveats: [
+            "Shadow mode: real Uniswap/Sushi quotes read over RPC (read-only eth_call). No transaction is ever sent and no contract is deployed.",
+            "Quote-only: the pre-send static-call simulation needs the deployed contract (testnet phase), so 'simulated' here means the quote said the route is profitable, nothing more.",
+            "Gas is an estimate. Quotes are taken at different moments, so a route that looks profitable may not have been executable at one single block.",
+            "Only the pools listed in strategies.config.json are checked. This says nothing about the rest of the market.",
+          ],
+          note: "Real on-chain quotes in shadow mode. Not a profit claim.",
+        }
+      : {
+          dataSource: "synthetic",
+          generatedAt: new Date().toISOString(),
+          cycles: cyclesRun,
+          seed,
+          caveats: [
+            "newPoolScanner dominates this chart ONLY because the synthetic generator gives brand-new pools large random mispricings (\u00b15%). Real new pools are mostly scams or illiquid, and this strategy is the riskiest of the four.",
+            "The 'simulated failed' rows are random synthetic reverts, included to exercise the auto-pause logic.",
+            "These numbers must not be read as a ranking of strategies. A real ranking needs a backtest on recorded on-chain data.",
+          ],
+          note: "Random prices generated to exercise the software. Not market history; not evidence of profitability.",
+        };
+    return {
+      meta,
+      status: { mode: real ? "shadow (dry-run)" : "dry-run", dryRun: true, paused: risk.paused, cyclesRun, liveExecutionAvailable: false },
+      strategies: names.map((name) => {
+        const st = store.stats[name];
+        return {
+          name,
+          enabled: Boolean(config.strategies[name]?.enabled),
+          routesEvaluated: st?.routesEvaluated ?? 0,
+          profitableBeforeRisk: st?.profitable ?? 0,
+          rejectedByRisk: st?.rejectedRisk ?? 0,
+          simulatedOk: st?.simulatedOk ?? 0,
+          simulatedRevert: st?.simulatedRevert ?? 0,
+          estimatedNetProfitUsd: r2(st?.estimatedNetProfitUsd ?? 0),
+          bestNetProfitUsd: st && Number.isFinite(st.bestNetProfitUsd) ? st.bestNetProfitUsd : null,
+        };
+      }),
+      trades: { simulated: ok.length + reverted.length, simulatedSucceeded: ok.length, simulatedFailed: reverted.length, executed: 0 },
+      gas: {
+        estimatedGasOfSimulatedTradesUsd: r2(ok.reduce((a, o) => a + o.gasCostUsd, 0)),
+        gasActuallySpentUsd: 0,
+      },
+      series: series.slice(-600), // keep the file small on long runs
+      recentOpportunities: all.slice(-40).reverse(),
+    };
+  };
+  const write = (cyclesRun: number) => {
+    mkdirSync(dirname(outFile), { recursive: true });
+    const tmp = outFile + ".tmp";
+    writeFileSync(tmp, JSON.stringify(build(cyclesRun), null, 1));
+    renameSync(tmp, outFile);
+  };
+
+  if (real) console.log(`SHADOW MODE: real quotes, read-only, nothing is sent. One cycle every ${intervalMs / 1000} s; writing ${outFile} after every cycle (Ctrl+C to stop).`);
   for (let c = 1; c <= cycles; c++) {
     const found = await engine.runCycle();
     all.push(...found);
     for (const o of found) if (o.status === "simulated_ok") cum[o.strategy] = (cum[o.strategy] ?? 0) + o.netProfitUsd;
-    if (c % 5 === 0 || c === cycles) series.push({ cycle: c, cumNetUsd: Object.fromEntries(names.map((n) => [n, Math.round((cum[n] ?? 0) * 100) / 100])) });
-  }
-
-  const ok = all.filter((o) => o.status === "simulated_ok");
-  const reverted = all.filter((o) => o.status === "simulated_revert");
-  const data = {
-    meta: {
-      dataSource: "synthetic",
-      generatedAt: new Date().toISOString(),
-      cycles,
-      seed,
-      caveats: [
-        "newPoolScanner dominates this chart ONLY because the synthetic generator gives brand-new pools large random mispricings (±5%). Real new pools are mostly scams or illiquid, and this strategy is the riskiest of the four.",
-        "The 'simulated failed' rows are random synthetic reverts, included to exercise the auto-pause logic.",
-        "These numbers must not be read as a ranking of strategies. A real ranking needs a backtest on recorded on-chain data.",
-      ],
-      note: "Random prices generated to exercise the software. Not market history; not evidence of profitability.",
-    },
-    status: {
-      mode: "dry-run",
-      dryRun: true,
-      paused: risk.paused,
-      cyclesRun: cycles,
-      liveExecutionAvailable: false,
-    },
-    strategies: names.map((name) => {
-      const s = store.stats[name];
-      return {
-        name,
-        enabled: Boolean(config.strategies[name]?.enabled),
-        routesEvaluated: s?.routesEvaluated ?? 0,
-        profitableBeforeRisk: s?.profitable ?? 0,
-        rejectedByRisk: s?.rejectedRisk ?? 0,
-        simulatedOk: s?.simulatedOk ?? 0,
-        simulatedRevert: s?.simulatedRevert ?? 0,
-        estimatedNetProfitUsd: Math.round((s?.estimatedNetProfitUsd ?? 0) * 100) / 100,
-        bestNetProfitUsd: s && Number.isFinite(s.bestNetProfitUsd) ? s.bestNetProfitUsd : null,
+    if (real) {
+      const best = (n: string) => {
+        const v = store.stats[n]?.bestNetProfitUsd;
+        return v !== undefined && Number.isFinite(v) ? r2(v) : 0;
       };
-    }),
-    trades: {
-      simulated: ok.length + reverted.length,
-      simulatedSucceeded: ok.length,
-      simulatedFailed: reverted.length,
-      executed: 0,
-    },
-    gas: {
-      estimatedGasOfSimulatedTradesUsd: Math.round(ok.reduce((a, o) => a + o.gasCostUsd, 0) * 100) / 100,
-      gasActuallySpentUsd: 0,
-    },
-    series,
-    recentOpportunities: all.slice(-40).reverse(),
-  };
-  mkdirSync(dirname(outFile), { recursive: true });
-  writeFileSync(outFile, JSON.stringify(data, null, 1));
-  console.log(`wrote ${outFile} (${data.recentOpportunities.length} recent opportunities, ${series.length} chart points)`);
+      series.push({ cycle: c, cumNetUsd: Object.fromEntries(names.map((n) => [n, best(n)])) });
+      write(c);
+      const evaluated = names.reduce((a, n) => a + (store.stats[n]?.routesEvaluated ?? 0), 0);
+      console.log(`cycle ${c}: ${found.length} candidate(s), ${evaluated} routes priced so far. Best net so far: ` + names.map((n) => `${n} $${best(n)}`).join(", "));
+      if (evaluated === 0) console.log("  WARNING: no route could be priced yet. Check ARBITRUM_RPC_URL and that the pools in strategies.config.json exist. A '$0' above does NOT mean break-even here.");
+      if (c < cycles) await new Promise((r) => setTimeout(r, intervalMs));
+    } else if (c % 5 === 0 || c === cycles) {
+      series.push({ cycle: c, cumNetUsd: Object.fromEntries(names.map((n) => [n, r2(cum[n] ?? 0)])) });
+    }
+  }
+  if (!real) write(cycles);
+  console.log(`wrote ${outFile} (${Math.min(40, all.length)} recent opportunities, ${series.length} chart points)`);
 }
 main();
