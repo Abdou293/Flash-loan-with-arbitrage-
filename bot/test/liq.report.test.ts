@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  prizeSummary, sizeVsSpeed, speedByBonus,
   bonusBuckets, CROWDED_SHARE, liquidatorConcentration, MIN_SAMPLES, percentile, perDay, renderReport, speedStats, topAssets, verdict,
   type EnrichedEvent,
 } from "../src/liquidations/report.js";
@@ -146,5 +147,70 @@ describe("rendered report", () => {
     expect(partial).toMatch(/run the same command again to continue/);
     expect(renderReport({ ...base, coveredBlocks: 1000 })).not.toMatch(/PARTIAL SCAN/);
     expect(renderReport(base)).not.toMatch(/PARTIAL SCAN/);
+  });
+});
+
+describe("speed versus prize size (the nuance a plain 'x% instant' hides)", () => {
+  const dust = (blocks: number, censored = false) => ev({ grossBonusUsd: 0.3, delay: { blocks, censored, calls: 20 } });
+  const big = (usd: number, blocks: number) => ev({ grossBonusUsd: usd, delay: { blocks, censored: false, calls: 20 } });
+
+  // shaped like the first real measurement: most liquidations are instant, a few tiny ones waited for hours
+  const realistic = [
+    big(162, 0), big(126, 0), big(40, 0),
+    ...Array.from({ length: 8 }, () => dust(0)),
+    ...Array.from({ length: 3 }, () => dust(20000, true)),
+  ];
+
+  it("measures how the slow ones differ from the instant ones", () => {
+    const z = sizeVsSpeed(realistic);
+    expect(z).toMatchObject({ clean: 14, instant: 11, slow: 3 });
+    expect(z.medianBonusSlowUsd).toBeCloseTo(0.3, 9);
+    expect(z.medianBonusInstantUsd).toBeCloseTo(0.3, 9);
+    expect(z.valueInstantShare!).toBeGreaterThan(0.99); // the money was taken instantly
+    expect(z.slowValueShare!).toBeLessThan(0.01); // the slow ones carry almost none of it
+  });
+
+  it("verdict stays CROWDED when the slow ones are small, and says so with numbers", () => {
+    const evs = [...realistic.slice(0, 3).map((e) => ({ ...e, grossBonusUsd: 100 })), ...realistic.slice(3)];
+    const z = sizeVsSpeed(evs);
+    const v = verdict(speedStats(evs), 0.8, 6, z);
+    expect(v.label).toBe("crowded");
+    expect(v.text).toMatch(/3 sampled liquidation\(s\) waited more than 10 blocks/);
+    expect(v.text).toMatch(/together they carry 0% of the sampled gross bonus/);
+    expect(v.text).toMatch(/the slow ones are the small ones/);
+    expect(v.text).toMatch(/Weighted by gross bonus, (9\d|100)% of the sampled prize/);
+  });
+
+  it("verdict becomes MIXED when most are instant but the VALUABLE ones are not", () => {
+    const evs = [...Array.from({ length: 10 }, () => dust(0)), big(900, 400), big(800, 300), big(700, 250), big(600, 500)];
+    const v = verdict(speedStats(evs), 0.5, 5, sizeVsSpeed(evs));
+    expect(v.label).toBe("mixed");
+    expect(v.text).toMatch(/valuable ones were NOT all taken instantly/);
+    expect(v.text).toMatch(/only a lead/);
+  });
+
+  it("splits speed by prize bucket", () => {
+    const rows = speedByBonus(realistic);
+    const by = Object.fromEntries(rows.map((r) => [r.label, r]));
+    expect(by["< $1"]).toMatchObject({ samples: 11, censored: 3 });
+    expect(by["< $1"]!.instantShare).toBeCloseTo(8 / 11, 9);
+    expect(by["$100 or more"]).toMatchObject({ samples: 2 });
+    expect(by["$20 - $100"]).toMatchObject({ samples: 1 });
+  });
+
+  it("sizes the whole prize pool and its concentration", () => {
+    const p = prizeSummary(realistic, 960_000);
+    expect(p.totalGrossBonusUsd).toBeCloseTo(162 + 126 + 40 + 11 * 0.3, 6);
+    expect(p.days).toBeCloseTo(3, 9);
+    expect(p.perDayUsd).toBeCloseTo(p.totalGrossBonusUsd / 3, 9);
+    expect(p.top3Share!).toBeCloseTo(328 / 331.3, 4);
+  });
+
+  it("the rendered report carries the new sections and never prints undefined/NaN", () => {
+    const md = renderReport({ events: realistic, fromBlock: 1, toBlock: 960_000, generatedAt: "x", lookback: 20000, eventsWithoutPrice: 0, poolAddress: "0xp" });
+    expect(md).toContain("### Speed by prize size (clean samples)");
+    expect(md).toMatch(/Whole market, all liquidators together: gross bonus of \*\*\$3\d\d\*\*/);
+    expect(md).toMatch(/the 3 largest liquidations made up 9\d% of it/);
+    expect(md).not.toMatch(/undefined|NaN/);
   });
 });

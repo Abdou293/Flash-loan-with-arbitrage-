@@ -117,7 +117,12 @@ Free public RPCs probed by the owner on 2026-11-25 for `eth_getLogs` (the limits
 | Alchemy free plan | 10 blocks | about 32,000 requests |
 | PublicNode (public endpoint) | 10 blocks (larger ranges need a personal token) | about 32,000 requests |
 | dRPC free plan | 100 blocks | about 3,200 requests |
-| Arbitrum public RPC (`arb1.arbitrum.io/rpc`) | at least 2000 blocks | about 160 requests |
+| Arbitrum public RPC (`arb1.arbitrum.io/rpc`) | at least 50,000 blocks (see note) | about 7 requests |
+
+Note on the public Arbitrum RPC: the first `--probe` showed it refusing 10,000 and more blocks with "block range extends beyond current
+head block". That was NOT a size limit: the probe asked it about a block that only the Alchemy node already had (the public RPC lags a
+few blocks). A real scan then used 50,000-block requests without any error (960,001 blocks in 22 requests); 50,000 is simply the
+tool's `--max-chunk` default, the real limit may be higher.
 
 When a different RPC is used for logs, the end block defaults to the lowest head of the two RPCs minus 20 blocks, because a
 public RPC can lag a few blocks behind; the probe also uses the logs RPC's own head.

@@ -1,5 +1,6 @@
 import type { LiquidationEvent } from "./aave.js";
 import type { DelayResult } from "./delay.js";
+import { BLOCKS_PER_DAY } from "./sample.js";
 
 export interface EnrichedEvent extends LiquidationEvent {
   timestamp: number;
@@ -151,13 +152,81 @@ export function speedStats(events: EnrichedEvent[]): SpeedStats {
   };
 }
 
+/** A sampled liquidation that waited more than this many blocks is called "slow". */
+export const SLOW_MIN_BLOCKS = 10;
+
+export interface SizeSpeed {
+  clean: number;
+  instant: number;
+  slow: number;
+  medianBonusInstantUsd?: number;
+  medianBonusSlowUsd?: number;
+  /** share of the sampled gross bonus (in USD) that was taken within INSTANT_MAX_BLOCKS */
+  valueInstantShare?: number;
+  /** share of the sampled gross bonus (in USD) carried by the slow liquidations */
+  slowValueShare?: number;
+}
+
+/** Does speed depend on how much there is to win? Uses only the clean sampled liquidations with a known bonus. */
+export function sizeVsSpeed(events: EnrichedEvent[]): SizeSpeed {
+  const clean = events.filter((e) => e.delay && !e.delay.error && !e.repeatUser && e.grossBonusUsd !== undefined);
+  const instant = clean.filter((e) => e.delay!.blocks <= INSTANT_MAX_BLOCKS);
+  const slow = clean.filter((e) => e.delay!.blocks > SLOW_MIN_BLOCKS);
+  const med = (xs: EnrichedEvent[]) => percentile(sortNum(xs.map((e) => e.grossBonusUsd!)), 50);
+  const total = sum(clean.map((e) => Math.max(0, e.grossBonusUsd!)));
+  return {
+    clean: clean.length,
+    instant: instant.length,
+    slow: slow.length,
+    medianBonusInstantUsd: med(instant),
+    medianBonusSlowUsd: med(slow),
+    valueInstantShare: total > 0 ? sum(instant.map((e) => Math.max(0, e.grossBonusUsd!))) / total : undefined,
+    slowValueShare: total > 0 ? sum(slow.map((e) => Math.max(0, e.grossBonusUsd!))) / total : undefined,
+  };
+}
+
+export function speedByBonus(events: EnrichedEvent[]) {
+  const clean = events.filter((e) => e.delay && !e.delay.error && !e.repeatUser && e.grossBonusUsd !== undefined);
+  return BONUS_BUCKETS.map(([label, lo, hi]) => {
+    const inB = clean.filter((e) => e.grossBonusUsd! >= lo && e.grossBonusUsd! < hi);
+    const blocks = sortNum(inB.map((e) => e.delay!.blocks));
+    return {
+      label,
+      samples: inB.length,
+      instantShare: inB.length ? inB.filter((e) => e.delay!.blocks <= INSTANT_MAX_BLOCKS).length / inB.length : undefined,
+      medianBlocks: percentile(blocks, 50),
+      censored: inB.filter((e) => e.delay!.censored).length,
+    };
+  });
+}
+
+export interface PrizeSummary {
+  totalGrossBonusUsd: number;
+  days: number;
+  perDayUsd: number;
+  top3Share?: number;
+}
+
+/** How much is there to win in the whole market, before anyone's costs? */
+export function prizeSummary(events: EnrichedEvent[], coveredBlocks: number): PrizeSummary {
+  const bonuses = events.map((e) => Math.max(0, e.grossBonusUsd ?? 0)).sort((a, b) => b - a);
+  const total = sum(bonuses);
+  const days = coveredBlocks / BLOCKS_PER_DAY;
+  return {
+    totalGrossBonusUsd: total,
+    days,
+    perDayUsd: days > 0 ? total / days : 0,
+    top3Share: total > 0 ? sum(bonuses.slice(0, 3)) / total : undefined,
+  };
+}
+
 export type VerdictLabel = "crowded" | "mixed" | "slow" | "unknown";
 export interface Verdict {
   label: VerdictLabel;
   text: string;
 }
 
-export function verdict(speed: SpeedStats, top3Share: number, distinct: number): Verdict {
+export function verdict(speed: SpeedStats, top3Share: number, distinct: number, size?: SizeSpeed): Verdict {
   if (speed.clean < MIN_SAMPLES) {
     return {
       label: "unknown",
@@ -166,13 +235,32 @@ export function verdict(speed: SpeedStats, top3Share: number, distinct: number):
   }
   const inst = speed.instantShare ?? 0;
   const concentration = `${distinct} distinct liquidator address(es) in the period, the top 3 took ${pct(top3Share * 100, 0)} of all liquidations.`;
+  const valueShare = size?.valueInstantShare;
+  const usdv = (x: number | undefined) => (x === undefined ? "n/a" : "$" + x.toFixed(2));
+  const slowNote =
+    size && size.slow > 0
+      ? ` ${size.slow} sampled liquidation(s) waited more than ${SLOW_MIN_BLOCKS} blocks; their median gross bonus was ${usdv(size.medianBonusSlowUsd)} against ${usdv(size.medianBonusInstantUsd)} for the instant ones, and together they carry ${pct((size.slowValueShare ?? 0) * 100, 0)} of the sampled gross bonus` +
+        ((size.slowValueShare ?? 1) < 0.1
+          ? " (the slow ones are the small ones: positions too small to pay for gas and swaps may simply be left alone)."
+          : " (a meaningful share of the prize: look at them one by one before concluding anything).")
+      : "";
+  const valueNote = valueShare === undefined ? "" : ` Weighted by gross bonus, ${pct(valueShare * 100, 0)} of the sampled prize was taken within ${INSTANT_MAX_BLOCKS} blocks.`;
+  if (inst >= CROWDED_SHARE && valueShare !== undefined && valueShare < CROWDED_SHARE) {
+    return {
+      label: "mixed",
+      text:
+        `Most sampled liquidations were instant (${pct(inst * 100, 0)} within ${INSTANT_MAX_BLOCKS} blocks) but they carried only ${pct(valueShare * 100, 0)} of the sampled gross bonus: the valuable ones were NOT all taken instantly.` +
+        ` ${concentration}${slowNote} This is only a lead: confirm on a fork, quoting the whole path (collateral swap, gas, flash-loan), before concluding anything.`,
+    };
+  }
   if (inst >= CROWDED_SHARE) {
     return {
       label: "crowded",
       text:
         `${pct(inst * 100, 0)} of the sampled liquidations (${speed.clean} clean samples) happened within ${INSTANT_MAX_BLOCKS} block(s) of the position becoming liquidatable` +
         ` (median ${speed.medianBlocks} block(s), ${pct((speed.sameBlockShare ?? 0) * 100, 0)} in the very same block). ${concentration}` +
-        ` Professional bots take essentially every liquidation immediately, usually in the same block as the price update that triggers it.` +
+        `${valueNote}${slowNote}` +
+        ` Professional bots take essentially every liquidation worth taking immediately, usually in the same block as the price update that triggers it.` +
         ` A bot running on a free RPC and a laptop cannot realistically be first. Treat a liquidation bot as a **portfolio project, not a profit source**.`,
     };
   }
@@ -210,12 +298,14 @@ export interface ReportInput {
 
 export function renderReport(r: ReportInput): string {
   const ev = r.events;
+  const total = r.toBlock - r.fromBlock + 1;
+  const covered = Math.min(total, r.coveredBlocks ?? total);
   const days = perDay(ev);
   const speed = speedStats(ev);
   const liq = liquidatorConcentration(ev);
-  const v = verdict(speed, liq.top3Share, liq.distinct);
-  const total = r.toBlock - r.fromBlock + 1;
-  const covered = Math.min(total, r.coveredBlocks ?? total);
+  const size = sizeVsSpeed(ev);
+  const v = verdict(speed, liq.top3Share, liq.distinct, size);
+  const prize = prizeSummary(ev, covered);
   const first = ev.length ? Math.min(...ev.map((e) => e.timestamp)) : undefined;
   const last = ev.length ? Math.max(...ev.map((e) => e.timestamp)) : undefined;
   const bonusSorted = sortNum(ev.map((e) => e.bonusPct).filter((x): x is number => x !== undefined));
@@ -259,6 +349,12 @@ export function renderReport(r: ReportInput): string {
   L.push(`| Gross bonus | Liquidations | Share |`, `|---|---:|---:|`);
   for (const b of bonusBuckets(ev)) L.push(`| ${b.label} | ${b.count} | ${pct(b.share * 100, 0)} |`);
   L.push("");
+  L.push(
+    `Whole market, all liquidators together: gross bonus of **${usd(prize.totalGrossBonusUsd)}** over about ${prize.days.toFixed(1)} day(s)` +
+      ` (about ${usd(prize.perDayUsd)} per day) before swap costs, gas and loan fees` +
+      (prize.top3Share !== undefined ? `; the 3 largest liquidations made up ${pct(prize.top3Share * 100, 0)} of it.` : "."),
+    "",
+  );
 
   L.push(`## Assets`, "");
   L.push(`| Debt asset | Liquidations | Debt repaid (USD) |`, `|---|---:|---:|`);
@@ -290,6 +386,10 @@ export function renderReport(r: ReportInput): string {
   L.push(`| 90th percentile delay (blocks) | ${speed.p90Blocks ?? "-"} |`);
   L.push(`| Still liquidatable at the ${r.lookback}-block lookback limit (delay is a lower bound) | ${speed.censored} |`, "");
 
+  L.push(`### Speed by prize size (clean samples)`, "");
+  L.push(`| Gross bonus | Samples | Within ${INSTANT_MAX_BLOCKS} blocks | Median delay (blocks) | At lookback limit |`, `|---|---:|---:|---:|---:|`);
+  for (const b of speedByBonus(ev)) L.push(`| ${b.label} | ${b.samples} | ${pct(b.instantShare === undefined ? undefined : b.instantShare * 100, 0)} | ${b.medianBlocks ?? "-"} | ${b.censored} |`);
+  L.push("");
   L.push(`## Verdict: ${v.label.toUpperCase()}`, "", v.text, "");
   L.push(`Rule used: "crowded" when at least ${CROWDED_SHARE * 100}% of clean samples are within ${INSTANT_MAX_BLOCKS} blocks and there are at least ${MIN_SAMPLES} samples. These thresholds are my rule of thumb, not a law.`, "");
 
