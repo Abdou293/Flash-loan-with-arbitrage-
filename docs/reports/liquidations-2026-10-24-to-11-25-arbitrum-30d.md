@@ -147,3 +147,30 @@ Rule used: "crowded" when at least 70% of clean samples are within 2 blocks and 
 - **Conclusion.** Liquidations on Aave V3 Arbitrum are a real market (about $155k of gross bonus in 30 days) but every
   liquidation worth taking is taken in the same block as the price update. A free-RPC laptop bot would not be first; a
   liquidation module in this project is a portfolio piece, not a profit source.
+
+## Addendum: focus on the hard-to-source debt assets (LUSD, EURS)
+
+Run on the same 30-day range with `--focus-debt LUSD,EURS` (18 extra liquidations measured besides the random sample). These
+measurements are kept out of the verdict above. Table pasted unedited from the tool's output:
+
+| Debt asset | Liquidations | Measured | Within 2 blocks | Median delay (blocks) | At lookback limit | Waited > 10 blocks: gross bonus | Gross bonus, all | Distinct liquidators | Not measured (repeat / failed) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| LUSD | 43 | 15 | 53% | 2 | 6 | $194.26 | $272.31 | 6 | 28 / 0 |
+| EURS | 22 | 6 | 17% | 1086 | 3 | $11.58 | $15.21 | 7 | 16 / 0 |
+
+### Reading it (analyst notes, not tool output)
+
+- **The hypothesis is supported in direction.** Liquidations with these debt assets wait much longer than the rest: 53% (LUSD)
+  and 17% (EURS) were taken within 2 blocks, against 81% overall and 100% of those with a gross bonus of $1 or more. EURS had a
+  median wait of 1,086 blocks (about 5 minutes). Most of the money of these two assets sat in the slow liquidations: $194.26
+  of $272.31 (71%) for LUSD and $11.58 of $15.21 (76%) for EURS.
+- **But the whole niche is tiny.** All 65 liquidations of both assets paid $287.52 of gross bonus in 30 days (about $9.6 a
+  day); the part that waited more than 10 blocks was $205.84 (about $6.9 a day), before gas, swap costs and any financing.
+- **Most events were not measured.** 28 of 43 LUSD and 16 of 22 EURS liquidations are repeats (the same borrower liquidated again
+  within 20,000 blocks, i.e. a series of partial liquidations), which the delay measurement skips because the position
+  stays liquidatable between them by definition. So the table describes the first liquidation of each series (15 and 6 cases).
+- **Getting the debt asset is the real obstacle.** The zero-interest lenders used by this project were not checked for LUSD or
+  EURS and are unlikely to hold them in size; a liquidator would have to buy the asset first, with slippage, which the gross
+  bonus figures above do not include.
+- **Conclusion.** The slow liquidations are real and are concentrated in hard-to-source debt assets, but they are worth about
+  $7 a day gross in total. This does not change the verdict: a liquidation bot here is a portfolio project, not a profit source.

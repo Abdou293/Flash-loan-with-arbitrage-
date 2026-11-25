@@ -162,6 +162,9 @@ Read-only measurement for a possible liquidation module: **1,031 liquidations, $
 (about $5,179/day on average, before any cost), but 93% of it came in 7 volatile days. Every sampled liquidation with a bonus of
 $1 or more was taken within 2 blocks (100% of the sampled prize by value; one $20–$100 exception); only dust positions waited.
 54 liquidators, the top 3 took 73%. Verdict: crowded; a liquidation bot here is a portfolio project, not a profit source.
+Following up the one valuable slow case (an LUSD debt), all 65 liquidations of LUSD and EURS debts were measured: they do wait
+longer (53% and 17% within 2 blocks), but the whole niche paid only $288 of gross bonus in 30 days, about $7 a day of it in the
+slow ones, before any cost, and the debt asset would have to be bought first.
 Reports: [30 days](docs/reports/liquidations-2026-10-24-to-11-25-arbitrum-30d.md),
 [first 3 calm days](docs/reports/liquidations-2026-11-21-to-25-arbitrum.md).
 
