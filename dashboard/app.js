@@ -31,12 +31,12 @@ function renderStatus(d) {
   s.replaceChildren(
     el("span", { class: "pill ok" }, d.status.dryRun ? "● DRY-RUN (no real transactions)" : "● LIVE"),
     el("span", { class: "pill " + (d.status.paused ? "bad" : "ok") }, d.status.paused ? "Auto-paused by risk engine" : "Risk engine: active"),
-    el("span", { class: "pill" }, `Data: ${d.meta.dataSource}`),
+    el("span", { class: "pill" }, `Module 1 data: ${d.meta.dataSource}`),
   );
   if (d.meta.dataSource === "synthetic") {
     const b = $("banner");
     b.hidden = false;
-    b.replaceChildren(el("div", {}, el("strong", {}, "Synthetic demo data. "), d.meta.note));
+    b.replaceChildren(el("div", {}, el("strong", {}, "Module 1 (arbitrage) shows synthetic demo data. "), d.meta.note + " Module 2 (liquidation monitor) is separate and uses real on-chain reads."));
   }
 }
 
@@ -137,6 +137,70 @@ function renderCaveats(d) {
 function renderMeta(d) {
   $("meta").textContent = `Generated ${new Date(d.meta.generatedAt).toLocaleString()} · ${d.status.cyclesRun} scan cycles · seed ${d.meta.seed ?? "n/a"}`;
 }
+
+async function loadShadow() {
+  try {
+    const r = await fetch("data/shadow.json", { cache: "no-store" });
+    return r.ok ? await r.json() : null;
+  } catch (_) { return null; }
+}
+
+function renderShadow(sh) {
+  if (!sh) { $("shadow-empty").hidden = false; return; }
+  const m = sh.meta, last = sh.latest;
+  $("shadow-body").hidden = false;
+  const tiles = [
+    ["Observed", `${m.hoursObserved} h`, `${m.cycles} cycles · ${m.accountsWatched} accounts watched`],
+    ["Cycles with a liquidatable account", m.cyclesWithLiquidatable, "health factor below 1"],
+    ["Dry-run 'would attempt'", m.cyclesWithWouldAttempt, "passed the same risk limits as module 1"],
+    ["Est. gross bonus if all won", usd(m.estimatedGrossBonusUsdIfAllWon), "ESTIMATE, not earnings: ignores swap cost and competition"],
+    ["Executed transactions", 0, "this tool has no wallet"],
+  ];
+  $("shadow-kpis").replaceChildren(...tiles.map(([label, value, note]) =>
+    el("div", { class: "kpi" }, el("div", { class: "label" }, label), el("div", { class: "value" }, String(value)), el("div", { class: "note" }, note))));
+
+  const pts = sh.series, box = $("shadow-chart");
+  if (pts.length < 2) {
+    box.replaceChildren(el("div", { class: "empty" }, "Need at least 2 cycles to draw a chart."));
+  } else {
+    const lines = [["liquidatable", "Liquidatable (hf < 1)", 3], ["atRisk", "At risk (hf < 1.02)", 1], ["watch", "Watch (hf < 1.10)", 2]];
+    const W = 720, H = 220, L = 40, R = 16, T = 12, B = 28;
+    const max = Math.max(1, ...pts.flatMap((p) => lines.map(([k]) => p[k])));
+    const x = (i) => L + (i / (pts.length - 1)) * (W - L - R);
+    const y = (v) => T + (1 - v / max) * (H - T - B);
+    const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-labelledby": "sht shd" });
+    s.append(svg("title", { id: "sht" }, "Accounts near liquidation over time"), svg("desc", { id: "shd" }, "Counts of watched accounts per risk band at each recorded cycle."));
+    for (let i = 0; i <= 4; i++) {
+      const v = (max * i) / 4;
+      s.append(svg("line", { class: "grid", x1: L, x2: W - R, y1: y(v), y2: y(v) }), svg("text", { x: L - 6, y: y(v) + 4, "text-anchor": "end" }, String(Math.round(v))));
+    }
+    s.append(svg("text", { x: L, y: H - 6 }, new Date(pts[0].t).toLocaleString()), svg("text", { x: W - R, y: H - 6, "text-anchor": "end" }, new Date(pts[pts.length - 1].t).toLocaleString()));
+    for (const [k, , ci] of lines) {
+      const path = pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p[k]).toFixed(1)}`).join(" ");
+      s.append(svg("path", { d: path, fill: "none", stroke: COLORS[ci], "stroke-width": 2, "stroke-linejoin": "round" }));
+    }
+    box.replaceChildren(s);
+    $("shadow-legend").replaceChildren(...lines.map(([, label, ci]) => { const i = el("i"); i.style.background = COLORS[ci]; return el("li", {}, i, label); }));
+  }
+
+  const body = document.querySelector("#shadow-rows tbody");
+  const rows = last ? last.rows.slice(0, 10) : [];
+  if (!rows.length) body.replaceChildren(el("tr", {}, el("td", { colspan: "6", class: "empty" }, "No account was in a risk band at the last cycle.")));
+  else body.replaceChildren(...rows.map((r) => {
+    const a = r.assets;
+    const detail = a && a.debtSymbol ? `${a.debtSymbol} / ${a.collateralSymbol || "?"} / ${a.lender || "no lender"}` : "";
+    const dec = r.estimate ? (r.estimate.decision === "would_attempt" ? "would attempt" : "reject: " + (r.estimate.reason || "")) : "";
+    return el("tr", {}, el("td", {}, r.band.replace("_", " ")), el("td", { class: "n" }, r.hf.toFixed(4)), el("td", { class: "n" }, "$" + Math.round(r.debtUsd).toLocaleString("en-US")),
+      el("td", { title: r.user }, r.user.slice(0, 6) + "…" + r.user.slice(-4)), el("td", {}, detail), el("td", {}, dec));
+  }));
+
+  const ul = el("ul", {});
+  (m.caveats || []).forEach((t) => ul.append(el("li", {}, t)));
+  $("shadow-caveats").replaceChildren(el("div", {}, el("strong", {}, "Read before interpreting: "), ul,
+    el("div", {}, `Source: ${m.dataSource}. Generated ${new Date(m.generatedAt).toLocaleString()}.`)));
+}
+
+loadShadow().then(renderShadow);
 
 load().then((d) => {
   renderStatus(d); renderKpis(d); renderStrategies(d); renderChart(d); renderCaveats(d); renderOpps(d); renderMeta(d);

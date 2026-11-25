@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Flash Arb Dashboard</title>
-  <meta name="description" content="Dry-run dashboard for an educational flash-loan arbitrage bot on Arbitrum.">
+  <title>DeFi Execution Engine Dashboard</title>
+  <meta name="description" content="Dry-run dashboard for a DeFi execution engine on Arbitrum: flash-loan arbitrage (synthetic demo data) and Aave liquidation monitor (real on-chain data, shadow mode).">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Cpath d=%27M2 12l4-5 3 3 5-7%27 fill=%27none%27 stroke=%27%232563eb%27 stroke-width=%272%27/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="top">
     <div>
-      <h1>Flash Loan Arbitrage Bot</h1>
-      <p class="sub">Arbitrum · educational / portfolio project</p>
+      <h1>DeFi Execution Engine</h1>
+      <p class="sub">Arbitrum · two modules on one core · educational / portfolio project</p>
     </div>
     <div id="status" class="pills" aria-live="polite"></div>
   </header>
@@ -21,6 +21,26 @@
   <div id="error" class="error" role="alert" hidden></div>
 
   <main>
+    <section id="shadow" aria-labelledby="shadow-h">
+      <h2 id="shadow-h">Module 2 · Liquidation monitor (Aave V3) <span class="tag real">real on-chain data · shadow mode</span></h2>
+      <p class="hint">Reads real Aave V3 positions on Arbitrum One and records what the bot WOULD do. It never sends a transaction.</p>
+      <div id="shadow-empty" class="banner inline" hidden><div>No shadow-mode data published yet. Run <code>npm run liq-watch</code> for a few hours, then <code>npm run export-shadow</code>.</div></div>
+      <div id="shadow-body" hidden>
+        <div id="shadow-kpis" class="kpis"></div>
+        <div id="shadow-chart" class="chart"></div>
+        <ul id="shadow-legend" class="legend"></ul>
+        <h3>Closest accounts at the last cycle</h3>
+        <div class="scroll">
+          <table id="shadow-rows">
+            <thead><tr><th>State</th><th class="n">Health factor</th><th class="n">Debt</th><th>Account</th><th>Debt / collateral / lender</th><th>Dry-run decision</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="shadow-caveats" class="banner inline" role="note"></div>
+      </div>
+    </section>
+
+    <h2 class="module">Module 1 · Flash-loan arbitrage <span class="tag">synthetic demo data</span></h2>
     <section aria-labelledby="kpi-h">
       <h2 id="kpi-h" class="sr">Key figures</h2>
       <div id="kpis" class="kpis"></div>

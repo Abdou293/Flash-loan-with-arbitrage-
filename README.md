@@ -1,27 +1,38 @@
-# Flash Loan Arbitrage on Arbitrum
+# DeFi Execution Engine on Arbitrum
 
-An educational, portfolio-grade implementation of a flash-loan arbitrage system: a Solidity contract that borrows with
-**zero-interest flash loans** (Balancer V2 Vault or Uniswap V4 PoolManager) and reverts unless the trade is profitable, plus a TypeScript plug-in bot that finds, prices, risk-checks and
-**simulates** opportunities, a backtesting pipeline, and a static dashboard.
+One engine, two modules, built as an educational, portfolio-grade project. Both modules borrow with **zero-interest flash
+loans** (Balancer V2 Vault or Uniswap V4 PoolManager) and revert the whole transaction unless a minimum profit is met.
+Everything runs in **dry-run / shadow mode**: nothing is deployed to mainnet and no real transaction is ever sent.
+
+## Three portfolio projects, one codebase
+
+| # | Project | What it is | Where |
+|---|---|---|---|
+| 1 | **Flash-Loan Arbitrage Bot** | `FlashArb.sol` + a TypeScript plug-in bot (4 strategies), backtesting, gap radar. Measured on real data: no profitable route on mainstream Arbitrum pools with free infrastructure (best simulated net about -$0.02). | `contracts/src/FlashArb.sol`, `bot/src/strategies`, `bot/src/backtest`, `bot/src/monitor` |
+| 2 | **Aave V3 Liquidation Bot** | `FlashLiquidator.sol` (flash loan -> repay the borrower's debt -> receive collateral plus bonus -> swap back -> repay, revert unless profit), a read-only measurement tool and a borrower health monitor. Measured on 30 days of real data: the liquidation market is real, but every liquidation worth taking is taken within the same block by specialised bots. | `contracts/src/FlashLiquidator.sol`, `bot/src/liquidations` |
+| 3 | **DeFi Execution Engine** | The shared core both modules use: one config file, the same risk limits, the same zero-interest lenders, Multicall3 batching, adaptive log scanning, mutation-checked tests, secret scanning, and one dashboard. | `bot/src/config`, `bot/src/core`, `bot/src/liquidations/{rpc,logs,enrich}.ts`, `dashboard/` |
+
+Honest note on "shared core": the two modules share code by importing the same config loader, lender selection
+(`lenderFor`), risk limits and Multicall helpers. They are not yet physically split into a separate package.
 
 > **Disclaimer.** Educational / portfolio project. Not financial advice. No profit guarantees. **Not security-audited.**
-> Use at your own risk. This repository contains no claim of real profits: every number shown comes from unit tests or
-> from clearly labelled **synthetic** demo data.
+> Use at your own risk. This repository contains no claim of real profits: every number shown comes from unit tests, from
+> clearly labelled **synthetic** demo data, or from clearly labelled read-only measurements of real on-chain data.
 
 ## Current status (honest)
 
 | Area | State |
 |---|---|
 | Smart contract (zero-interest loans only: Balancer V2 + Uniswap V4) + 29 Foundry logic tests (mocks) | Done, passing |
-| `FlashLiquidator.sol` (Aave V3 liquidations, zero-interest loans) + 32 mock tests, mutation-checked | Written, passing; borrower monitor (`liq-watch`, dry-run) added, not yet run live; 6/6 fork tests passing on a live Arbitrum RPC (`FlashLiquidator.fork.t.sol`; profit in them is artificial: only the Aave oracle price is lowered) |
+| `FlashLiquidator.sol` (Aave V3 liquidations, zero-interest loans) + 32 mock tests, mutation-checked | Written, passing; borrower monitor (`liq-watch`, dry-run) run live on Arbitrum (17 accounts, asset and lender lookup confirmed); 6/6 fork tests passing on a live Arbitrum RPC (`FlashLiquidator.fork.t.sol`; profit in them is artificial: only the Aave oracle price is lowered) |
 | Foundry fork tests against real Arbitrum One | **4/4 passing** on a live RPC: Balancer V2 and Uniswap V4 lenders (earlier Aave+Balancer version: 5/5) |
 | On-chain identity check of all contract addresses (`scripts/verify-addresses.sh`) | **13/13 passing** on Arbitrum One |
-| Bot framework, 4 strategies, risk engine, 33 unit tests | Done, passing (also on a clean machine); dry-run only |
+| Bot framework, 4 strategies, risk engine, liquidation tools, 125 unit tests | Done, passing (also on a clean machine); dry-run only |
 | Historical collector + RPC price quotes | **Run on real data**: 48 snapshots of Arbitrum One (about 24 h) |
 | Backtest engine + report generator | **Run on real data**; see "Results" |
 | Live dry-run loop with RPC data, static-call simulator | Written, **not yet run** |
 | Testnet end-to-end test | Instructions in [docs/TESTNET.md](docs/TESTNET.md), **not yet run** |
-| Dashboard | Done; shows **synthetic** demo data |
+| Dashboard | Done; module 1 shows **synthetic** demo data; module 2 section shows **real** shadow-mode data once `export-shadow` has been run (empty until then) |
 
 ### What the fork tests showed (real Arbitrum state, earlier version with both Aave V3 and Balancer V2)
 Aave was later removed so that the contract only uses zero-interest loans; these measurements explain that decision.

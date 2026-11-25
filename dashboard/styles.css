@@ -50,3 +50,7 @@ tr:last-child td { border-bottom: 0; }
 footer { color: var(--muted); font-size: 0.85rem; padding-top: 28px; padding-bottom: 32px; }
 .banner.inline { max-width: none; padding: 0; margin-top: 10px; }
 .banner.inline ul { margin: 6px 0 0; padding-left: 18px; }
+h3 { font-size: 0.95rem; margin: 18px 0 6px; }
+h2.module { margin-top: 36px; }
+.tag.real { color: var(--ok); border-color: var(--ok); }
+code { font-size: 0.85em; }
