@@ -20,7 +20,7 @@ import {
   resolveAave,
   type TokenMeta,
 } from "./enrich.js";
-import { probeLogLimit, scanLogs, type ScanState } from "./logs.js";
+import { coveredBlocks, probeLogLimit, scanLogs, type ScanState } from "./logs.js";
 import { renderReport, type EnrichedEvent } from "./report.js";
 import { redact, ThrottledRpc, hex, num } from "./rpc.js";
 import { BLOCKS_PER_DAY, markRepeats, parseEvent, pickSample, serializeEvent } from "./sample.js";
@@ -66,6 +66,7 @@ async function main() {
         "  --chunk-blocks N      starting eth_getLogs range (default 5000; adapts automatically)",
         "  --max-chunk N         largest range ever tried (default 50000)",
         "  --interval-ms N       minimum delay between RPC requests (default 250, free-tier friendly)",
+        "  --max-minutes M       stop the log scan cleanly after M minutes (progress is saved; run again to continue)",
         "  --sample-hf N         liquidations to measure for speed (default 40; each costs ~25 eth_calls)",
         "  --lookback N          how far back (blocks) to look for when a position became liquidatable (default 20000)",
         "  --logs-rpc-url URL    use another RPC for eth_getLogs only (or set ARBITRUM_LOGS_RPC_URL)",
@@ -121,6 +122,7 @@ async function main() {
   const startChunk = Number(arg("chunk-blocks", "5000"));
   const maxChunk = Number(arg("max-chunk", "50000"));
   const sampleN = Number(arg("sample-hf", "40"));
+  const maxMinutes = Number(arg("max-minutes", "0"));
   const lookback = Number(arg("lookback", "20000"));
   const outDir = arg("out-dir") ?? join(root, "data");
   const cacheDir = join(root, "data", "liquidations");
@@ -158,6 +160,7 @@ async function main() {
       if (logs.length) appendFileSync(files.logs, logs.map((l) => JSON.stringify(l)).join("\n") + "\n");
     },
     onChunkDone: (s) => atomicWrite(files.state, JSON.stringify({ pool, done: s.done })),
+    shouldStop: () => maxMinutes > 0 && Date.now() - startedAt >= maxMinutes * 60_000,
     onProgress: (p) => {
       if (Date.now() - lastPrint < 10_000) return;
       lastPrint = Date.now();
@@ -166,7 +169,12 @@ async function main() {
   });
   const minutes = ((Date.now() - startedAt) / 60_000).toFixed(1);
   const chunkInfo = `${stats.requests} getLogs requests, ${stats.rangeErrors} range errors, final chunk ${stats.finalChunk} blocks` + (stats.ceiling ? `, provider limit found: about ${stats.ceiling} blocks` : "");
-  log(`Scan finished in ${minutes} min: ${chunkInfo}.`);
+  const covered = coveredBlocks(state.done, from, to);
+  log(`Scan ${stats.stopped ? "paused" : "finished"} after ${minutes} min: ${chunkInfo}.`);
+  if (covered < to - from + 1) {
+    const left = to - from + 1 - covered;
+    log(`  Scanned ${covered.toLocaleString("en-US")} of ${(to - from + 1).toLocaleString("en-US")} blocks. Run the SAME command again to continue (about ${left.toLocaleString("en-US")} blocks left).`);
+  }
 
   // ---- load + decode every cached log in range --------------------------------------------------
   const seen = new Map<string, ReturnType<typeof decodeLiquidationLog>>();
@@ -254,6 +262,7 @@ async function main() {
     lookback,
     eventsWithoutPrice: events.filter((e) => e.debtUsd === undefined).length,
     repeatEvents,
+    coveredBlocks: covered,
     poolAddress: pool,
   });
   const tag = `${from}-${to}`;

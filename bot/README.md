@@ -99,3 +99,13 @@ your RPC accepts. If it only accepts ~10 blocks, scan fewer days or give `--logs
 Status: tested offline (43 unit tests for this tool, plus an end-to-end run against a fake JSON-RPC node that enforces a 10-block
 `eth_getLogs` limit: 40/40 sampled delays matched the planted ground truth, resume re-scanned nothing, the API key never
 appeared in any output). **Not yet run against the real Arbitrum network.**
+
+### Measured on the free Alchemy plan (2026-11-25)
+`--probe` against a free Alchemy Arbitrum endpoint: block ranges of 100 and more were refused, 10 blocks were accepted.
+One day of Arbitrum is about 320,000 blocks, so one day of scanning needs about 32,000 `eth_getLogs` requests (about 3 hours
+at 250 ms spacing, about 1.9M compute units). Ways to cope, all free:
+- `--max-minutes M` stops the scan cleanly after M minutes (progress is saved, the report says it is PARTIAL); run the same command
+  again to continue, e.g. overnight.
+- `--logs-rpc-url URL` (or `ARBITRUM_LOGS_RPC_URL`) uses another free RPC only for `eth_getLogs`; check what it accepts first with
+  `npm run liquidations -- --probe --logs-rpc-url URL`. Health-factor queries (which need old state) still go to `ARBITRUM_RPC_URL`.
+- Scan a short window first (`--days 0.25`) to see how many liquidations there are per day before committing to a long scan.

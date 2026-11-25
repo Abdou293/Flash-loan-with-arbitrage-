@@ -37,6 +37,16 @@ export function missingIntervals(done: Interval[], from: number, to: number): In
   return out;
 }
 
+/** How many blocks of [from, to] are already scanned. */
+export function coveredBlocks(done: Interval[], from: number, to: number): number {
+  let n = 0;
+  for (const d of done) {
+    const lo = Math.max(d.from, from), hi = Math.min(d.to, to);
+    if (hi >= lo) n += hi - lo + 1;
+  }
+  return n;
+}
+
 export type LogsErrorKind = "range" | "other";
 
 /**
@@ -70,6 +80,8 @@ export interface ScanStats {
   finalChunk: number;
   /** largest range the provider is known to accept (after errors), or undefined if it never complained */
   ceiling?: number;
+  /** true when the scan stopped early because `shouldStop` asked for it (progress is saved: run again to continue) */
+  stopped?: boolean;
 }
 
 export interface ScanOptions {
@@ -85,6 +97,8 @@ export interface ScanOptions {
   /** called after a chunk is marked done: persist `state` here */
   onChunkDone?: (state: ScanState, iv: Interval) => void | Promise<void>;
   onProgress?: (info: { iv: Interval; chunk: number; requests: number; logs: number; remaining: number }) => void;
+  /** checked before every request; return true to stop cleanly (e.g. time budget used up) */
+  shouldStop?: () => boolean;
 }
 
 /**
@@ -103,6 +117,11 @@ export async function scanLogs(o: ScanOptions): Promise<ScanStats> {
   for (const gap of gaps) {
     let start = gap.from;
     while (start <= gap.to) {
+      if (o.shouldStop?.()) {
+        stats.stopped = true;
+        stats.finalChunk = chunk;
+        return stats;
+      }
       const end = Math.min(gap.to, start + chunk - 1);
       const iv = { from: start, to: end };
       let logs: RawLog[];

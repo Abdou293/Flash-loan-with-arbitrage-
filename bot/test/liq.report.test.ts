@@ -138,4 +138,13 @@ describe("rendered report", () => {
     expect(empty).toContain("Verdict: UNKNOWN");
     expect(empty).not.toMatch(/undefined|NaN/);
   });
+
+  it("warns loudly when only part of the range was scanned, and stays quiet when all of it was", () => {
+    const base = { events: [ev({})], fromBlock: 1, toBlock: 1000, generatedAt: "x", lookback: 10, eventsWithoutPrice: 0, poolAddress: "0xp" };
+    const partial = renderReport({ ...base, coveredBlocks: 250 });
+    expect(partial).toMatch(/PARTIAL SCAN: 250 of 1,000 blocks scanned \(25%\)/);
+    expect(partial).toMatch(/run the same command again to continue/);
+    expect(renderReport({ ...base, coveredBlocks: 1000 })).not.toMatch(/PARTIAL SCAN/);
+    expect(renderReport(base)).not.toMatch(/PARTIAL SCAN/);
+  });
 });

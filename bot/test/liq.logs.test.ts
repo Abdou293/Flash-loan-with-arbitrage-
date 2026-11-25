@@ -143,3 +143,45 @@ describe("error text", () => {
     expect(errorText(new Error("plain"))).toBe("plain");
   });
 });
+
+describe("provider messages hidden inside ethers HTTP errors", () => {
+  it("extracts the JSON-RPC message from info.responseBody", async () => {
+    const { errorText } = await import("../src/liquidations/rpc.js");
+    const e = Object.assign(new Error("server response 400 Bad Request (request={  }, response={  }, error=null, info={...})"), {
+      info: { responseBody: JSON.stringify({ jsonrpc: "2.0", id: 1, error: { code: -32600, message: "up to a 10 block range. Upgrade to PAYG." } }) },
+    });
+    expect(errorText(e)).toBe("up to a 10 block range. Upgrade to PAYG.");
+    expect(classifyLogsError(errorText(e))).toEqual({ kind: "range", suggestedSize: 10 });
+  });
+});
+
+describe("time-budgeted scan and coverage", () => {
+  it("stops cleanly when asked, saves what was done, and a second run finishes without redoing it", async () => {
+    const { coveredBlocks } = await import("../src/liquidations/logs.js");
+    const all = mkLogs([5, 150, 420, 800, 999]);
+    const state: ScanState = { done: [] };
+    const got: any[] = [];
+    let n = 0;
+    const chain1 = new FakeChain({ latest: 1000, logs: all });
+    const s1 = await scanLogs({
+      rpc: chain1, address: POOL, topic0: LIQUIDATION_CALL_TOPIC, from: 1, to: 1000, state,
+      chunk: { start: 100, min: 1, max: 100 }, onLogs: (l) => void got.push(...l),
+      shouldStop: () => n++ >= 3, // allow exactly 3 requests
+    });
+    expect(s1.stopped).toBe(true);
+    expect(state.done).toEqual([{ from: 1, to: 300 }]);
+    expect(coveredBlocks(state.done, 1, 1000)).toBe(300);
+    expect(coveredBlocks(state.done, 200, 500)).toBe(101);
+    expect(coveredBlocks(state.done, 400, 1000)).toBe(0);
+
+    const chain2 = new FakeChain({ latest: 1000, logs: all });
+    const s2 = await scanLogs({
+      rpc: chain2, address: POOL, topic0: LIQUIDATION_CALL_TOPIC, from: 1, to: 1000, state,
+      chunk: { start: 100, min: 1, max: 100 }, onLogs: (l) => void got.push(...l),
+    });
+    expect(s2.stopped).toBeUndefined();
+    expect(Math.min(...chain2.getLogsCalls.map((c) => c.from))).toBe(301);
+    expect(state.done).toEqual([{ from: 1, to: 1000 }]);
+    expect(ids(got)).toEqual(ids(all));
+  });
+});

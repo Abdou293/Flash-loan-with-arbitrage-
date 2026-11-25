@@ -203,6 +203,8 @@ export interface ReportInput {
   eventsWithoutPrice: number;
   /** liquidations of a borrower already liquidated within the lookback (not sampled for speed) */
   repeatEvents?: number;
+  /** blocks of [fromBlock, toBlock] actually scanned (defaults to all of them) */
+  coveredBlocks?: number;
   poolAddress: string;
 }
 
@@ -212,6 +214,8 @@ export function renderReport(r: ReportInput): string {
   const speed = speedStats(ev);
   const liq = liquidatorConcentration(ev);
   const v = verdict(speed, liq.top3Share, liq.distinct);
+  const total = r.toBlock - r.fromBlock + 1;
+  const covered = Math.min(total, r.coveredBlocks ?? total);
   const first = ev.length ? Math.min(...ev.map((e) => e.timestamp)) : undefined;
   const last = ev.length ? Math.max(...ev.map((e) => e.timestamp)) : undefined;
   const bonusSorted = sortNum(ev.map((e) => e.bonusPct).filter((x): x is number => x !== undefined));
@@ -225,6 +229,12 @@ export function renderReport(r: ReportInput): string {
     `- Aave V3 Pool: \`${r.poolAddress}\``,
     `- Blocks: ${r.fromBlock}–${r.toBlock} (${r.toBlock - r.fromBlock + 1} blocks)` +
       (first && last ? `, ${new Date(first * 1000).toISOString()} to ${new Date(last * 1000).toISOString()} (first and last event)` : ""),
+    ...(covered < total
+      ? [
+          `- **PARTIAL SCAN: ${covered.toLocaleString("en-US")} of ${total.toLocaleString("en-US")} blocks scanned (${((covered / total) * 100).toFixed(0)}%).** ` +
+            `Every count below covers only the scanned part; run the same command again to continue.`,
+        ]
+      : []),
     `- Liquidation events found: **${ev.length}**` + (r.eventsWithoutPrice ? ` (${r.eventsWithoutPrice} without an oracle price: excluded from USD figures)` : ""),
     `- Generated: ${r.generatedAt}`,
   );

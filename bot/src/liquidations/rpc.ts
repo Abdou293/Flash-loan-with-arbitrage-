@@ -14,9 +14,23 @@ export const redact = (s: string) =>
  * ethers wraps provider errors ("could not coalesce error (error={...}, payload=...)"): prefer the provider's own
  * message when it is there, otherwise gather whatever text the error carries.
  */
+/** HTTP errors carry the provider's JSON-RPC error as a JSON string: pull its message out. */
+function messageFromBody(body: unknown): string | undefined {
+  if (typeof body !== "string") return undefined;
+  try {
+    const j = JSON.parse(body);
+    const m = Array.isArray(j) ? j[0]?.error?.message : j?.error?.message;
+    return typeof m === "string" ? m : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function errorText(e: unknown): string {
   const x = e as any;
-  const inner = [x?.error?.message, x?.info?.error?.message].find((p) => typeof p === "string" && p.length > 0);
+  const inner = [x?.error?.message, x?.info?.error?.message, messageFromBody(x?.info?.responseBody)].find(
+    (p) => typeof p === "string" && p.length > 0,
+  );
   if (inner) return inner;
   const parts = [x?.message, x?.info?.responseBody, x?.shortMessage].filter((p): p is string => typeof p === "string" && p.length > 0);
   return [...new Set(parts)].join(" | ") || String(e);

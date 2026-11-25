@@ -91,7 +91,7 @@ if [ -n "$AAVE_PROVIDER" ]; then
   check "Aave provider exposes a price oracle" yes "$([ -n "$AAVE_ORACLE" ] && echo yes)"
   if [ -n "$AAVE_ORACLE" ]; then
     check "Aave oracle price unit is 1e8 (USD, 8 decimals)" 100000000 "$(call "$AAVE_ORACLE" 'BASE_CURRENCY_UNIT()(uint256)')"
-    WETH_PRICE="$(call "$AAVE_ORACLE" 'getAssetPrice(address)(uint256)' $WETH 2>/dev/null)"
+    WETH_PRICE="$(cast call "$AAVE_ORACLE" 'getAssetPrice(address)(uint256)' "$WETH" --rpc-url "$RPC" 2>/dev/null | head -1 | awk '{print $1}')"
     check "Aave oracle prices WETH between 100 and 100000 USD" yes "$(awk -v p="${WETH_PRICE:-0}" 'BEGIN{print (p>=100*1e8 && p<=100000*1e8) ? "yes" : "no"}')"
     echo "INFO  Aave oracle WETH price = $(awk -v p="${WETH_PRICE:-0}" 'BEGIN{printf "%.2f", p/1e8}') USD"
   fi
