@@ -1,0 +1,1748 @@
+{
+  "meta": {
+    "dataSource": "real on-chain reads, shadow mode (dry-run)",
+    "generatedAt": "2026-11-25T23:25:28.235Z",
+    "cycles": 407,
+    "firstCycle": "2026-11-25T06:13:05.260Z",
+    "lastCycle": "2026-11-25T23:25:14.057Z",
+    "hoursObserved": 6.94,
+    "spanHours": 17.2,
+    "accountsWatched": 93,
+    "cyclesWithLiquidatable": 0,
+    "cyclesWithWouldAttempt": 0,
+    "estimatedGrossBonusUsdIfAllWon": 0,
+    "rejectedReasons": {},
+    "caveats": [
+      "Shadow mode: the monitor reads the real Aave V3 state on Arbitrum but never sends a transaction.",
+      "The dollar figure is an ESTIMATE (flat 5% bonus, no swap cost, no competition). It is what would be earned if every 'would attempt' were won, which our measurements say it would not be: profitable liquidations are normally taken in the same block by specialised bots.",
+      "Only the accounts the monitor knows about (recent borrowers) are watched, not every Aave account."
+    ]
+  },
+  "series": [
+    {
+      "t": "2026-11-25T06:13:05.260Z",
+      "block": 527340487,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 4,
+      "minHf": 1.071883494994721
+    },
+    {
+      "t": "2026-11-25T16:28:32.315Z",
+      "block": 527476450,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0550596675850756
+    },
+    {
+      "t": "2026-11-25T16:30:34.824Z",
+      "block": 527476928,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0533959120058012
+    },
+    {
+      "t": "2026-11-25T16:32:37.318Z",
+      "block": 527477403,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0519667897419827
+    },
+    {
+      "t": "2026-11-25T16:34:39.758Z",
+      "block": 527477861,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0513494777712757
+    },
+    {
+      "t": "2026-11-25T16:36:42.496Z",
+      "block": 527478343,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.049746281805338
+    },
+    {
+      "t": "2026-11-25T16:38:44.966Z",
+      "block": 527478807,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0490575311942485
+    },
+    {
+      "t": "2026-11-25T16:40:47.475Z",
+      "block": 527479282,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.044120150601411
+    },
+    {
+      "t": "2026-11-25T16:42:49.946Z",
+      "block": 527479757,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0457956453476613
+    },
+    {
+      "t": "2026-11-25T16:44:52.600Z",
+      "block": 527480222,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.042776112817279
+    },
+    {
+      "t": "2026-11-25T16:46:55.117Z",
+      "block": 527480699,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0446588792062572
+    },
+    {
+      "t": "2026-11-25T16:48:57.566Z",
+      "block": 527481174,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0460606084884712
+    },
+    {
+      "t": "2026-11-25T16:51:00.158Z",
+      "block": 527481643,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0466010845194846
+    },
+    {
+      "t": "2026-11-25T16:53:02.740Z",
+      "block": 527482085,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0485163881931225
+    },
+    {
+      "t": "2026-11-25T16:55:05.288Z",
+      "block": 527482523,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0485161618468186
+    },
+    {
+      "t": "2026-11-25T16:57:07.794Z",
+      "block": 527482961,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0501304646874647
+    },
+    {
+      "t": "2026-11-25T16:59:10.327Z",
+      "block": 527483434,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0519746355272763
+    },
+    {
+      "t": "2026-11-25T17:01:13.027Z",
+      "block": 527483892,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0519743992140216
+    },
+    {
+      "t": "2026-11-25T17:03:15.492Z",
+      "block": 527484367,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0535575818985172
+    },
+    {
+      "t": "2026-11-25T17:05:18.015Z",
+      "block": 527484839,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0541529889973467
+    },
+    {
+      "t": "2026-11-25T17:07:20.586Z",
+      "block": 527485319,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0531148310935068
+    },
+    {
+      "t": "2026-11-25T17:09:23.066Z",
+      "block": 527485811,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0563860886147323
+    },
+    {
+      "t": "2026-11-25T17:11:25.715Z",
+      "block": 527486296,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0570156611924018
+    },
+    {
+      "t": "2026-11-25T17:13:28.364Z",
+      "block": 527486777,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0560398804124458
+    },
+    {
+      "t": "2026-11-25T17:15:32.747Z",
+      "block": 527487265,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0559921277510236
+    },
+    {
+      "t": "2026-11-25T17:17:35.254Z",
+      "block": 527487749,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0567122212210613
+    },
+    {
+      "t": "2026-11-25T17:19:38.193Z",
+      "block": 527488233,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0541630812965685
+    },
+    {
+      "t": "2026-11-25T17:21:40.742Z",
+      "block": 527488724,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.056705519801844
+    },
+    {
+      "t": "2026-11-25T17:23:43.609Z",
+      "block": 527489206,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.055257248479599
+    },
+    {
+      "t": "2026-11-25T17:25:46.197Z",
+      "block": 527489681,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0540282434390087
+    },
+    {
+      "t": "2026-11-25T17:27:48.711Z",
+      "block": 527490160,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0538962120526751
+    },
+    {
+      "t": "2026-11-25T17:29:54.270Z",
+      "block": 527490634,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0553209506420718
+    },
+    {
+      "t": "2026-11-25T17:31:56.925Z",
+      "block": 527491115,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0564012489715497
+    },
+    {
+      "t": "2026-11-25T17:33:59.607Z",
+      "block": 527491591,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0566415651115435
+    },
+    {
+      "t": "2026-11-25T17:36:07.129Z",
+      "block": 527492075,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0569933707598005
+    },
+    {
+      "t": "2026-11-25T17:38:09.633Z",
+      "block": 527492563,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0576107329277844
+    },
+    {
+      "t": "2026-11-25T17:40:12.443Z",
+      "block": 527493043,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0577183487463
+    },
+    {
+      "t": "2026-11-25T17:42:15.304Z",
+      "block": 527493520,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0582509076369062
+    },
+    {
+      "t": "2026-11-25T17:44:18.020Z",
+      "block": 527494003,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0587691373415202
+    },
+    {
+      "t": "2026-11-25T17:46:20.532Z",
+      "block": 527494485,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0582102988820534
+    },
+    {
+      "t": "2026-11-25T17:48:23.115Z",
+      "block": 527494947,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.058114843034636
+    },
+    {
+      "t": "2026-11-25T17:50:26.330Z",
+      "block": 527495409,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.057680650759218
+    },
+    {
+      "t": "2026-11-25T17:52:29.131Z",
+      "block": 527495868,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.057543192977184
+    },
+    {
+      "t": "2026-11-25T17:54:31.773Z",
+      "block": 527496331,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0572027219213898
+    },
+    {
+      "t": "2026-11-25T17:56:34.519Z",
+      "block": 527496810,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0585502629786616
+    },
+    {
+      "t": "2026-11-25T17:58:37.400Z",
+      "block": 527497279,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0566742551064416
+    },
+    {
+      "t": "2026-11-25T18:00:39.956Z",
+      "block": 527497746,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0559153911155599
+    },
+    {
+      "t": "2026-11-25T18:02:42.877Z",
+      "block": 527498215,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0566797962555041
+    },
+    {
+      "t": "2026-11-25T18:04:45.372Z",
+      "block": 527498666,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0561571104885241
+    },
+    {
+      "t": "2026-11-25T18:06:47.921Z",
+      "block": 527499137,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.059103271866579
+    },
+    {
+      "t": "2026-11-25T18:08:50.382Z",
+      "block": 527499606,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0575520829809675
+    },
+    {
+      "t": "2026-11-25T18:10:53.734Z",
+      "block": 527500080,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0577293255098865
+    },
+    {
+      "t": "2026-11-25T18:12:56.282Z",
+      "block": 527500548,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0580967334554277
+    },
+    {
+      "t": "2026-11-25T18:14:58.887Z",
+      "block": 527500992,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0571250338252662
+    },
+    {
+      "t": "2026-11-25T18:17:02.003Z",
+      "block": 527501464,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 7,
+      "minHf": 1.0592965722479386
+    },
+    {
+      "t": "2026-11-25T18:19:04.641Z",
+      "block": 527501951,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 8,
+      "minHf": 1.0600674204366447
+    },
+    {
+      "t": "2026-11-25T18:21:10.470Z",
+      "block": 527502425,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 8,
+      "minHf": 1.0588009652477266
+    },
+    {
+      "t": "2026-11-25T18:23:13.090Z",
+      "block": 527502912,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.054288075125578
+    },
+    {
+      "t": "2026-11-25T18:25:15.612Z",
+      "block": 527503384,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.052857461583916
+    },
+    {
+      "t": "2026-11-25T18:27:18.369Z",
+      "block": 527503850,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0529535910482297
+    },
+    {
+      "t": "2026-11-25T18:29:21.071Z",
+      "block": 527504315,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0511019508490238
+    },
+    {
+      "t": "2026-11-25T18:31:23.810Z",
+      "block": 527504791,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.05048067130161
+    },
+    {
+      "t": "2026-11-25T18:33:28.770Z",
+      "block": 527505255,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.049591605123727
+    },
+    {
+      "t": "2026-11-25T18:35:31.627Z",
+      "block": 527505714,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0501840201158084
+    },
+    {
+      "t": "2026-11-25T18:37:34.198Z",
+      "block": 527506186,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.052047143539656
+    },
+    {
+      "t": "2026-11-25T18:39:37.602Z",
+      "block": 527506655,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.052914383083992
+    },
+    {
+      "t": "2026-11-25T18:41:42.902Z",
+      "block": 527507133,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0510050590251077
+    },
+    {
+      "t": "2026-11-25T18:43:46.267Z",
+      "block": 527507599,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0515325439869798
+    },
+    {
+      "t": "2026-11-25T18:45:48.711Z",
+      "block": 527508069,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0515774957153143
+    },
+    {
+      "t": "2026-11-25T18:47:52.447Z",
+      "block": 527508538,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0532039629444057
+    },
+    {
+      "t": "2026-11-25T18:49:55.075Z",
+      "block": 527508999,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0531126992559419
+    },
+    {
+      "t": "2026-11-25T18:51:58.079Z",
+      "block": 527509466,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.051912052022698
+    },
+    {
+      "t": "2026-11-25T18:54:01.295Z",
+      "block": 527509918,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0542342507085896
+    },
+    {
+      "t": "2026-11-25T18:56:04.292Z",
+      "block": 527510356,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0529238246350878
+    },
+    {
+      "t": "2026-11-25T18:58:11.053Z",
+      "block": 527510805,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0520517433853003
+    },
+    {
+      "t": "2026-11-25T19:00:13.685Z",
+      "block": 527511246,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0520514925658266
+    },
+    {
+      "t": "2026-11-25T19:02:23.937Z",
+      "block": 527511708,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0519097724296007
+    },
+    {
+      "t": "2026-11-25T19:04:27.573Z",
+      "block": 527512180,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0532875317672556
+    },
+    {
+      "t": "2026-11-25T19:06:30.308Z",
+      "block": 527512646,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0550232123243437
+    },
+    {
+      "t": "2026-11-25T19:08:33.361Z",
+      "block": 527513093,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0546813975128064
+    },
+    {
+      "t": "2026-11-25T19:10:36.925Z",
+      "block": 527513545,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.054934869317611
+    },
+    {
+      "t": "2026-11-25T19:12:39.394Z",
+      "block": 527513997,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0544532229750896
+    },
+    {
+      "t": "2026-11-25T19:14:42.986Z",
+      "block": 527514448,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0544010116559943
+    },
+    {
+      "t": "2026-11-25T19:16:46.231Z",
+      "block": 527514906,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0573256315682438
+    },
+    {
+      "t": "2026-11-25T19:18:48.767Z",
+      "block": 527515381,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0592573524477678
+    },
+    {
+      "t": "2026-11-25T19:20:51.734Z",
+      "block": 527515838,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0569672916072348
+    },
+    {
+      "t": "2026-11-25T19:22:57.291Z",
+      "block": 527516326,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.05962904928984
+    },
+    {
+      "t": "2026-11-25T19:25:01.399Z",
+      "block": 527516791,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.06108407065743
+    },
+    {
+      "t": "2026-11-25T19:27:04.254Z",
+      "block": 527517255,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0593489544887755
+    },
+    {
+      "t": "2026-11-25T19:29:30.826Z",
+      "block": 527517803,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0585664747257129
+    },
+    {
+      "t": "2026-11-25T19:31:38.940Z",
+      "block": 527518291,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0587267828852693
+    },
+    {
+      "t": "2026-11-25T19:33:43.949Z",
+      "block": 527518762,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0579373306106905
+    },
+    {
+      "t": "2026-11-25T19:35:47.991Z",
+      "block": 527519219,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0579243887070526
+    },
+    {
+      "t": "2026-11-25T19:37:55.791Z",
+      "block": 527519688,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.057304186970252
+    },
+    {
+      "t": "2026-11-25T19:40:03.191Z",
+      "block": 527520144,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0584177544078985
+    },
+    {
+      "t": "2026-11-25T19:42:07.194Z",
+      "block": 527520585,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0585125434932712
+    },
+    {
+      "t": "2026-11-25T19:44:10.882Z",
+      "block": 527521034,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0559943257824245
+    },
+    {
+      "t": "2026-11-25T19:46:21.506Z",
+      "block": 527521501,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0544670106832983
+    },
+    {
+      "t": "2026-11-25T19:48:26.807Z",
+      "block": 527521943,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0544667550670124
+    },
+    {
+      "t": "2026-11-25T19:50:35.172Z",
+      "block": 527522411,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0523908855580117
+    },
+    {
+      "t": "2026-11-25T19:52:38.591Z",
+      "block": 527522857,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0520749632447335
+    },
+    {
+      "t": "2026-11-25T19:54:41.948Z",
+      "block": 527523314,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0552727229501333
+    },
+    {
+      "t": "2026-11-25T19:56:46.908Z",
+      "block": 527523770,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0567345343934522
+    },
+    {
+      "t": "2026-11-25T19:59:37.114Z",
+      "block": 527524383,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0548555480055912
+    },
+    {
+      "t": "2026-11-25T20:01:47.688Z",
+      "block": 527524879,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.054058885352579
+    },
+    {
+      "t": "2026-11-25T20:03:50.778Z",
+      "block": 527525339,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0555460264231176
+    },
+    {
+      "t": "2026-11-25T20:05:54.351Z",
+      "block": 527525782,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.053325529927212
+    },
+    {
+      "t": "2026-11-25T20:07:57.992Z",
+      "block": 527526247,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0525981075748347
+    },
+    {
+      "t": "2026-11-25T20:10:03.155Z",
+      "block": 527526701,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0518690921251461
+    },
+    {
+      "t": "2026-11-25T20:12:12.423Z",
+      "block": 527527170,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0524339855718499
+    },
+    {
+      "t": "2026-11-25T20:14:15.723Z",
+      "block": 527527623,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0550800586298357
+    },
+    {
+      "t": "2026-11-25T20:16:20.300Z",
+      "block": 527528064,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0543962915746257
+    },
+    {
+      "t": "2026-11-25T20:18:29.372Z",
+      "block": 527528531,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0562010604670737
+    },
+    {
+      "t": "2026-11-25T20:20:34.959Z",
+      "block": 527528974,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0540710559814286
+    },
+    {
+      "t": "2026-11-25T20:22:38.358Z",
+      "block": 527529435,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.054756093234078
+    },
+    {
+      "t": "2026-11-25T20:24:42.362Z",
+      "block": 527529879,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0555741908640863
+    },
+    {
+      "t": "2026-11-25T20:26:46.400Z",
+      "block": 527530326,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0547296170479326
+    },
+    {
+      "t": "2026-11-25T20:28:51.756Z",
+      "block": 527530757,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0538150108777984
+    },
+    {
+      "t": "2026-11-25T20:31:26.075Z",
+      "block": 527531324,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.050578776091704
+    },
+    {
+      "t": "2026-11-25T20:33:30.618Z",
+      "block": 527531784,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0522354994308192
+    },
+    {
+      "t": "2026-11-25T20:35:40.093Z",
+      "block": 527532260,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0528517869024394
+    },
+    {
+      "t": "2026-11-25T20:37:47.039Z",
+      "block": 527532731,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0528676021090873
+    },
+    {
+      "t": "2026-11-25T20:39:50.509Z",
+      "block": 527533197,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0535177605402992
+    },
+    {
+      "t": "2026-11-25T20:41:59.941Z",
+      "block": 527533665,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0522545348014165
+    },
+    {
+      "t": "2026-11-25T20:44:04.701Z",
+      "block": 527534138,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0514788278279352
+    },
+    {
+      "t": "2026-11-25T20:46:08.063Z",
+      "block": 527534590,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0530036103346776
+    },
+    {
+      "t": "2026-11-25T20:48:11.983Z",
+      "block": 527535034,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0535575876172647
+    },
+    {
+      "t": "2026-11-25T20:50:15.323Z",
+      "block": 527535488,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0541963969849597
+    },
+    {
+      "t": "2026-11-25T20:52:19.467Z",
+      "block": 527535956,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0559360302216696
+    },
+    {
+      "t": "2026-11-25T20:54:22.755Z",
+      "block": 527536407,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0559357656694883
+    },
+    {
+      "t": "2026-11-25T20:56:25.636Z",
+      "block": 527536862,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0568432213255243
+    },
+    {
+      "t": "2026-11-25T20:58:28.510Z",
+      "block": 527537324,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0575913345989254
+    },
+    {
+      "t": "2026-11-25T21:00:31.407Z",
+      "block": 527537787,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.056836420073921
+    },
+    {
+      "t": "2026-11-25T21:02:34.653Z",
+      "block": 527538250,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0565480380521572
+    },
+    {
+      "t": "2026-11-25T21:04:37.921Z",
+      "block": 527538716,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0587384242569045
+    },
+    {
+      "t": "2026-11-25T21:06:40.811Z",
+      "block": 527539172,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.0576564877994439
+    },
+    {
+      "t": "2026-11-25T21:08:43.326Z",
+      "block": 527539621,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 9,
+      "minHf": 1.057123457052015
+    },
+    {
+      "t": "2026-11-25T21:10:09.154Z",
+      "block": 527539934,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0508214266375284
+    },
+    {
+      "t": "2026-11-25T21:12:12.047Z",
+      "block": 527540384,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.050405762868809
+    },
+    {
+      "t": "2026-11-25T21:14:15.415Z",
+      "block": 527540820,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.050405651949144
+    },
+    {
+      "t": "2026-11-25T21:16:19.871Z",
+      "block": 527541253,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0506643594380067
+    },
+    {
+      "t": "2026-11-25T21:18:23.150Z",
+      "block": 527541684,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0505584483496262
+    },
+    {
+      "t": "2026-11-25T21:20:25.865Z",
+      "block": 527542096,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0504037468728271
+    },
+    {
+      "t": "2026-11-25T21:22:28.600Z",
+      "block": 527542530,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0505453275379384
+    },
+    {
+      "t": "2026-11-25T21:24:32.197Z",
+      "block": 527542955,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0504814255447297
+    },
+    {
+      "t": "2026-11-25T21:26:35.344Z",
+      "block": 527543378,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.050904995612416
+    },
+    {
+      "t": "2026-11-25T21:28:41.143Z",
+      "block": 527543834,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0514460763549527
+    },
+    {
+      "t": "2026-11-25T21:30:43.828Z",
+      "block": 527544275,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0511692778383623
+    },
+    {
+      "t": "2026-11-25T21:32:46.799Z",
+      "block": 527544722,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0509323743595245
+    },
+    {
+      "t": "2026-11-25T21:34:49.803Z",
+      "block": 527545147,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0512168729007128
+    },
+    {
+      "t": "2026-11-25T21:36:52.500Z",
+      "block": 527545581,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0510202732430276
+    },
+    {
+      "t": "2026-11-25T21:38:55.336Z",
+      "block": 527546006,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0511016647999023
+    },
+    {
+      "t": "2026-11-25T21:40:58.029Z",
+      "block": 527546416,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0507522913219194
+    },
+    {
+      "t": "2026-11-25T21:43:03.287Z",
+      "block": 527546835,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.05084649475621
+    },
+    {
+      "t": "2026-11-25T21:45:06.105Z",
+      "block": 527547263,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0510736086001473
+    },
+    {
+      "t": "2026-11-25T21:47:08.744Z",
+      "block": 527547677,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0505315715341144
+    },
+    {
+      "t": "2026-11-25T21:49:11.289Z",
+      "block": 527548094,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0508542707341573
+    },
+    {
+      "t": "2026-11-25T21:51:13.841Z",
+      "block": 527548513,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0508541576072101
+    },
+    {
+      "t": "2026-11-25T21:53:16.425Z",
+      "block": 527548926,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.050899542037647
+    },
+    {
+      "t": "2026-11-25T21:55:19.116Z",
+      "block": 527549350,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.050841046601602
+    },
+    {
+      "t": "2026-11-25T21:57:21.661Z",
+      "block": 527549789,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0508409339171958
+    },
+    {
+      "t": "2026-11-25T21:59:24.287Z",
+      "block": 527550215,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0508408202929485
+    },
+    {
+      "t": "2026-11-25T22:01:26.855Z",
+      "block": 527550648,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0503049953331542
+    },
+    {
+      "t": "2026-11-25T22:03:29.497Z",
+      "block": 527551097,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0503048822594396
+    },
+    {
+      "t": "2026-11-25T22:05:32.059Z",
+      "block": 527551532,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0503047680123858
+    },
+    {
+      "t": "2026-11-25T22:07:34.659Z",
+      "block": 527551975,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.050304654356959
+    },
+    {
+      "t": "2026-11-25T22:09:37.375Z",
+      "block": 527552411,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.050660698850824
+    },
+    {
+      "t": "2026-11-25T22:11:39.994Z",
+      "block": 527552854,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0501359448270744
+    },
+    {
+      "t": "2026-11-25T22:13:42.620Z",
+      "block": 527553285,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0499044201070435
+    },
+    {
+      "t": "2026-11-25T22:15:45.191Z",
+      "block": 527553725,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.049904304962843
+    },
+    {
+      "t": "2026-11-25T22:17:47.774Z",
+      "block": 527554170,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0500762797214633
+    },
+    {
+      "t": "2026-11-25T22:19:50.295Z",
+      "block": 527554618,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0498501808337903
+    },
+    {
+      "t": "2026-11-25T22:21:52.873Z",
+      "block": 527555048,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 14,
+      "minHf": 1.0499343966850865
+    },
+    {
+      "t": "2026-11-25T22:23:55.584Z",
+      "block": 527555481,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 14,
+      "minHf": 1.0496664353644152
+    },
+    {
+      "t": "2026-11-25T22:25:58.140Z",
+      "block": 527555919,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 14,
+      "minHf": 1.049437908014211
+    },
+    {
+      "t": "2026-11-25T22:28:00.752Z",
+      "block": 527556369,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 14,
+      "minHf": 1.0497419915338575
+    },
+    {
+      "t": "2026-11-25T22:30:03.309Z",
+      "block": 527556806,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 14,
+      "minHf": 1.0497418768660585
+    },
+    {
+      "t": "2026-11-25T22:32:05.962Z",
+      "block": 527557245,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0498891989613452
+    },
+    {
+      "t": "2026-11-25T22:34:08.526Z",
+      "block": 527557688,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.050087064506808
+    },
+    {
+      "t": "2026-11-25T22:36:11.092Z",
+      "block": 527558128,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0500366291524734
+    },
+    {
+      "t": "2026-11-25T22:38:13.688Z",
+      "block": 527558561,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0502012206354148
+    },
+    {
+      "t": "2026-11-25T22:40:16.325Z",
+      "block": 527558976,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.050437764924433
+    },
+    {
+      "t": "2026-11-25T22:42:18.852Z",
+      "block": 527559415,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.050186757471795
+    },
+    {
+      "t": "2026-11-25T22:44:21.469Z",
+      "block": 527559854,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.049920682345583
+    },
+    {
+      "t": "2026-11-25T22:46:24.073Z",
+      "block": 527560286,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0502555078450106
+    },
+    {
+      "t": "2026-11-25T22:48:26.646Z",
+      "block": 527560711,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0501614269303898
+    },
+    {
+      "t": "2026-11-25T22:50:29.231Z",
+      "block": 527561131,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0501613127072242
+    },
+    {
+      "t": "2026-11-25T22:52:32.079Z",
+      "block": 527561566,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0501611975424467
+    },
+    {
+      "t": "2026-11-25T22:54:34.694Z",
+      "block": 527562016,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0497950224088177
+    },
+    {
+      "t": "2026-11-25T22:56:37.799Z",
+      "block": 527562442,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0497492043852954
+    },
+    {
+      "t": "2026-11-25T22:58:40.345Z",
+      "block": 527562879,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0497490899403308
+    },
+    {
+      "t": "2026-11-25T23:00:42.950Z",
+      "block": 527563324,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0494284576626596
+    },
+    {
+      "t": "2026-11-25T23:02:45.474Z",
+      "block": 527563768,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.049149949948504
+    },
+    {
+      "t": "2026-11-25T23:04:48.001Z",
+      "block": 527564206,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0492487274656432
+    },
+    {
+      "t": "2026-11-25T23:06:50.609Z",
+      "block": 527564641,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0492617450171924
+    },
+    {
+      "t": "2026-11-25T23:08:53.326Z",
+      "block": 527565069,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 13,
+      "minHf": 1.0490978876439865
+    },
+    {
+      "t": "2026-11-25T23:10:55.878Z",
+      "block": 527565508,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 12,
+      "minHf": 1.0497441569107338
+    },
+    {
+      "t": "2026-11-25T23:12:58.450Z",
+      "block": 527565953,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.050215148115582
+    },
+    {
+      "t": "2026-11-25T23:15:01.064Z",
+      "block": 527566397,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0499802617119218
+    },
+    {
+      "t": "2026-11-25T23:17:03.676Z",
+      "block": 527566834,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0501387740238208
+    },
+    {
+      "t": "2026-11-25T23:19:06.180Z",
+      "block": 527567267,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.05040127405591
+    },
+    {
+      "t": "2026-11-25T23:21:08.796Z",
+      "block": 527567715,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0504011594214668
+    },
+    {
+      "t": "2026-11-25T23:23:11.357Z",
+      "block": 527568151,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0503607118064437
+    },
+    {
+      "t": "2026-11-25T23:25:14.057Z",
+      "block": 527568593,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0500927114305567
+    }
+  ],
+  "latest": {
+    "block": 527568593,
+    "timestamp": "2026-11-25T23:25:14.057Z",
+    "watched": 93,
+    "readFailures": 0,
+    "counts": {
+      "liquidatable": 0,
+      "at_risk": 0,
+      "watch": 11,
+      "healthy": 79,
+      "no_debt": 3
+    },
+    "rows": [
+      {
+        "user": "0x0e80e7f0540e63efc7dd3fadf9a95a62d0eb50b6",
+        "band": "watch",
+        "hf": 1.0500927114305567,
+        "debtUsd": 9034.72232357,
+        "collateralUsd": 11448.43901942
+      },
+      {
+        "user": "0x541980dd1db4123185d6b632e9d6a09f77c1e4fa",
+        "band": "watch",
+        "hf": 1.05823942271254,
+        "debtUsd": 253.1821495,
+        "collateralUsd": 318.9611092
+      },
+      {
+        "user": "0x7a68a32cc17669c4367e92dfe6541d102ef048e7",
+        "band": "watch",
+        "hf": 1.06067139876309,
+        "debtUsd": 9624.09254176,
+        "collateralUsd": 12302.13020936
+      },
+      {
+        "user": "0x26aecc32cd80e439391572e36849d655756b0bfc",
+        "band": "watch",
+        "hf": 1.0615275309888843,
+        "debtUsd": 8291.72746096,
+        "collateralUsd": 10625.85652561
+      },
+      {
+        "user": "0x36a16cc0f16e524b7ffeebb6a9931a152abbdc3f",
+        "band": "watch",
+        "hf": 1.062335914370134,
+        "debtUsd": 366.08611948,
+        "collateralUsd": 409.37519208
+      },
+      {
+        "user": "0x6b6d692852c4d70f58e593cc8a1ee167f814206e",
+        "band": "watch",
+        "hf": 1.0756504935293416,
+        "debtUsd": 82499.50257356,
+        "collateralUsd": 107770.59481995
+      },
+      {
+        "user": "0xb143f6ca55358fac056eca7ac1a228a1f018b048",
+        "band": "watch",
+        "hf": 1.0782806175783812,
+        "debtUsd": 23954.28752844,
+        "collateralUsd": 31499.3218873
+      },
+      {
+        "user": "0xb9973f2a0dee11f603994c9ccbfd3027bca175eb",
+        "band": "watch",
+        "hf": 1.0867668859778192,
+        "debtUsd": 90392.40056049,
+        "collateralUsd": 118204.81478382
+      },
+      {
+        "user": "0xd4f5fbbecc330db0b2668e583073ed12f883eb80",
+        "band": "watch",
+        "hf": 1.087757298172516,
+        "debtUsd": 17085.83471245,
+        "collateralUsd": 22125.28738552
+      },
+      {
+        "user": "0x5b3a59d923cff08e3d53f80d5ea2b9e94a0b3b86",
+        "band": "watch",
+        "hf": 1.0946838693854668,
+        "debtUsd": 166898.35250662,
+        "collateralUsd": 217501.11228096
+      },
+      {
+        "user": "0xc3bc1a29c5feac0d852594c8a60348e9cbbb6021",
+        "band": "watch",
+        "hf": 1.0970876932342388,
+        "debtUsd": 32234.01009559,
+        "collateralUsd": 42099.4473565
+      }
+    ],
+    "dryRun": true
+  }
+}
