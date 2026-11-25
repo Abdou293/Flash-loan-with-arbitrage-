@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  prizeSummary, sizeVsSpeed, speedByBonus,
+  focusStats, inRandomSample, prizeSummary, sizeVsSpeed, speedByBonus,
   bonusBuckets, CROWDED_SHARE, liquidatorConcentration, MIN_SAMPLES, percentile, perDay, renderReport, speedStats, topAssets, verdict,
   type EnrichedEvent,
 } from "../src/liquidations/report.js";
@@ -212,5 +212,43 @@ describe("speed versus prize size (the nuance a plain 'x% instant' hides)", () =
     expect(md).toMatch(/Whole market, all liquidators together: gross bonus of \*\*\$3\d\d\*\*/);
     expect(md).toMatch(/the 3 largest liquidations made up 9\d% of it/);
     expect(md).not.toMatch(/undefined|NaN/);
+  });
+});
+
+describe("--focus-debt: every liquidation of chosen debt assets, kept apart from the random sample", () => {
+  const lusd = (blocks: number, bonus: number, o: Partial<EnrichedEvent> = {}) =>
+    ev({ debtSymbol: "LUSD", grossBonusUsd: bonus, delay: { blocks, censored: blocks >= 20000, calls: 20 }, inSample: false, ...o });
+  const sampled = Array.from({ length: 12 }, () => ev({ grossBonusUsd: 50, delay: { blocks: 0, censored: false, calls: 5 }, inSample: true }));
+  const focus = [lusd(0, 10), lusd(20000, 59), lusd(300, 4), lusd(1, 2, { repeatUser: true })];
+  const evs = [...sampled, ...focus];
+
+  it("focus measurements do not change the general speed statistics or the verdict inputs", () => {
+    expect(speedStats(evs)).toEqual(speedStats(sampled));
+    expect(sizeVsSpeed(evs)).toEqual(sizeVsSpeed(sampled));
+    expect(evs.filter(inRandomSample)).toHaveLength(12);
+  });
+
+  it("events from older caches (no inSample flag) still count as sampled", () => {
+    expect(inRandomSample(ev({ delay: { blocks: 0, censored: false, calls: 1 } }))).toBe(true);
+    expect(inRandomSample(ev({}))).toBe(false);
+  });
+
+  it("reports every focus liquidation: speed, money left waiting, repeats", () => {
+    const [row] = focusStats(evs, ["lusd"]); // case-insensitive
+    expect(row).toMatchObject({ symbol: "lusd", liquidations: 4, repeats: 1, measured: 3, errors: 0, censored: 1, medianBlocks: 300 });
+    expect(row!.instantShare).toBeCloseTo(1 / 3, 9);
+    expect(row!.slowGrossBonusUsd).toBeCloseTo(63, 9); // 59 + 4 waited more than 10 blocks
+    expect(row!.grossBonusUsd).toBeCloseTo(75, 9);
+  });
+
+  it("renders a separate section that says it is not used in the verdict", () => {
+    const md = renderReport({ events: evs, fromBlock: 1, toBlock: 100, generatedAt: "x", lookback: 20000, eventsWithoutPrice: 0, poolAddress: "0xp", focusDebt: ["LUSD", "EURS"] });
+    expect(md).toContain("## Focus: every liquidation whose debt is LUSD, EURS (all measured, not a sample)");
+    expect(md).toMatch(/NOT used in the general statistics or the verdict/);
+    expect(md).toMatch(/\| LUSD \| 4 \| 3 \| 33% \| 300 \| 1 \| \$63\.00 \| \$75\.00 \| 1 \| 1 \/ 0 \|/);
+    expect(md).toMatch(/\| EURS \| 0 \| 0 \| - \| - \| 0 \| \$0\.00 \| \$0\.00 \| 0 \| 0 \/ 0 \|/);
+    expect(md).not.toMatch(/undefined|NaN/);
+    // focus section comes before the verdict
+    expect(md.indexOf("## Focus:")).toBeLessThan(md.indexOf("## Verdict:"));
   });
 });

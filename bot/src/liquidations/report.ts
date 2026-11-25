@@ -13,7 +13,12 @@ export interface EnrichedEvent extends LiquidationEvent {
   /** same borrower liquidated again within the lookback window: delay is not a clean measurement */
   repeatUser?: boolean;
   delay?: DelayResult;
+  /** false when the delay was measured only because of --focus-debt: such events stay out of the general statistics */
+  inSample?: boolean;
 }
+
+/** Measured AND part of the random sample (events without the flag count as sampled, e.g. in older caches). */
+export const inRandomSample = (e: EnrichedEvent) => e.delay !== undefined && e.inSample !== false;
 
 // ----- verdict rules (my rule of thumb, stated in the report; not a law) -----
 /** a liquidation within this many blocks of becoming liquidatable counts as "instant" (2 blocks = about 0.5 s) */
@@ -131,7 +136,7 @@ export interface SpeedStats {
 }
 
 export function speedStats(events: EnrichedEvent[]): SpeedStats {
-  const sampled = events.filter((e) => e.delay !== undefined);
+  const sampled = events.filter(inRandomSample);
   const errors = sampled.filter((e) => e.delay!.error).length;
   const ok = sampled.filter((e) => !e.delay!.error);
   const repeatExcluded = ok.filter((e) => e.repeatUser).length;
@@ -169,7 +174,7 @@ export interface SizeSpeed {
 
 /** Does speed depend on how much there is to win? Uses only the clean sampled liquidations with a known bonus. */
 export function sizeVsSpeed(events: EnrichedEvent[]): SizeSpeed {
-  const clean = events.filter((e) => e.delay && !e.delay.error && !e.repeatUser && e.grossBonusUsd !== undefined);
+  const clean = events.filter((e) => inRandomSample(e) && !e.delay!.error && !e.repeatUser && e.grossBonusUsd !== undefined);
   const instant = clean.filter((e) => e.delay!.blocks <= INSTANT_MAX_BLOCKS);
   const slow = clean.filter((e) => e.delay!.blocks > SLOW_MIN_BLOCKS);
   const med = (xs: EnrichedEvent[]) => percentile(sortNum(xs.map((e) => e.grossBonusUsd!)), 50);
@@ -186,7 +191,7 @@ export function sizeVsSpeed(events: EnrichedEvent[]): SizeSpeed {
 }
 
 export function speedByBonus(events: EnrichedEvent[]) {
-  const clean = events.filter((e) => e.delay && !e.delay.error && !e.repeatUser && e.grossBonusUsd !== undefined);
+  const clean = events.filter((e) => inRandomSample(e) && !e.delay!.error && !e.repeatUser && e.grossBonusUsd !== undefined);
   return BONUS_BUCKETS.map(([label, lo, hi]) => {
     const inB = clean.filter((e) => e.grossBonusUsd! >= lo && e.grossBonusUsd! < hi);
     const blocks = sortNum(inB.map((e) => e.delay!.blocks));
@@ -218,6 +223,46 @@ export function prizeSummary(events: EnrichedEvent[], coveredBlocks: number): Pr
     perDayUsd: days > 0 ? total / days : 0,
     top3Share: total > 0 ? sum(bonuses.slice(0, 3)) / total : undefined,
   };
+}
+
+export interface FocusRow {
+  symbol: string;
+  liquidations: number;
+  /** partial liquidations of a borrower already liquidated within the lookback: not measured */
+  repeats: number;
+  measured: number;
+  errors: number;
+  instantShare?: number;
+  medianBlocks?: number;
+  censored: number;
+  grossBonusUsd: number;
+  /** gross bonus of the liquidations that waited more than SLOW_MIN_BLOCKS: what a slower bot could have competed for */
+  slowGrossBonusUsd: number;
+  liquidators: number;
+}
+
+/** Speed of EVERY liquidation whose debt asset is one of `symbols` (not a sample). */
+export function focusStats(events: EnrichedEvent[], symbols: string[]): FocusRow[] {
+  return symbols.map((symbol) => {
+    const all = events.filter((e) => e.debtSymbol.toLowerCase() === symbol.toLowerCase());
+    const measuredAll = all.filter((e) => e.delay && !e.repeatUser);
+    const ok = measuredAll.filter((e) => !e.delay!.error);
+    const blocks = sortNum(ok.map((e) => e.delay!.blocks));
+    const slow = ok.filter((e) => e.delay!.blocks > SLOW_MIN_BLOCKS);
+    return {
+      symbol,
+      liquidations: all.length,
+      repeats: all.filter((e) => e.repeatUser).length,
+      measured: ok.length,
+      errors: measuredAll.length - ok.length,
+      instantShare: ok.length ? ok.filter((e) => e.delay!.blocks <= INSTANT_MAX_BLOCKS).length / ok.length : undefined,
+      medianBlocks: percentile(blocks, 50),
+      censored: ok.filter((e) => e.delay!.censored).length,
+      grossBonusUsd: sum(all.map((e) => Math.max(0, e.grossBonusUsd ?? 0))),
+      slowGrossBonusUsd: sum(slow.map((e) => Math.max(0, e.grossBonusUsd ?? 0))),
+      liquidators: new Set(all.map((e) => e.liquidator)).size,
+    };
+  });
 }
 
 export type VerdictLabel = "crowded" | "mixed" | "slow" | "unknown";
@@ -291,6 +336,8 @@ export interface ReportInput {
   eventsWithoutPrice: number;
   /** liquidations of a borrower already liquidated within the lookback (not sampled for speed) */
   repeatEvents?: number;
+  /** debt-asset symbols whose liquidations were ALL measured (--focus-debt) */
+  focusDebt?: string[];
   /** blocks of [fromBlock, toBlock] actually scanned (defaults to all of them) */
   coveredBlocks?: number;
   poolAddress: string;
@@ -390,6 +437,25 @@ export function renderReport(r: ReportInput): string {
   L.push(`| Gross bonus | Samples | Within ${INSTANT_MAX_BLOCKS} blocks | Median delay (blocks) | At lookback limit |`, `|---|---:|---:|---:|---:|`);
   for (const b of speedByBonus(ev)) L.push(`| ${b.label} | ${b.samples} | ${pct(b.instantShare === undefined ? undefined : b.instantShare * 100, 0)} | ${b.medianBlocks ?? "-"} | ${b.censored} |`);
   L.push("");
+  if (r.focusDebt?.length) {
+    const rows = focusStats(ev, r.focusDebt);
+    L.push(`## Focus: every liquidation whose debt is ${r.focusDebt.join(", ")} (all measured, not a sample)`, "");
+    L.push(
+      `Measured separately with \`--focus-debt\`; these extra measurements are NOT used in the general statistics or the verdict above,`,
+      `which stay based on the random sample. Partial liquidations of the same borrower within the lookback are not measured.`,
+      "",
+    );
+    L.push(
+      `| Debt asset | Liquidations | Measured | Within ${INSTANT_MAX_BLOCKS} blocks | Median delay (blocks) | At lookback limit | Waited > ${SLOW_MIN_BLOCKS} blocks: gross bonus | Gross bonus, all | Distinct liquidators | Not measured (repeat / failed) |`,
+      `|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|`,
+    );
+    for (const f of rows) {
+      L.push(
+        `| ${f.symbol} | ${f.liquidations} | ${f.measured} | ${pct(f.instantShare === undefined ? undefined : f.instantShare * 100, 0)} | ${f.medianBlocks ?? "-"} | ${f.censored} | ${usd(f.slowGrossBonusUsd, 2)} | ${usd(f.grossBonusUsd, 2)} | ${f.liquidators} | ${f.repeats} / ${f.errors} |`,
+      );
+    }
+    L.push("");
+  }
   L.push(`## Verdict: ${v.label.toUpperCase()}`, "", v.text, "");
   L.push(`Rule used: "crowded" when at least ${CROWDED_SHARE * 100}% of clean samples are within ${INSTANT_MAX_BLOCKS} blocks and there are at least ${MIN_SAMPLES} samples. These thresholds are my rule of thumb, not a law.`, "");
 

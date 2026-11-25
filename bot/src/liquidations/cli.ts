@@ -66,6 +66,7 @@ async function main() {
         "  --chunk-blocks N      starting eth_getLogs range (default 5000; adapts automatically)",
         "  --max-chunk N         largest range ever tried (default 50000)",
         "  --interval-ms N       minimum delay between RPC requests (default 250, free-tier friendly)",
+        "  --focus-debt A,B      also measure the speed of EVERY liquidation whose debt asset is A or B (e.g. LUSD,EURS); reported separately",
         "  --max-minutes M       stop the log scan cleanly after M minutes (progress is saved; run again to continue)",
         "  --sample-hf N         liquidations to measure for speed (default 40; each costs ~25 eth_calls)",
         "  --lookback N          how far back (blocks) to look for when a position became liquidatable (default 20000)",
@@ -125,6 +126,7 @@ async function main() {
   const maxChunk = Number(arg("max-chunk", "50000"));
   const sampleN = Number(arg("sample-hf", "40"));
   const maxMinutes = Number(arg("max-minutes", "0"));
+  const focusDebt = (arg("focus-debt") ?? "").split(",").map((x) => x.trim()).filter(Boolean);
   const lookback = Number(arg("lookback", "20000"));
   const outDir = arg("out-dir") ?? join(root, "data");
   const cacheDir = join(root, "data", "liquidations");
@@ -234,7 +236,12 @@ async function main() {
 
   // ---- 3) speed sample: how long was the position liquidatable before it was liquidated? --------------
   const todo = pickSample(events.filter((e) => !e.repeatUser), sampleN);
-  const toMeasure = todo.filter((e) => !e.delay);
+  const inTodo = new Set(todo);
+  for (const e of events) e.inSample = inTodo.has(e);
+  const focusSet = new Set(focusDebt.map((x) => x.toLowerCase()));
+  const focus = events.filter((e) => !e.repeatUser && !inTodo.has(e) && focusSet.has(e.debtSymbol.toLowerCase()));
+  if (focusDebt.length) log(`Focus on debt ${focusDebt.join(", ")}: ${focus.length} extra liquidation(s) to measure besides the random sample.`);
+  const toMeasure = [...todo, ...focus].filter((e) => !e.delay);
   if (toMeasure.length) log(`Measuring speed for ${toMeasure.length} liquidation(s) (about 25 state queries each; this part needs an archive-capable RPC)...`);
   let k = 0;
   for (const e of toMeasure) {
@@ -264,6 +271,7 @@ async function main() {
     lookback,
     eventsWithoutPrice: events.filter((e) => e.debtUsd === undefined).length,
     repeatEvents,
+    focusDebt: focusDebt.length ? focusDebt : undefined,
     coveredBlocks: covered,
     poolAddress: pool,
   });

@@ -126,3 +126,10 @@ tool's `--max-chunk` default, the real limit may be higher.
 
 When a different RPC is used for logs, the end block defaults to the lowest head of the two RPCs minus 20 blocks, because a
 public RPC can lag a few blocks behind; the probe also uses the logs RPC's own head.
+
+### Focused measurement (`--focus-debt`)
+`--focus-debt LUSD,EURS` measures the speed of **every** liquidation whose debt asset is in the list (not just the random
+sample) and reports it in its own "Focus" section, with the gross bonus of the ones that waited more than 10 blocks. These
+extra measurements are kept out of the general statistics and the verdict, which stay based on the random sample (re-run with
+the same `--sample-hf` to keep the same sample). Motivation: in the 30-day report the only valuable slow liquidation repaid an
+LUSD debt; the hypothesis is that debt assets that are hard to source on Arbitrum are left to wait.
