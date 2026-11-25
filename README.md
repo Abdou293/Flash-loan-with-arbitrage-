@@ -157,12 +157,13 @@ Even with the 10 bps slippage reserve removed, no episode was positive: best -$0
 was always the smallest ($100), because larger trades lose more to price impact. The remaining gaps are worth a few cents,
 about the cost of gas. Report: [docs/reports/gap-monitor-2026-11-24-1h-before-reserve.md](docs/reports/gap-monitor-2026-11-24-1h-before-reserve.md).
 
-### Results: Aave V3 liquidations on Arbitrum, 3 days of real data (2026-11-21 to 25)
-Read-only measurement for a possible liquidation module: 14 liquidations in the whole market, about **$122 per day of gross
-bonus for all liquidators together** (before any cost), 99% of it in the 3 largest. Every liquidation with a bonus of $1 or
-more was taken within 2 blocks (100% of the prize by value); the only slow ones were dust positions (median bonus $0.01).
-Verdict: crowded; a liquidation bot here is a portfolio project, not a profit source. Report:
-[docs/reports/liquidations-2026-11-21-to-25-arbitrum.md](docs/reports/liquidations-2026-11-21-to-25-arbitrum.md).
+### Results: Aave V3 liquidations on Arbitrum, 30 days of real data (2026-10-24 to 11-25)
+Read-only measurement for a possible liquidation module: **1,031 liquidations, $155,363 of gross bonus** for the whole market
+(about $5,179/day on average, before any cost), but 93% of it came in 7 volatile days. Every sampled liquidation with a bonus of
+$1 or more was taken within 2 blocks (100% of the sampled prize by value; one $20–$100 exception); only dust positions waited.
+54 liquidators, the top 3 took 73%. Verdict: crowded; a liquidation bot here is a portfolio project, not a profit source.
+Reports: [30 days](docs/reports/liquidations-2026-10-24-to-11-25-arbitrum-30d.md),
+[first 3 calm days](docs/reports/liquidations-2026-11-21-to-25-arbitrum.md).
 
 **No profitable opportunity was found.** Every route lost money after the flash-loan premium, DEX fees, price impact,
 slippage reserve and gas. `feeTier` came closest. This is the expected result for liquid pools that professional bots keep
