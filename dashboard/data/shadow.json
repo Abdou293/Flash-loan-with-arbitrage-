@@ -1,12 +1,12 @@
 {
   "meta": {
     "dataSource": "real on-chain reads, shadow mode (dry-run)",
-    "generatedAt": "2026-11-25T23:25:28.235Z",
-    "cycles": 407,
+    "generatedAt": "2026-11-26T00:17:06.288Z",
+    "cycles": 457,
     "firstCycle": "2026-11-25T06:13:05.260Z",
-    "lastCycle": "2026-11-25T23:25:14.057Z",
-    "hoursObserved": 6.94,
-    "spanHours": 17.2,
+    "lastCycle": "2026-11-26T00:16:18.771Z",
+    "hoursObserved": 7.8,
+    "spanHours": 18.05,
     "accountsWatched": 93,
     "cyclesWithLiquidatable": 0,
     "cyclesWithWouldAttempt": 0,
@@ -1650,97 +1650,290 @@
       "atRisk": 0,
       "watch": 11,
       "minHf": 1.0500927114305567
+    },
+    {
+      "t": "2026-11-25T23:27:16.584Z",
+      "block": 527569041,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0500515678769955
+    },
+    {
+      "t": "2026-11-25T23:29:19.171Z",
+      "block": 527569489,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0500514523010354
+    },
+    {
+      "t": "2026-11-25T23:31:21.912Z",
+      "block": 527569933,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0497784551607146
+    },
+    {
+      "t": "2026-11-25T23:33:24.594Z",
+      "block": 527570384,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.049932956214321
+    },
+    {
+      "t": "2026-11-25T23:35:27.201Z",
+      "block": 527570839,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0503161592745738
+    },
+    {
+      "t": "2026-11-25T23:37:29.768Z",
+      "block": 527571295,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0503776748456022
+    },
+    {
+      "t": "2026-11-25T23:39:32.272Z",
+      "block": 527571724,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0507742372720223
+    },
+    {
+      "t": "2026-11-25T23:41:34.871Z",
+      "block": 527572146,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0507741215868864
+    },
+    {
+      "t": "2026-11-25T23:43:37.448Z",
+      "block": 527572572,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.050658259577386
+    },
+    {
+      "t": "2026-11-25T23:45:40.082Z",
+      "block": 527572995,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.050658144050477
+    },
+    {
+      "t": "2026-11-25T23:47:42.652Z",
+      "block": 527573417,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0507387293656827
+    },
+    {
+      "t": "2026-11-25T23:49:45.221Z",
+      "block": 527573840,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0507386140342339
+    },
+    {
+      "t": "2026-11-25T23:51:47.752Z",
+      "block": 527574282,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0511295264459468
+    },
+    {
+      "t": "2026-11-25T23:53:50.287Z",
+      "block": 527574703,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0514416758997782
+    },
+    {
+      "t": "2026-11-25T23:55:52.874Z",
+      "block": 527575133,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.051341912114858
+    },
+    {
+      "t": "2026-11-25T23:57:55.449Z",
+      "block": 527575572,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0519962442256499
+    },
+    {
+      "t": "2026-11-25T23:59:57.960Z",
+      "block": 527575984,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0515467763437536
+    },
+    {
+      "t": "2026-11-26T00:02:00.699Z",
+      "block": 527576451,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0518256933990864
+    },
+    {
+      "t": "2026-11-26T00:04:03.288Z",
+      "block": 527576903,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.051228630459341
+    },
+    {
+      "t": "2026-11-26T00:06:05.872Z",
+      "block": 527577351,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0513479014216822
+    },
+    {
+      "t": "2026-11-26T00:08:08.428Z",
+      "block": 527577793,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0515606258136168
+    },
+    {
+      "t": "2026-11-26T00:10:11.020Z",
+      "block": 527578234,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0517254612370857
+    },
+    {
+      "t": "2026-11-26T00:12:13.727Z",
+      "block": 527578686,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.0526165449609717
+    },
+    {
+      "t": "2026-11-26T00:14:16.243Z",
+      "block": 527579141,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 11,
+      "minHf": 1.052484480185491
+    },
+    {
+      "t": "2026-11-26T00:16:18.771Z",
+      "block": 527579618,
+      "liquidatable": 0,
+      "atRisk": 0,
+      "watch": 10,
+      "minHf": 1.0535540025474754
     }
   ],
   "latest": {
-    "block": 527568593,
-    "timestamp": "2026-11-25T23:25:14.057Z",
+    "block": 527579618,
+    "timestamp": "2026-11-26T00:16:18.771Z",
     "watched": 93,
     "readFailures": 0,
     "counts": {
       "liquidatable": 0,
       "at_risk": 0,
-      "watch": 11,
-      "healthy": 79,
+      "watch": 10,
+      "healthy": 80,
       "no_debt": 3
     },
     "rows": [
       {
         "user": "0x0e80e7f0540e63efc7dd3fadf9a95a62d0eb50b6",
         "band": "watch",
-        "hf": 1.0500927114305567,
-        "debtUsd": 9034.72232357,
-        "collateralUsd": 11448.43901942
+        "hf": 1.0535540025474754,
+        "debtUsd": 9089.98344482,
+        "collateralUsd": 11556.61895051
       },
       {
         "user": "0x541980dd1db4123185d6b632e9d6a09f77c1e4fa",
         "band": "watch",
-        "hf": 1.05823942271254,
-        "debtUsd": 253.1821495,
-        "collateralUsd": 318.9611092
-      },
-      {
-        "user": "0x7a68a32cc17669c4367e92dfe6541d102ef048e7",
-        "band": "watch",
-        "hf": 1.06067139876309,
-        "debtUsd": 9624.09254176,
-        "collateralUsd": 12302.13020936
+        "hf": 1.060355400241171,
+        "debtUsd": 260.30932814,
+        "collateralUsd": 328.59571646
       },
       {
         "user": "0x26aecc32cd80e439391572e36849d655756b0bfc",
         "band": "watch",
-        "hf": 1.0615275309888843,
-        "debtUsd": 8291.72746096,
-        "collateralUsd": 10625.85652561
+        "hf": 1.0604140240512163,
+        "debtUsd": 8379.13635985,
+        "collateralUsd": 10726.78049523
       },
       {
         "user": "0x36a16cc0f16e524b7ffeebb6a9931a152abbdc3f",
         "band": "watch",
-        "hf": 1.062335914370134,
-        "debtUsd": 366.08611948,
-        "collateralUsd": 409.37519208
+        "hf": 1.0623339893633645,
+        "debtUsd": 368.97188407,
+        "collateralUsd": 412.60144586
+      },
+      {
+        "user": "0x7a68a32cc17669c4367e92dfe6541d102ef048e7",
+        "band": "watch",
+        "hf": 1.0631416162848988,
+        "debtUsd": 9690.86580304,
+        "collateralUsd": 12416.53902459
       },
       {
         "user": "0x6b6d692852c4d70f58e593cc8a1ee167f814206e",
         "band": "watch",
-        "hf": 1.0756504935293416,
-        "debtUsd": 82499.50257356,
-        "collateralUsd": 107770.59481995
+        "hf": 1.0865833555506732,
+        "debtUsd": 82500.12263314,
+        "collateralUsd": 108867.81808386
       },
       {
         "user": "0xb143f6ca55358fac056eca7ac1a228a1f018b048",
         "band": "watch",
-        "hf": 1.0782806175783812,
-        "debtUsd": 23954.28752844,
-        "collateralUsd": 31499.3218873
-      },
-      {
-        "user": "0xb9973f2a0dee11f603994c9ccbfd3027bca175eb",
-        "band": "watch",
-        "hf": 1.0867668859778192,
-        "debtUsd": 90392.40056049,
-        "collateralUsd": 118204.81478382
-      },
-      {
-        "user": "0xd4f5fbbecc330db0b2668e583073ed12f883eb80",
-        "band": "watch",
-        "hf": 1.087757298172516,
-        "debtUsd": 17085.83471245,
-        "collateralUsd": 22125.28738552
+        "hf": 1.087816282410826,
+        "debtUsd": 23997.31801566,
+        "collateralUsd": 31834.96740168
       },
       {
         "user": "0x5b3a59d923cff08e3d53f80d5ea2b9e94a0b3b86",
         "band": "watch",
-        "hf": 1.0946838693854668,
-        "debtUsd": 166898.35250662,
-        "collateralUsd": 217501.11228096
+        "hf": 1.0916786594091343,
+        "debtUsd": 168676.87236794,
+        "collateralUsd": 219215.40702376
       },
       {
-        "user": "0xc3bc1a29c5feac0d852594c8a60348e9cbbb6021",
+        "user": "0xb9973f2a0dee11f603994c9ccbfd3027bca175eb",
         "band": "watch",
-        "hf": 1.0970876932342388,
-        "debtUsd": 32234.01009559,
-        "collateralUsd": 42099.4473565
+        "hf": 1.093911833796725,
+        "debtUsd": 90616.21907282,
+        "collateralUsd": 119278.45028778
+      },
+      {
+        "user": "0xd4f5fbbecc330db0b2668e583073ed12f883eb80",
+        "band": "watch",
+        "hf": 1.0963243160075775,
+        "debtUsd": 17085.93507779,
+        "collateralUsd": 22299.6739137
       }
     ],
     "dryRun": true

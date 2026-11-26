@@ -2,8 +2,8 @@
  "meta": {
   "dataSource": "rpc (real on-chain quotes, shadow mode)",
   "startedAt": "2026-11-25T16:02:29.358Z",
-  "generatedAt": "2026-11-25T23:22:02.159Z",
-  "cycles": 93,
+  "generatedAt": "2026-11-26T00:13:31.400Z",
+  "cycles": 106,
   "seriesLabel": "Best net profit seen so far, per strategy (USD)",
   "seriesHint": "Real quotes, after DEX fees, slippage reserve and estimated gas. Zero-interest lenders, so no loan fee. A value below $0 means no route has been profitable yet.",
   "caveats": [
@@ -19,25 +19,25 @@
   "mode": "shadow (dry-run)",
   "dryRun": true,
   "paused": false,
-  "cyclesRun": 93,
+  "cyclesRun": 106,
   "liveExecutionAvailable": false
  },
  "strategies": [
   {
    "name": "crossDex",
    "enabled": true,
-   "routesEvaluated": 930,
+   "routesEvaluated": 1060,
    "profitableBeforeRisk": 0,
    "rejectedByRisk": 0,
    "simulatedOk": 0,
    "simulatedRevert": 0,
    "estimatedNetProfitUsd": 0,
-   "bestNetProfitUsd": -64.35
+   "bestNetProfitUsd": -64.21
   },
   {
    "name": "triangular",
    "enabled": true,
-   "routesEvaluated": 3348,
+   "routesEvaluated": 3816,
    "profitableBeforeRisk": 0,
    "rejectedByRisk": 0,
    "simulatedOk": 0,
@@ -48,7 +48,7 @@
   {
    "name": "feeTier",
    "enabled": true,
-   "routesEvaluated": 744,
+   "routesEvaluated": 848,
    "profitableBeforeRisk": 1,
    "rejectedByRisk": 1,
    "simulatedOk": 0,
@@ -911,6 +911,123 @@
    "cycle": 93,
    "cumNetUsd": {
     "crossDex": -64.35,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 94,
+   "cumNetUsd": {
+    "crossDex": -64.35,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 95,
+   "cumNetUsd": {
+    "crossDex": -64.35,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 96,
+   "cumNetUsd": {
+    "crossDex": -64.35,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 97,
+   "cumNetUsd": {
+    "crossDex": -64.35,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 98,
+   "cumNetUsd": {
+    "crossDex": -64.35,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 99,
+   "cumNetUsd": {
+    "crossDex": -64.35,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 100,
+   "cumNetUsd": {
+    "crossDex": -64.35,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 101,
+   "cumNetUsd": {
+    "crossDex": -64.21,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 102,
+   "cumNetUsd": {
+    "crossDex": -64.21,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 103,
+   "cumNetUsd": {
+    "crossDex": -64.21,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 104,
+   "cumNetUsd": {
+    "crossDex": -64.21,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 105,
+   "cumNetUsd": {
+    "crossDex": -64.21,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 106,
+   "cumNetUsd": {
+    "crossDex": -64.21,
     "triangular": -10.84,
     "feeTier": 0.29,
     "newPoolScanner": null
