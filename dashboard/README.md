@@ -16,9 +16,11 @@ The published site reads **only real shadow-mode data**: `data/arbitrage-shadow.
     npm run export-dashboard                       # regenerates dashboard/data/sample.json (SYNTHETIC demo data)
     npm run export-dashboard -- --out live.json    # local-only file, git-ignored
 
-## Deploy on Vercel (free)
+## Deploy (free static hosting)
 
-Import the GitHub repo, set **Root Directory** to `dashboard`, framework preset **Other**, no build command. Done.
+The published dashboard runs on Render's free static-site tier: connect the GitHub repo, **Publish directory** `dashboard`,
+build command `echo static`. Vercel works the same way (Root Directory `dashboard`, framework preset **Other**, no build
+command). The host does not always redeploy on every push; trigger a manual deploy after pushing new data files.
 
 ## What the numbers mean
 

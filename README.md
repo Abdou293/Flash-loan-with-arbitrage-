@@ -30,7 +30,7 @@ Honest note on "shared core": the two modules share code by importing the same c
 | Bot framework, 4 strategies, risk engine, liquidation tools, 125 unit tests | Done, passing (also on a clean machine); dry-run only |
 | Historical collector + RPC price quotes | **Run on real data**: 48 snapshots of Arbitrum One (about 24 h) |
 | Backtest engine + report generator | **Run on real data**; see "Results" |
-| Live dry-run loop with RPC data, static-call simulator | Written, **not yet run** |
+| Live shadow-mode loop with real RPC quotes | **Run** (180 cycles, quote-only). The pre-send static-call simulation needs the deployed contract and is **not yet run** |
 | Testnet end-to-end test | Instructions in [docs/TESTNET.md](docs/TESTNET.md), **not yet run** |
 | Dashboard | Done and published (Render, free tier); shows **real** shadow-mode data for both modules plus the parsed past studies. Synthetic demo data only exists on localhost, labelled |
 | Shadow-mode collection | Run on real data: 743 liquidation-monitor cycles (about 12.65 h), 180 arbitrage cycles; see "Live dashboard and shadow-mode results" |
@@ -106,7 +106,7 @@ Shared components: price monitor (`core/market`), profit calculator, risk engine
 
 ## Tech stack
 Solidity 0.8.26 · Foundry · OpenZeppelin 5 · TypeScript (Node 22) · ethers v6 · Vitest · static HTML/CSS/JS dashboard ·
-gitleaks pre-commit secret scanning · GitHub Actions CI. Everything runs on free tiers (free RPC, Vercel free, local fork).
+gitleaks pre-commit secret scanning · GitHub Actions CI. Everything runs on free tiers (free RPC, Render free static site, local fork).
 
 ## Setup
 Windows users: install WSL2 (Ubuntu), then work inside Ubuntu.
