@@ -32,7 +32,8 @@ Honest note on "shared core": the two modules share code by importing the same c
 | Backtest engine + report generator | **Run on real data**; see "Results" |
 | Live dry-run loop with RPC data, static-call simulator | Written, **not yet run** |
 | Testnet end-to-end test | Instructions in [docs/TESTNET.md](docs/TESTNET.md), **not yet run** |
-| Dashboard | Done; module 1 shows **synthetic** demo data; module 2 section shows **real** shadow-mode data once `export-shadow` has been run (empty until then) |
+| Dashboard | Done and published (Render, free tier); shows **real** shadow-mode data for both modules plus the parsed past studies. Synthetic demo data only exists on localhost, labelled |
+| Shadow-mode collection | Run on real data: 743 liquidation-monitor cycles (about 12.65 h), 180 arbitrage cycles; see "Live dashboard and shadow-mode results" |
 
 ### What the fork tests showed (real Arbitrum state, earlier version with both Aave V3 and Balancer V2)
 Aave was later removed so that the contract only uses zero-interest loans; these measurements explain that decision.
@@ -184,13 +185,31 @@ Reports: [30 days](docs/reports/liquidations-2026-10-24-to-11-25-arbitrum-30d.md
 slippage reserve and gas. `feeTier` came closest. This is the expected result for liquid pools that professional bots keep
 in line, and it is the reason this project stays in dry-run mode. Sampling every 30 minutes cannot see gaps that last seconds.
 
-## Screenshots (synthetic demo data)
+## Live dashboard and shadow-mode results (real data, 2026-11-26)
+
+Live dashboard: https://defi-execution-engine-dashboard.onrender.com (static page, no wallet, nothing is sent).
+
 | Desktop | Mobile |
 |---|---|
 | ![Dashboard desktop](docs/screenshots/dashboard-desktop.png) | ![Dashboard mobile](docs/screenshots/dashboard-mobile.png) |
 
-The dashboard displays randomly generated prices and says so in a banner. In those demo data `newPoolScanner` "wins" only
-because the generator gives new pools large random mispricings; that is **not** a finding.
+Shadow mode means the tools read the real chain and record what the bot WOULD do; no transaction is ever sent.
+What the runs recorded (the files are `dashboard/data/shadow.json` and `dashboard/data/arbitrage-shadow.json`):
+
+- **Liquidation monitor:** 743 cycles (about 12.65 h of continuous monitoring inside a 31.9 h window; the monitor was
+  stopped or the laptop asleep for the rest), 93 borrower accounts watched. **No account became liquidatable** during
+  those hours; typically 9 to 14 accounts sat in the "watch" band (health factor under 1.10), the closest at about 1.05.
+- **Arbitrage, real quotes:** 180 cycles, 9,720 routes priced. Best net result so far per strategy, after DEX fees,
+  slippage reserve and estimated gas: crossDex about -$63.9, triangular about -$10.8, feeTier +$0.29. The single positive
+  candidate (feeTier, $1,000, WETH -> USDC on the 0.30% pool and back on the 0.05% pool) is below the $1 minimum-profit
+  limit, came from one price snapshot, and never repeated. `newPoolScanner` has no data because new-pool discovery is
+  not implemented over RPC.
+- **Past studies** (30 days of Aave liquidations, 24 h of arbitrage quotes, block-level gap radar) are shown at the
+  bottom of the dashboard, parsed from `docs/reports/`.
+
+These are measurements, not profit claims: quote-only, one pair set, no competition modelled, and a few hours of
+shadow data. The conclusion from all of it is unchanged: arbitrage on these pools is not profitable with free
+infrastructure, and profitable liquidations are taken in the same block by specialised bots.
 
 ## Limitations and risks
 - **Competition.** Flash-loan arbitrage on Arbitrum is contested by professional bots with low-latency infrastructure.
