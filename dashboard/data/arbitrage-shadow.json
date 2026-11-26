@@ -2,8 +2,8 @@
  "meta": {
   "dataSource": "rpc (real on-chain quotes, shadow mode)",
   "startedAt": "2026-11-25T16:02:29.358Z",
-  "generatedAt": "2026-11-26T00:13:31.400Z",
-  "cycles": 106,
+  "generatedAt": "2026-11-26T14:05:03.252Z",
+  "cycles": 180,
   "seriesLabel": "Best net profit seen so far, per strategy (USD)",
   "seriesHint": "Real quotes, after DEX fees, slippage reserve and estimated gas. Zero-interest lenders, so no loan fee. A value below $0 means no route has been profitable yet.",
   "caveats": [
@@ -19,25 +19,25 @@
   "mode": "shadow (dry-run)",
   "dryRun": true,
   "paused": false,
-  "cyclesRun": 106,
+  "cyclesRun": 180,
   "liveExecutionAvailable": false
  },
  "strategies": [
   {
    "name": "crossDex",
    "enabled": true,
-   "routesEvaluated": 1060,
+   "routesEvaluated": 1800,
    "profitableBeforeRisk": 0,
    "rejectedByRisk": 0,
    "simulatedOk": 0,
    "simulatedRevert": 0,
    "estimatedNetProfitUsd": 0,
-   "bestNetProfitUsd": -64.21
+   "bestNetProfitUsd": -63.93
   },
   {
    "name": "triangular",
    "enabled": true,
-   "routesEvaluated": 3816,
+   "routesEvaluated": 6480,
    "profitableBeforeRisk": 0,
    "rejectedByRisk": 0,
    "simulatedOk": 0,
@@ -48,7 +48,7 @@
   {
    "name": "feeTier",
    "enabled": true,
-   "routesEvaluated": 848,
+   "routesEvaluated": 1440,
    "profitableBeforeRisk": 1,
    "rejectedByRisk": 1,
    "simulatedOk": 0,
@@ -1028,6 +1028,672 @@
    "cycle": 106,
    "cumNetUsd": {
     "crossDex": -64.21,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 107,
+   "cumNetUsd": {
+    "crossDex": -63.96,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 108,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 109,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 110,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 111,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 112,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 113,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 114,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 115,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 116,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 117,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 118,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 119,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 120,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 121,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 122,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 123,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 124,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 125,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 126,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 127,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 128,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 129,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 130,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 131,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 132,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 133,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 134,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 135,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 136,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 137,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 138,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 139,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 140,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 141,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 142,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 143,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 144,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 145,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 146,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 147,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 148,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 149,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 150,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 151,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 152,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 153,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 154,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 155,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 156,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 157,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 158,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 159,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 160,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 161,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 162,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 163,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 164,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 165,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 166,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 167,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 168,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 169,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 170,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 171,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 172,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 173,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 174,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 175,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 176,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 177,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 178,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 179,
+   "cumNetUsd": {
+    "crossDex": -63.93,
+    "triangular": -10.84,
+    "feeTier": 0.29,
+    "newPoolScanner": null
+   }
+  },
+  {
+   "cycle": 180,
+   "cumNetUsd": {
+    "crossDex": -63.93,
     "triangular": -10.84,
     "feeTier": 0.29,
     "newPoolScanner": null
